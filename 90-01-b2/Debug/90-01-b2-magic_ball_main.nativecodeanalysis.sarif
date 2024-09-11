@@ -1,0 +1,51 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.39.33521.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///e:/work/tju/oop/bighw/90-01-b2/90-01-b2-magic_ball_main.cpp"
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "hashes": {
+            "sha-256": "d3b076cad92dd5a8e1ddc82fd681f70d190e5a7ed6ed31f9851204b4ea840140"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///e:/work/tju/oop/bighw/include/cmd_console_tools.h"
+          },
+          "hashes": {
+            "sha-256": "f925387d7df810b54eb4aaba88d7032ef78ad04bea8e5690c34e1f04f7c1ef0c"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///e:/work/tju/oop/bighw/90-01-b2/90-01-b2-magic_ball.h"
+          },
+          "hashes": {
+            "sha-256": "216d43b5facc92c24cc15f98cc14fe10487ece25f8d63d362a53cb9008634b75"
+          }
+        }
+      ]
+    }
+  ]
+}
