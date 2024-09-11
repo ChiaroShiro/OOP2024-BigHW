@@ -164,3 +164,10 @@ int getLineNumber(int minli, int maxli, const char* msg)
 	}
 	return n;
 }
+
+
+void programExit()
+{
+	cout << "\n\n\n\n\n\n";
+	system("pause");
+}

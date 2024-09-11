@@ -2,6 +2,8 @@
 #include <iostream>
 #include <windows.h>
 #include "../include/cmd_console_tools.h"
+#include "../include/io_tools.h"
+#include "../include/matrix.h"
 #include "../include/menu.h"
 using namespace std;
 
@@ -21,10 +23,31 @@ int main()
 	cct_setfontsize("新宋体", 28);
 	cct_setcursor(CURSOR_INVISIBLE);
 	srand((unsigned int)time(0));
+	int n, m;
 	while (1) {
 		cct_setconsoleborder(110, 25);
 		int opt = showMenu('a', MENU_CONTENT, 'q', "退出");
-		
+		if (opt == -1) {
+			programExit();
+			break;
+		}
+		cct_cls();
+		n = getLineNumber(8, 10, "请输入行数（8-10）:");
+		m = getLineNumber(8, 10, "请输入列数（8-10）:");
+		if (opt == 1)
+			;
+		if (opt == 2)
+			;
+		if (opt == 3)
+			;
+		if (opt == 4)
+			;
+		if (opt == 5)
+			;
+		if (opt == 6)
+			;
+		if (opt == 7)
+			;
 	}
 	return 0;
 }

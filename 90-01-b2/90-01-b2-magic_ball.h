@@ -24,7 +24,6 @@ struct Pair {
 	int y;
 };
 
-void programExit();
 void mainWork(int n, int m, bool isLoop = 1);
 
 void baseOptionInit(int n, int m);

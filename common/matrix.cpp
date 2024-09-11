@@ -157,13 +157,6 @@ static void drawOneHollowLine(int m, bool showBorder, int elelen, int gap)
 	wait(gap);
 }
 
-/*
- * 绘制 n 行 m 列个元素的背景板
- * showBorder 为 1 则显示边界，否则不显示
- * totx 和 toty 会存储更改后的屏幕的长宽
- * coren 为每个元素的行数，corem 为每个元素的宽度（中文字符宽度）
- * gap 为绘制每个元素后的暂停时间
- */
 void drawBackground(int n, int m, bool showBorder, int* totx, int* toty,
 						   int coren, int corem, int gap)
 {
@@ -212,4 +205,26 @@ int oneDrawing(int n, int m, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE
 	if (isGap)
 		wait(400);
 	return ret;
+}
+
+void drawCanvas(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], const char* s)
+{
+	cout << s << '\n';
+	cout << "  |";
+	for (int i = 1; i <= m; i++)
+		cout << setw(3) << i;
+	cout << "\n--+-";
+	for (int i = 1; i <= m; i++)
+		cout << "---";
+	cout << '\n';
+	for (int i = 1; i <= n; i++) {
+		cout << char('A' + i - 1) << " |";
+		for (int j = 1; j <= m; j++) {
+			cout << "  ";
+			cct_setcolor(COLOR_RED * !!sta[i][j]);
+			cout << map[i][j];
+			cct_setcolor();
+		}
+		cout << '\n';
+	}
 }

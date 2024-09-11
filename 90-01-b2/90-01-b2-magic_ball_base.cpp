@@ -12,28 +12,6 @@
 #include "90-01-b2-magic_ball.h"
 using namespace std;
 
-void drawCanvas(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], const char* s)
-{
-	cout << s << '\n';
-	cout << "  |";
-	for (int i = 1; i <= m; i++)
-		cout << setw(3) << i;
-	cout << "\n--+-";
-	for (int i = 1; i <= m; i++)
-		cout << "---";
-	cout << '\n';
-	for (int i = 1; i <= n; i++) {
-		cout << char('A' + i - 1) << " |";
-		for (int j = 1; j <= m; j++) {
-			cout << "  ";
-			cct_setcolor(COLOR_RED * !!sta[i][j]);
-			cout << map[i][j];
-			cct_setcolor();
-		}
-		cout << '\n';
-	}
-}
-
 static bool showCanvasAndTag(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 {
 	drawCanvas(n, m, map, sta, "³õÊ¼Êý×é");

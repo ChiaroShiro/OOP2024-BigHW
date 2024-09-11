@@ -1,1 +1,15 @@
-﻿
+﻿  cmd_console_tools.cpp
+  io_tools.cpp
+  matrix.cpp
+  menu.cpp
+  90-02-b1-main.cpp
+E:\work\tju\OOP\BigHW\90-02-b1\90-02-b1-main.cpp(38,4): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+E:\work\tju\OOP\BigHW\90-02-b1\90-02-b1-main.cpp(40,4): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+E:\work\tju\OOP\BigHW\90-02-b1\90-02-b1-main.cpp(42,4): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+E:\work\tju\OOP\BigHW\90-02-b1\90-02-b1-main.cpp(44,4): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+E:\work\tju\OOP\BigHW\90-02-b1\90-02-b1-main.cpp(46,4): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+E:\work\tju\OOP\BigHW\90-02-b1\90-02-b1-main.cpp(48,4): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+E:\work\tju\OOP\BigHW\90-02-b1\90-02-b1-main.cpp(50,4): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+  90-02-b1-option.cpp
+  正在生成代码...
+  90-02-b1.vcxproj -> E:\work\tju\OOP\BigHW\Debug\90-02-b1.exe

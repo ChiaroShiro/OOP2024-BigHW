@@ -1,4 +1,15 @@
 /*2351871 郎若谷 计科*/
+
+
+/*
+ * 
+ * matrix.h
+ * 
+ * 提供了二维矩阵游戏中通用的操作函数和动画函数
+ * 
+ */
+
+
 #pragma once
 
 #define STA_NORMAL			0
@@ -117,3 +128,9 @@ int oneDrawing(int n, int m, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE
 	void (*delBall)(int, int, int),
 	void (*drawFrontBall)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], bool, int),
 	void (*extraMoving)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], int, void(*)(int, int, int), void (*)(int, int, int, int, int)) = NULL);
+
+/*
+ * 无动画选项下的文字绘画矩阵功能
+ * n*m的矩阵 map 和 sta ，s 为画表的头部
+ */
+void drawCanvas(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], const char* s);

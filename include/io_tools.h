@@ -1,4 +1,15 @@
 /* 2351871 郎若谷 计科 */
+
+
+/*
+ *
+ * io_tools.h
+ *
+ * 提供了常用的IO相关函数
+ * 以及简单的通用函数
+ *
+ */
+
 #pragma once
 
 /*
@@ -94,3 +105,8 @@ void showLine(const char* s, int* retx, int* rety, int x = -1, int y = -1);
  * 输出提示信息为 msg
  */
 int getLineNumber(int minli, int maxli, const char* msg);
+
+/*
+ * 程序结束函数
+ */
+void programExit();

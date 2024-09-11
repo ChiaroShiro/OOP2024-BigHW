@@ -12,12 +12,6 @@
 #include "90-01-b2-magic_ball.h"
 using namespace std;
 
-void programExit()
-{
-	cout << "\n\n\n\n\n\n";
-	system("pause");
-}
-
 bool findBlock(int n, int m, int map[][MAP_SIZE], int res[][MAP_SIZE])
 {
 	bool ret = 0;

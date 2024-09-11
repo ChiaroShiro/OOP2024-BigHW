@@ -30,6 +30,15 @@
     <ClCompile Include="..\common\matrix.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="90-02-b1-option.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="90-02-b1-base.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="90-02-b1-matrix.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\cmd_console_tools.h">
@@ -42,6 +51,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\include\matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="90-02-b1-head.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,14 @@
 /*2351871 郎若谷 计科*/
+
+
+/*
+ *
+ * menu.h
+ *
+ * 提供了通用的游戏菜单显示函数
+ *
+ */
+
 #pragma once
 
 const int __MENU_INIT_X = 150;
