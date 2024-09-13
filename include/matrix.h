@@ -70,6 +70,11 @@ void generate(int n, int m, int map[][MAP_SIZE], int cates);
 void clearStatus(int n, int m, int sta[][MAP_SIZE], int x);
 
 /*
+ * 将 n*m 矩阵中 sta 的 ori 全部换成 trans
+ */
+void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans);
+
+/*
  * 在 n*m 的矩阵中从 (x,y) 点开始向四周寻找颜色（map值）相同且状态（sta值）被标记为 STA_NEED_DEL 的元素
  * 并将该元素删除，状态（sta）随后被置为 STA_NOW_DEL
  * 删除动画调用 delBall(x, y, col) 函数
@@ -80,18 +85,28 @@ void dfsFindBlock(int x, int y, int n, int m, const int map[][MAP_SIZE], int sta
 	              void (*delBall)(int, int, int));
 
 /*
- * 在 n*m 的矩阵中，寻找所有状态（sta值）为 STA_NEED_DEL 的同色连通块，并依次删除
- * 随后将所有被删除元素上方的元素下移至最高的没有被删除的元素上方
- * 如果 showGraph 是 1 则会调用 delBall 和 slideDownBall 参数显示动画效果
+ * 在 n* m 的矩阵中，寻找所有状态（sta值）为 STA_NEED_DEL 的同色连通块，并依次删除
+ * sta 置为 STA_NOW_DEL
+ * 如果 showGraph 是 1 则会调用 delBall 参数显示动画效果
  * 
  * n, m: 矩阵大小
  * map: 矩阵每个元素的颜色；  sta: 矩阵每个元素的状态
  * showGraph: 是否调用动画效果，默认为0（不调用）
  * delBall(x, y, col): 删除元素的动画函数。前两个参数描述被删除元素的坐标 (x, y)，第三个参数描述被删除元素的颜色 col (map值)
+ */
+void deleteBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, void (*delBall)(int, int, int) = NULL);
+
+/*
+ * 将所有被删除元素 (sta 为 STA_NOW_DEL) 上方的元素下移至最高的没有被删除的元素上方
+ * 随后把 sta 置为 STA_VOID
+ * 如果 showGraph 是 1 则会调用 slideDownBall 参数显示动画效果
+ * 
+ * n, m: 矩阵大小
+ * map: 矩阵每个元素的颜色；  sta: 矩阵每个元素的状态
+ * showGraph: 是否调用动画效果，默认为0（不调用）
  * slideDownBall(n, m, x, y, col): 前两个参数n, m描述矩阵大小，三四参数描述被操作元素的坐标 (x, y)，col 为该元素的颜色。函数效果是显示将这个位置的元素向下移动一格的动画
  */
-void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, 
-			  void (*delBall)(int, int, int) = NULL, void (*slideDownBall)(int, int, int, int, int) = NULL);
+void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, void (*slideDownBall)(int, int, int, int, int) = NULL);
 
 /*
  * n*m 的矩阵，颜色存在 map 中，状态存在 sta 中
@@ -133,4 +148,4 @@ int oneDrawing(int n, int m, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE
  * 无动画选项下的文字绘画矩阵功能
  * n*m的矩阵 map 和 sta ，s 为画表的头部
  */
-void drawCanvas(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], const char* s);
+void drawCanvas(int n, int m, const int map[][MAP_SIZE], const int sta[][MAP_SIZE], const char* s, int colorTag = -1);

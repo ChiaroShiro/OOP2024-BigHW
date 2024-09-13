@@ -13,10 +13,11 @@
 #include "90-02-b1-head.h"
 using namespace std;
 
-void opt1_findTag(int n, int m) 
+void NonAnimeOption(int n, int m, int optChoose) 
 {
 	int map[MAP_SIZE][MAP_SIZE] = { 0 }, sta[MAP_SIZE][MAP_SIZE] = { 0 };
 	generate(n, m, map, COLOR_CATES);
-
+	baseDrawing(n, m, map, sta, optChoose);
+	waitLine(400, "\n\n本小题结束，请输入End继续...", "输入错误！请重新输入", "End", 1);
 }
 

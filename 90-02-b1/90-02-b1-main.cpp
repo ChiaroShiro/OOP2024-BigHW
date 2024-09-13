@@ -5,6 +5,7 @@
 #include "../include/io_tools.h"
 #include "../include/matrix.h"
 #include "../include/menu.h"
+#include "90-02-b1-head.h"
 using namespace std;
 
 const char* MENU_CONTENT[] = {
@@ -20,12 +21,12 @@ const char* MENU_CONTENT[] = {
 
 int main()
 {
-	cct_setfontsize("新宋体", 28);
+	cct_setfontsize("新宋体", 20);
 	cct_setcursor(CURSOR_INVISIBLE);
 	srand((unsigned int)time(0));
 	int n, m;
 	while (1) {
-		cct_setconsoleborder(110, 25);
+		cct_setconsoleborder(110, 35);
 		int opt = showMenu('a', MENU_CONTENT, 'q', "退出");
 		if (opt == -1) {
 			programExit();
@@ -34,12 +35,8 @@ int main()
 		cct_cls();
 		n = getLineNumber(8, 10, "请输入行数（8-10）:");
 		m = getLineNumber(8, 10, "请输入列数（8-10）:");
-		if (opt == 1)
-			;
-		if (opt == 2)
-			;
-		if (opt == 3)
-			;
+		if (opt <= 3)
+			NonAnimeOption(n, m, opt);
 		if (opt == 4)
 			;
 		if (opt == 5)

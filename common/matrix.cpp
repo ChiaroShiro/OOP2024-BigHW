@@ -32,6 +32,14 @@ void clearStatus(int n, int m, int sta[][MAP_SIZE], int x)
 			sta[i][j] = x;
 }
 
+void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans)
+{
+	for (int i = 1; i <= n; i++)
+		for (int j = 1; j <= m; j++)
+			if (sta[i][j] == ori)
+				sta[i][j] = trans;
+}
+
 void dfsFindBlock(int x, int y, int n, int m, const int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*delBall)(int, int, int))
 {
 	static const int FX[] = { 0, 0, -1, 1 };
@@ -47,17 +55,22 @@ void dfsFindBlock(int x, int y, int n, int m, const int map[][MAP_SIZE], int sta
 	}
 }
 
-void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph, void (*delBall)(int, int, int), void (*slideDownBall)(int, int, int, int, int))
+void deleteBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph, void (*delBall)(int, int, int))
 {
 	for (int i = 1; i <= n; i++) {
 		for (int j = 1; j <= m; j++) {
 			if (sta[i][j] == STA_NEED_DEL) {
 				sta[i][j] = STA_NOW_DEL;
+				map[i][j] = 0;
 				if (showGraph)
 					dfsFindBlock(i, j, n, m, map, sta, delBall);
 			}
 		}
 	}
+}
+
+void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph, void (*slideDownBall)(int, int, int, int, int))
+{
 	for (int j = 1; j <= m; j++) {
 		int downGap = 0, now = n;
 		while (now) {
@@ -194,7 +207,8 @@ int oneDrawing(int n, int m, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE
 		cct_gotoxy(0, y_size - 3);
 		waitLine(0, "按回车键进行消除和下落除0操作", '\n');
 	}
-	fallBall(n, m, map, sta, 1, delBall, slideDownBall);
+	deleteBall(n, m, map, sta, 1, delBall);
+	fallBall(n, m, map, sta, 1, slideDownBall);
 	if (extraMoving != NULL)
 		extraMoving(n, m, map, sta, 1, delBall, slideDownBall);
 	if (!isGap) {
@@ -207,7 +221,7 @@ int oneDrawing(int n, int m, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE
 	return ret;
 }
 
-void drawCanvas(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], const char* s)
+void drawCanvas(int n, int m, const int map[][MAP_SIZE], const int sta[][MAP_SIZE], const char* s, int colorTag)
 {
 	cout << s << '\n';
 	cout << "  |";
@@ -221,7 +235,8 @@ void drawCanvas(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], const ch
 		cout << char('A' + i - 1) << " |";
 		for (int j = 1; j <= m; j++) {
 			cout << "  ";
-			cct_setcolor(COLOR_RED * !!sta[i][j]);
+			if(colorTag == -1 || colorTag == sta[i][j])
+				cct_setcolor(COLOR_RED * !!sta[i][j]);
 			cout << map[i][j];
 			cct_setcolor();
 		}
