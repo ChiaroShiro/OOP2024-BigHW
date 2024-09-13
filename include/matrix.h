@@ -25,29 +25,56 @@
 #define BUP					0
 #define BMID				1
 #define BDOWN				2
-
+ 
 #define CHOLLOW				0
 #define CSOLID				1
 #define CDOUBLE				2
 #define CFOUR				3
 #define CVOID				4
 
-const char BHEAD[][9] = { "╔",
-						  "╠",
-						  "╚" };
-const char BBODY[][9] = { "╦",
-						  "╬",
-						  "╩" };
-const char BTAIL[][5] = { "╗",
-						  "╣",
-						  "╝" };
-const char BHENG[] = "═";
-const char BSHU[] = "║";
+const char* const DOUBLE_HEAD[] = {"╔", "╠","╚"};
+
+
+const char DOUBLE_TRAN[][9] = { "╦", "╬", "╩" };
+const char DOUBLE_TAIL[][9] = { "╗","╣","╝" };
+const char DOUBLE_LINE[] = "═";
+const char DOUBLE_VERT[] = "║";
+
+const char SINGLE_HEAD[][9] = { "┏", "┣","┗" };
+const char SINGLE_TRAN[][9] = { "┳", "╋", "┻" };
+const char SINGLE_TAIL[][9] = { "┓","┫","┛" };
+const char SINGLE_LINE[] = "━";
+const char SINGLE_VERT[] = "┃";
+
 const char CORE[][5] = { "〇",
 						 "●",
 						 "◎",
 						 "¤",
 						 "  " };
+
+class StyleCSS {
+private:
+	const char* head[3];	// 行首
+	const char* tran[3];	// 中间段
+	const char* tail[3];	// 行尾
+	const char* line;		// 行横
+	const char* vert;		// 列竖
+	int now;				// 现在要输出哪种格式
+
+public:
+	StyleCSS();
+	void setHead(const char* news[]);
+	void setTail(const char* news[]);
+	void setTran(const char* news[]);
+	void setLine(const char* news);
+	void setVert(const char* news);
+	void setOutput(int kind);
+	const char* getHead();
+	const char* getTail();
+	const char* getLine();
+	const char* getTran();
+	const char* getVert();
+};
 
 /*
  * 计算某个元素在屏幕上的位置
@@ -125,7 +152,7 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
  * gap 为绘制每个元素后的间隔
  */
 void drawBackground(int n, int m, bool showBorder, int* totx, int* toty,
-	int coren, int corem, int gap = 0);
+	int coren, int corem, StyleCSS style, int gap = 0);
 
 
 /*

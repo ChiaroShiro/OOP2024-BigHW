@@ -10,7 +10,67 @@
 #include "../include/io_tools.h"
 #include "../include/matrix.h"
 using namespace std;
- 
+
+StyleCSS::StyleCSS() {
+	for (int i = 0; i < 3; i++) {
+		this->head[i] = DOUBLE_HEAD[i];
+		this->tran[i] = DOUBLE_TRAN[i];
+		this->tail[i] = DOUBLE_TAIL[i];
+	}
+	line = DOUBLE_LINE;
+	vert = DOUBLE_VERT;
+	now = 0;
+}
+
+void StyleCSS::setHead(const char* news[])
+{
+	for (int i = 0; i < 3; i++)
+		this->head[i] = news[i];
+}
+void StyleCSS::setTail(const char* news[])
+{
+	for (int i = 0; i < 3; i++)
+		this->tail[i] = news[i];
+}
+void StyleCSS::setTran(const char* news[])
+{
+	for (int i = 0; i < 3; i++)
+		this->tran[i] = news[i];
+}
+void StyleCSS::setLine(const char* news)
+{
+	this->line = news;
+}
+void StyleCSS::setVert(const char* news)
+{
+	this->vert = news;
+}
+void StyleCSS::setOutput(int kind)
+{
+	this->now = kind;
+}
+const char* StyleCSS::getHead()
+{
+	return this->head[this->now];
+}
+const char* StyleCSS::getTail()
+{
+	return this->tail[this->now];
+}
+const char* StyleCSS::getTran()
+{
+	return this->tran[this->now];
+}
+const char* StyleCSS::getLine()
+{
+	return this->line;
+}
+const char* StyleCSS::getVert()
+{
+	return this->vert;
+}
+
+
 void getpos(int i, int j, int* x, int* y, int showBorder, int cn, int cm)
 {
 	// y 是列数，x 是行数
@@ -61,9 +121,9 @@ void deleteBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool sho
 		for (int j = 1; j <= m; j++) {
 			if (sta[i][j] == STA_NEED_DEL) {
 				sta[i][j] = STA_NOW_DEL;
-				map[i][j] = 0;
 				if (showGraph)
 					dfsFindBlock(i, j, n, m, map, sta, delBall);
+				map[i][j] = 0;
 			}
 		}
 	}
@@ -126,23 +186,25 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
 /*
  * 画一实心行，m 为长度，kind 为行首元素的样式，showBorder 为 1 则有边框，否则无边框
  * 每个元素的长度由 elelen 决定，gap 为绘画每个元素后的暂停时长
+ * 样式：
  */
-static void drawOneSolidLine(int m, int kind, bool showBorder, int elelen, int gap)
+static void drawOneSolidLine(int m, int kind, bool showBorder, int elelen, int gap, StyleCSS style)
 {
-	cout << BHEAD[kind];
+	style.setOutput(kind);
+	cout << style.getHead();
 	wait(gap);
 	for (int i = 1; i < m; i++) {
 		for (int j = 0; j < elelen; j++)
-			cout << BHENG;
+			cout << style.getLine();
 		wait(gap);
 		if (showBorder) {
-			cout << BBODY[kind];
+			cout << style.getTran();
 			wait(gap);
 		}
 	}
 	for (int j = 0; j < elelen; j++)
-		cout << BHENG;
-	cout << BTAIL[kind] << '\n';
+		cout << style.getLine();
+	cout << style.getTail() << '\n';
 	wait(gap);
 }
 
@@ -151,27 +213,27 @@ static void drawOneSolidLine(int m, int kind, bool showBorder, int elelen, int g
  * 画一空心行，m 为长度，showBorder 为 1 则有边框，否则无边框
  * 每个元素的长度由 elelen 决定，gap 为绘画每个元素后的暂停时长
  */
-static void drawOneHollowLine(int m, bool showBorder, int elelen, int gap)
+static void drawOneHollowLine(int m, bool showBorder, int elelen, int gap, StyleCSS style)
 {
-	cout << BSHU;
+	cout << style.getVert();
 	wait(gap);
 	for (int i = 1; i < m; i++) {
 		for (int j = 0; j < elelen; j++)
 			cout << "  ";
 		wait(gap);
 		if (showBorder) {
-			cout << BSHU;
+			cout << style.getVert();
 			wait(gap);
 		}
 	}
 	for (int j = 0; j < elelen; j++)
 		cout << "  ";
-	cout << BSHU << '\n';
+	cout << style.getVert() << '\n';
 	wait(gap);
 }
 
 void drawBackground(int n, int m, bool showBorder, int* totx, int* toty,
-						   int coren, int corem, int gap)
+						   int coren, int corem, StyleCSS style, int gap)
 {
 	getpos(n, m, totx, toty, showBorder, coren, corem);
 	*totx = max(*totx + 12, 40);
@@ -180,16 +242,16 @@ void drawBackground(int n, int m, bool showBorder, int* totx, int* toty,
 	cct_gotoxy(0, 0);
 	cout << "屏幕：" << *totx << "行" << *toty << "列\n";
 	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-	drawOneSolidLine(m, BUP, showBorder, corem, gap);
+	drawOneSolidLine(m, BUP, showBorder, corem, gap, style);
 	for (int i = 1; i < n; i++) {
 		for (int j = 0; j < coren; j++)
-			drawOneHollowLine(m, showBorder, corem, gap);
+			drawOneHollowLine(m, showBorder, corem, gap, style);
 		if (showBorder)
-			drawOneSolidLine(m, BMID, showBorder, corem, gap);
+			drawOneSolidLine(m, BMID, showBorder, corem, gap, style);
 	}
 	for (int j = 0; j < coren; j++)
-		drawOneHollowLine(m, showBorder, corem, gap);
-	drawOneSolidLine(m, BDOWN, showBorder, corem, gap);
+		drawOneHollowLine(m, showBorder, corem, gap, style);
+	drawOneSolidLine(m, BDOWN, showBorder, corem, gap, style);
 	cct_setcolor();
 }
 

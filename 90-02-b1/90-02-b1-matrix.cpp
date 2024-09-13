@@ -100,7 +100,8 @@ void squeezeBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool sh
 			++slidecnt;
 			continue;
 		}
-		if (slidecnt == 0) continue;
+		if (slidecnt == 0) 
+			continue;
 		for (int i = 1; i <= n; i++) {
 			if (sta[i][j] == STA_VOID)
 				continue;

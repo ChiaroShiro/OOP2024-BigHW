@@ -127,7 +127,7 @@ void slideDownBall(int n, int m, int x, int y, int val)
 	wait(MID_GAP);
 	cct_gotoxy(posx, posy + 1);
 	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-	cout << BHENG;
+	cout << DOUBLE_LINE;
 	cct_gotoxy(posx, posy + 2);
 	cct_setcolor(getcol(val), COLOR_BLACK);
 	cout << CORE[CHOLLOW];
@@ -156,7 +156,7 @@ void graphOptionInitBorder(int n, int m, bool showBorder)
 	drawCanvas(n, m, map, sta, "初始数组:");
 	waitLine(0, "按回车键显示图形", '\n');
 	cct_cls();
-	drawBackground(n, m, showBorder, &x_size, &y_size, 1, 1, SMALL_GAP);
+	drawBackground(n, m, showBorder, &x_size, &y_size, 1, 1, StyleCSS());
 	drawFrontBall(n, m, map, sta, showBorder, SMALL_GAP);
 	endHint(y_size);
 }
@@ -167,7 +167,7 @@ void graphOptionDelete(int n, int m)
 	int x_size, y_size;
 	generate(n, m, map, BALL_CATEGORY_SIZE);
 	cct_cls();
-	drawBackground(n, m, 0, &x_size, &y_size, 1, 1);
+	drawBackground(n, m, 0, &x_size, &y_size, 1, 1, StyleCSS());
 	findBlock(n, m, map, sta);
 	drawFrontBall(n, m, map, sta, 0);
 	endHint(y_size);
@@ -179,7 +179,7 @@ void graphOptionDeleteHint(int n, int m)
 	int x_size, y_size;
 	generate(n, m, map, BALL_CATEGORY_SIZE);
 	cct_cls();
-	drawBackground(n, m, 1, &x_size, &y_size, 1, 1);
+	drawBackground(n, m, 1, &x_size, &y_size, 1, 1, StyleCSS());
 	finishDrawing(n, m, x_size, y_size, map, sta, 1, 1, 0);
 	endHint(y_size);
 }
@@ -266,7 +266,7 @@ void mainWork(int n, int m, bool isLoop)
 	int x_size, y_size, x_text, y_text, score = 0, flag = 0;
 	generate(n, m, map, BALL_CATEGORY_SIZE);
 	cct_cls();
-	drawBackground(n, m, 1, &x_size, &y_size, 1, 1);
+	drawBackground(n, m, 1, &x_size, &y_size, 1, 1, StyleCSS());
 	updateScore(score);
 	while (1) {
 		cct_gotoxy(0, y_size - 5);

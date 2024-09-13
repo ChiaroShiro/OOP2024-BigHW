@@ -12,3 +12,4 @@ bool isPossible(int n, int m, const int map[][MAP_SIZE], const int sta[][MAP_SIZ
 void squeezeBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, void (*slideLeftBall)(int, int, int, int, int) = NULL);
 
 void NonAnimeOption(int n, int m, int optChoose);
+void AnimeOption(int n, int m, int optChoos);

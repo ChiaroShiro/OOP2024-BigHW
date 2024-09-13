@@ -37,14 +37,8 @@ int main()
 		m = getLineNumber(8, 10, "ÇëÊäÈëÁĞÊı£¨8-10£©:");
 		if (opt <= 3)
 			NonAnimeOption(n, m, opt);
-		if (opt == 4)
-			;
-		if (opt == 5)
-			;
-		if (opt == 6)
-			;
-		if (opt == 7)
-			;
+		if (opt >= 4 && opt <= 7)
+			AnimeOption(n, m, opt);
 	}
 	return 0;
 }

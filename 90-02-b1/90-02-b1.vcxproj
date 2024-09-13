@@ -144,6 +144,7 @@
     <ClCompile Include="..\common\matrix.cpp" />
     <ClCompile Include="..\common\menu.cpp" />
     <ClCompile Include="90-02-b1-base.cpp" />
+    <ClCompile Include="90-02-b1-graph.cpp" />
     <ClCompile Include="90-02-b1-main.cpp" />
     <ClCompile Include="90-02-b1-matrix.cpp" />
     <ClCompile Include="90-02-b1-option.cpp" />
