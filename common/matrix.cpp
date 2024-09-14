@@ -22,26 +22,26 @@ StyleCSS::StyleCSS() {
 	now = 0;
 }
 
-void StyleCSS::setHead(const char* news[])
+void StyleCSS::setHead(const char* const news[])
 {
 	for (int i = 0; i < 3; i++)
 		this->head[i] = news[i];
 }
-void StyleCSS::setTail(const char* news[])
+void StyleCSS::setTail(const char* const news[])
 {
 	for (int i = 0; i < 3; i++)
 		this->tail[i] = news[i];
 }
-void StyleCSS::setTran(const char* news[])
+void StyleCSS::setTran(const char* const news[])
 {
 	for (int i = 0; i < 3; i++)
 		this->tran[i] = news[i];
 }
-void StyleCSS::setLine(const char* news)
+void StyleCSS::setLine(const char* const news)
 {
 	this->line = news;
 }
-void StyleCSS::setVert(const char* news)
+void StyleCSS::setVert(const char* const news)
 {
 	this->vert = news;
 }
@@ -70,12 +70,17 @@ const char* StyleCSS::getVert()
 	return this->vert;
 }
 
+void rgetpos(int i, int j, int* x, int* y, int addx, int addy, int cn, int cm)
+{
+	*x = (j - 2) / (cm + addx) + 1;
+	*y = (i - 2) / (2 * (cn + addy)) + 1;
+}
 
-void getpos(int i, int j, int* x, int* y, int showBorder, int cn, int cm)
+void getpos(int i, int j, int* x, int* y, int addx, int addy, int cn, int cm)
 {
 	// y 是列数，x 是行数
-	*x = 2 + (cm * 2 + 2 * showBorder) * (j - 1);
-	*y = 2 + (cn + 1 * showBorder) * (i - 1);
+	*x = 2 + (cm + addx) * (j - 1) * 2;
+	*y = 2 + (cn + addy) * (i - 1);
 }
 
 void generate(int n, int m, int map[][MAP_SIZE], int cates)
@@ -232,25 +237,67 @@ static void drawOneHollowLine(int m, bool showBorder, int elelen, int gap, Style
 	wait(gap);
 }
 
-void drawBackground(int n, int m, bool showBorder, int* totx, int* toty,
+void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int* toty,
 						   int coren, int corem, StyleCSS style, int gap)
 {
-	getpos(n, m, totx, toty, showBorder, coren, corem);
-	*totx = max(*totx + 12, 40);
-	*toty = max(*toty + 7, 14);
+	int addxy = showBorder;
+	getpos(n, m, totx, toty, addxy, addxy, coren, corem);
+	*totx = max(*totx + 12, 40) + !!showFrame * 2;
+	*toty = max(*toty + 7, 14) + !!showFrame;
 	cct_setconsoleborder(*totx, *toty);
 	cct_gotoxy(0, 0);
 	cout << "屏幕：" << *totx << "行" << *toty << "列\n";
+	if (showFrame) {
+		for (int i = 0; i < n; i++) {
+			int xx, yy;
+			getpos(1, i + 1, &xx, &yy, addxy, addxy, coren, corem);
+			yy -= 1;
+			cct_gotoxy(xx + 2, yy);
+			cout << setw(corem + 1) << (char)((showFrame & 0xFF) + i);
+		}
+		cout << endl;
+	}
+	if (showFrame)
+		cout << "  ";
 	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 	drawOneSolidLine(m, BUP, showBorder, corem, gap, style);
 	for (int i = 1; i < n; i++) {
-		for (int j = 0; j < coren; j++)
+		for (int j = 0; j < coren; j++) {
+			if (showFrame) {
+				cct_setcolor(COLOR_BLACK, COLOR_WHITE);
+				if (j == coren / 2)
+					cout << (char)(((showFrame >> 8) & 0xFF) + i - 1) << " ";
+				else
+					cout << "  ";
+				cct_setcolor(COLOR_WHITE, COLOR_BLACK);
+			}
 			drawOneHollowLine(m, showBorder, corem, gap, style);
-		if (showBorder)
+		}
+		if (showBorder) {
+			if (showFrame) {
+				cct_setcolor(COLOR_BLACK, COLOR_WHITE);
+				cout << "  ";
+				cct_setcolor(COLOR_WHITE, COLOR_BLACK);
+			}
 			drawOneSolidLine(m, BMID, showBorder, corem, gap, style);
+		}
 	}
-	for (int j = 0; j < coren; j++)
+	for (int j = 0; j < coren; j++) {
+		if (showFrame) {
+			cct_setcolor(COLOR_BLACK, COLOR_WHITE);
+			if (j == coren / 2)
+				cout << (char)(((showFrame >> 8) & 0xFF) + n - 1) << " ";
+			else
+				cout << "  ";
+			cct_setcolor(COLOR_WHITE, COLOR_BLACK);
+		}
 		drawOneHollowLine(m, showBorder, corem, gap, style);
+	}
+	if (showFrame) {
+		cct_setcolor(COLOR_BLACK, COLOR_WHITE);
+		cout << "  ";
+		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
+	}
 	drawOneSolidLine(m, BDOWN, showBorder, corem, gap, style);
 	cct_setcolor();
 }

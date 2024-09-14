@@ -33,24 +33,18 @@
 #define CVOID				4
 
 const char* const DOUBLE_HEAD[] = {"╔", "╠","╚"};
+const char* const DOUBLE_TRAN[] = { "╦", "╬", "╩" };
+const char* const DOUBLE_TAIL[] = { "╗","╣","╝" };
+const char* const DOUBLE_LINE = "═";
+const char* const DOUBLE_VERT = "║";
 
+const char* const SINGLE_HEAD[] = { "┏", "┣","┗" };
+const char* const SINGLE_TRAN[] = { "┳", "╋", "┻" };
+const char* const SINGLE_TAIL[] = { "┓","┫","┛" };
+const char* const SINGLE_LINE = "━";
+const char* const SINGLE_VERT = "┃";
 
-const char DOUBLE_TRAN[][9] = { "╦", "╬", "╩" };
-const char DOUBLE_TAIL[][9] = { "╗","╣","╝" };
-const char DOUBLE_LINE[] = "═";
-const char DOUBLE_VERT[] = "║";
-
-const char SINGLE_HEAD[][9] = { "┏", "┣","┗" };
-const char SINGLE_TRAN[][9] = { "┳", "╋", "┻" };
-const char SINGLE_TAIL[][9] = { "┓","┫","┛" };
-const char SINGLE_LINE[] = "━";
-const char SINGLE_VERT[] = "┃";
-
-const char CORE[][5] = { "〇",
-						 "●",
-						 "◎",
-						 "¤",
-						 "  " };
+const char* const CORE[] = { "〇","●","◎","¤","  " };
 
 class StyleCSS {
 private:
@@ -63,11 +57,11 @@ private:
 
 public:
 	StyleCSS();
-	void setHead(const char* news[]);
-	void setTail(const char* news[]);
-	void setTran(const char* news[]);
-	void setLine(const char* news);
-	void setVert(const char* news);
+	void setHead(const char* const news[]);
+	void setTail(const char* const news[]);
+	void setTran(const char* const news[]);
+	void setLine(const char* const news);
+	void setVert(const char* const news);
 	void setOutput(int kind);
 	const char* getHead();
 	const char* getTail();
@@ -82,7 +76,8 @@ public:
  * showBorder 为 1 则是有边界，为 0 则是无边界
  * cn 和 cm 是每个元素的行数和列数
  */
-void getpos(int i, int j, int* x, int* y, int showBorder, int cn, int cm);
+void getpos(int i, int j, int* x, int* y, int addx, int addy, int cn, int cm);
+void rgetpos(int i, int j, int* x, int* y, int addx, int addy, int cn, int cm);
 
 /*
  * 随机生成一个 n*m 矩阵，存储在 map 中
@@ -151,7 +146,7 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
  * coren 和 corem 描述每个元素的大小
  * gap 为绘制每个元素后的间隔
  */
-void drawBackground(int n, int m, bool showBorder, int* totx, int* toty,
+void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int* toty,
 	int coren, int corem, StyleCSS style, int gap = 0);
 
 

@@ -12,12 +12,6 @@
 #include "90-01-b2-magic_ball.h"
 using namespace std;
 
-static void rgetpos(int i, int j, int* x, int* y)
-{
-	*x = (j - 2) / 2 + 1;
-	*y = (i - 2) / 4 + 1;
-}
-
 static int getcol(int x)
 {
 	return x + (x >= 7) + (x >= 8) * 3 + (x == 9);
@@ -51,7 +45,7 @@ static void endHint(int y_size)
 static int checkClickable(int x, int y, int n, int m, int sta[][MAP_SIZE])
 {
 	int mapx, mapy;
-	rgetpos(x, y, &mapx, &mapy);
+	rgetpos(x, y, &mapx, &mapy, 1, 1, 1, 1);
 	if (mapx < 1 || mapy < 1 || mapx > n || mapy > m)
 		return CLICK_UNABLE;
 	if ((y % 2) || (x % 4 < 2))
@@ -72,7 +66,7 @@ static void updateBall(int x, int y, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 		cct_setcolor(getcol(map[x][y]), COLOR_WHITE);
 	else
 		cct_setcolor(getcol(map[x][y]), COLOR_BLACK);
-	getpos(x, y, &x, &y, 1, 1, 1);
+	getpos(x, y, &x, &y, 1, 1, 1, 1);
 	cct_gotoxy(x, y);
 	cout << CORE[CDOUBLE];
 	cct_setcolor();
@@ -83,7 +77,7 @@ static void drawFrontBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE]
 	for (int i = 1; i <= n; i++) {
 		for (int j = 1; j <= m; j++) {
 			int x, y;
-			getpos(i, j, &x, &y, showBorder, 1, 1);
+			getpos(i, j, &x, &y, showBorder, showBorder, 1, 1);
 			cct_gotoxy(x, y);
 			cct_setcolor(getcol(map[i][j]), COLOR_BLACK);
 			cout << CORE[getGraph(sta[i][j])];
@@ -96,7 +90,7 @@ static void drawFrontBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE]
 void eliminateBall(int x, int y, int val)
 {
 	int posx, posy;
-	getpos(x, y, &posx, &posy, 1, 1, 1);
+	getpos(x, y, &posx, &posy, 1, 1, 1, 1);
 	cct_setcolor(getcol(val), COLOR_BLACK);
 	for (int i = 0; i < 6; i++) {
 		cct_gotoxy(posx, posy);
@@ -115,7 +109,7 @@ void eliminateBall(int x, int y, int val)
 void slideDownBall(int n, int m, int x, int y, int val)
 {
 	int posx, posy;
-	getpos(x, y, &posx, &posy, 1, 1, 1);
+	getpos(x, y, &posx, &posy, 1, 1, 1, 1);
 	if (x != 0) {
 		cct_gotoxy(posx, posy);
 		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
@@ -156,7 +150,7 @@ void graphOptionInitBorder(int n, int m, bool showBorder)
 	drawCanvas(n, m, map, sta, "初始数组:");
 	waitLine(0, "按回车键显示图形", '\n');
 	cct_cls();
-	drawBackground(n, m, showBorder, &x_size, &y_size, 1, 1, StyleCSS());
+	drawBackground(n, m, showBorder, 0, &x_size, &y_size, 1, 1, StyleCSS());
 	drawFrontBall(n, m, map, sta, showBorder, SMALL_GAP);
 	endHint(y_size);
 }
@@ -167,7 +161,7 @@ void graphOptionDelete(int n, int m)
 	int x_size, y_size;
 	generate(n, m, map, BALL_CATEGORY_SIZE);
 	cct_cls();
-	drawBackground(n, m, 0, &x_size, &y_size, 1, 1, StyleCSS());
+	drawBackground(n, m, 0, 0, &x_size, &y_size, 1, 1, StyleCSS());
 	findBlock(n, m, map, sta);
 	drawFrontBall(n, m, map, sta, 0);
 	endHint(y_size);
@@ -179,7 +173,7 @@ void graphOptionDeleteHint(int n, int m)
 	int x_size, y_size;
 	generate(n, m, map, BALL_CATEGORY_SIZE);
 	cct_cls();
-	drawBackground(n, m, 1, &x_size, &y_size, 1, 1, StyleCSS());
+	drawBackground(n, m, 1, 0, &x_size, &y_size, 1, 1, StyleCSS());
 	finishDrawing(n, m, x_size, y_size, map, sta, 1, 1, 0);
 	endHint(y_size);
 }
@@ -214,7 +208,7 @@ static bool mouseLoop(int n, int m, int x_text, int y_text, int map[][MAP_SIZE],
 			cout << "位置非法                      ";
 			continue;
 		}
-		rgetpos(x, y, &x, &y);
+		rgetpos(x, y, &x, &y, 1, 1, 1, 1);
 		cout << char('A' + x - 1) << "行" << char(y + '0') << "列";
 		cct_getxy(tmpx, tmpy);
 		clearLine(tmpx, tmpy);
@@ -266,7 +260,7 @@ void mainWork(int n, int m, bool isLoop)
 	int x_size, y_size, x_text, y_text, score = 0, flag = 0;
 	generate(n, m, map, BALL_CATEGORY_SIZE);
 	cct_cls();
-	drawBackground(n, m, 1, &x_size, &y_size, 1, 1, StyleCSS());
+	drawBackground(n, m, 1, 0, &x_size, &y_size, 1, 1, StyleCSS());
 	updateScore(score);
 	while (1) {
 		cct_gotoxy(0, y_size - 5);
