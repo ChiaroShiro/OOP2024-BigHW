@@ -21,6 +21,7 @@ const char* MENU_CONTENT[] = {
 
 int main()
 {
+	cct_setcolor();
 	cct_setfontsize("ĞÂËÎÌå", 20);
 	cct_setcursor(CURSOR_INVISIBLE);
 	srand((unsigned int)time(0));
