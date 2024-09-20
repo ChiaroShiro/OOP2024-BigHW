@@ -187,6 +187,7 @@ static int findMouseClick(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE]
 		}
 		if (ret == RET_QUIT_GAME)
 			return 1;
+
 		if (ret == RET_CHANGE_CELL || chsx < 1 || chsy < 1 || chsx > n || chsy > m) {
 			if (rechoose == 1) {
 				memset(tmp, 0, sizeof(tmp));
