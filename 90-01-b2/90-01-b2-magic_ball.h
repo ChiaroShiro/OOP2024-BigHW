@@ -39,5 +39,5 @@ bool findAvailable(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE]);
 bool tryFindBlock(int n, int m, int map[][MAP_SIZE]);
 bool tryFindAvailable(int n, int m, int map[][MAP_SIZE]);
 
-void eliminateBall(int x, int y, int val);
-void slideDownBall(int n, int m, int x, int y, int val);
+void eliminateBall(int x, int y, int val, int showBorder);
+void slideDownBall(int n, int m, int x, int y, int val, int showBorder);

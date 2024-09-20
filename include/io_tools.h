@@ -110,3 +110,14 @@ int getLineNumber(int minli, int maxli, const char* msg);
  * 程序结束函数
  */
 void programExit();
+
+/*
+ * 等待回车换左键单击
+ */
+void waitForEndlineOrClick();
+
+/*
+ * 在二维动画的底部输出文字
+ */
+void gotoBottom(int n, int showBorder);
+void showBottom(int n, const char* s, int showBorder, int bgcol = COLOR_BLACK, int frcol = COLOR_WHITE);

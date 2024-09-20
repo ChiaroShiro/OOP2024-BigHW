@@ -170,3 +170,28 @@ void programExit()
 	cout << "\n\n\n\n\n\n";
 	system("pause");
 }
+
+void waitForEndlineOrClick()
+{
+	int x, y, mevent, keya, keyb;
+	while (1) {
+		cct_enable_mouse();
+		int korm = cct_read_keyboard_and_mouse(x, y, mevent, keya, keyb);
+		if (korm == CCT_KEYBOARD_EVENT && (keya == '\n' || keya == '\r'))
+			break;
+		if (korm == CCT_MOUSE_EVENT && mevent == MOUSE_LEFT_BUTTON_CLICK)
+			break;
+	}
+}
+
+void gotoBottom(int n, int showBorder)
+{
+	cct_gotoxy(0, 4 + 3 * n + (n - 1) * showBorder);
+}
+
+void showBottom(int n, const char* s, int showBorder, int bgcol, int frcol)
+{
+	gotoBottom(n, showBorder);
+	cct_setcolor(bgcol, frcol);
+	cout << s;
+}

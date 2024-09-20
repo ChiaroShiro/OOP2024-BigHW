@@ -86,7 +86,7 @@ void baseDrawing(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], int opt
 		if (chs == 'N')
 			continue;
 
-		deleteBall(n, m, map, sta);
+		deleteBall(n, m, 0, map, sta);
 		drawCanvas(n, m, map, sta, "\n\n相同值归并后的数组(不同色标识)：", STA_NOW_DEL);
 		nowScore = nowScore * nowScore * 5;
 		totScore += nowScore;

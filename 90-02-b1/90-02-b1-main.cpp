@@ -22,7 +22,7 @@ const char* MENU_CONTENT[] = {
 int main()
 {
 	cct_setcolor();
-	cct_setfontsize("新宋体", 20);
+	cct_setfontsize("新宋体", 24);
 	cct_setcursor(CURSOR_INVISIBLE);
 	srand((unsigned int)time(0));
 	int n, m;

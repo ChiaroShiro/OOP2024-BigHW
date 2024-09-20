@@ -87,7 +87,7 @@ static void drawFrontBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE]
 	}
 }
 
-void eliminateBall(int x, int y, int val)
+void eliminateBall(int x, int y, int val, int showBorder = 1)
 {
 	int posx, posy;
 	getpos(x, y, &posx, &posy, 1, 1, 1, 1);
@@ -106,7 +106,7 @@ void eliminateBall(int x, int y, int val)
 	cct_setcolor();
 }
 
-void slideDownBall(int n, int m, int x, int y, int val)
+void slideDownBall(int n, int m, int x, int y, int val, int showBorder = 1)
 {
 	int posx, posy;
 	getpos(x, y, &posx, &posy, 1, 1, 1, 1);
@@ -134,7 +134,7 @@ int finishDrawing(int n, int m, int x_size, int y_size, int map[][MAP_SIZE], int
 {
 	int ret = 0;
 	while (findBlock(n, m, map, sta)) {
-		ret += oneDrawing(n, m, y_size, map, sta, isGap, BALL_CATEGORY_SIZE, slideDownBall, eliminateBall, drawFrontBall);
+		ret += oneDrawing(n, m, y_size, 1, map, sta, isGap, BALL_CATEGORY_SIZE, slideDownBall, eliminateBall, drawFrontBall);
 	}
 	clearStatus(n, m, sta, STA_NORMAL);
 	findAvailable(n, m, map, sta);

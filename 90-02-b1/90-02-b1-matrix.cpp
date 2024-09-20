@@ -13,9 +13,7 @@
 #include "90-02-b1-head.h"
 using namespace std;
 
-static const int forwardx[] = { 0, 0, 1, -1 };
-static const int forwardy[] = { 1, -1, 0, 0 };
-
+// dfs连通块，内部格子变成 NEED_DEL
 static int dfsArea(int x, int y, int col, int n, int m, const int map[][MAP_SIZE], int sta[][MAP_SIZE])
 {
 	sta[x][y] = STA_NEED_DEL;
@@ -39,7 +37,7 @@ int isErasable(int n, int m, int x, int y, const int map[][MAP_SIZE], int sta[][
 		return -1;
 	int area = dfsArea(x, y, map[x][y], n, m, map, sta);
 	if (area == 1) {
-		sta[x][y] = STA_NORMAL;
+		sta[x][y] = STA_NORMAL; // 如果不可行则不会修改 sta
 		return 0;
 	}
 	return area;
@@ -92,6 +90,7 @@ static bool checkColumnVoid(int x, int n, const int sta[][MAP_SIZE])
 	return 1;
 }
 
+// 处理空列
 void squeezeBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph, void (*slideLeftBall)(int, int, int, int, int))
 {
 	int slidecnt = 0;

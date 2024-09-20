@@ -24,6 +24,7 @@ void NonAnimeOption(int n, int m, int optChoose)
 void AnimeOption(int n, int m, int optChoose)
 {
 	int map[MAP_SIZE][MAP_SIZE] = { 0 }, sta[MAP_SIZE][MAP_SIZE] = { 0 };
+	int xborder = 0, yborder = 0;
 	generate(n, m, map, COLOR_CATES);
 	StyleCSS style;
 	style.setHead(SINGLE_HEAD);
@@ -31,7 +32,8 @@ void AnimeOption(int n, int m, int optChoose)
 	style.setTran(SINGLE_TRAN);
 	style.setLine(SINGLE_LINE); 
 	style.setVert(SINGLE_VERT);
-	while (gaming(n, m, map, sta, optChoose, style))
-		;
+	gaming(n, m, map, sta, optChoose, style, xborder, yborder);
+	cct_gotoxy(0, yborder - 4);
+	cct_setcolor();
 	waitLine(400, "\n\n本小题结束，请输入End继续...", "输入错误！请重新输入", "End", 1);
 }

@@ -32,6 +32,10 @@
 #define CFOUR				3
 #define CVOID				4
 
+
+const int forwardx[] = { 0, 0, 1, -1 };
+const int forwardy[] = { 1, -1, 0, 0 };
+
 const char* const DOUBLE_HEAD[] = {"╔", "╠","╚"};
 const char* const DOUBLE_TRAN[] = { "╦", "╬", "╩" };
 const char* const DOUBLE_TAIL[] = { "╗","╣","╝" };
@@ -103,8 +107,8 @@ void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans);
  * 
  * delBall函数前两个参数描述被删位置的坐标(x,y)，第三个参数为这个位置的颜色（map值）
  */
-void dfsFindBlock(int x, int y, int n, int m, const int map[][MAP_SIZE], int sta[][MAP_SIZE], 
-	              void (*delBall)(int, int, int));
+void dfsFindBlock(int x, int y, int n, int m, int showBorder, const int map[][MAP_SIZE], int sta[][MAP_SIZE], 
+	              void (*delBall)(int, int, int, int));
 
 /*
  * 在 n* m 的矩阵中，寻找所有状态（sta值）为 STA_NEED_DEL 的同色连通块，并依次删除
@@ -116,7 +120,7 @@ void dfsFindBlock(int x, int y, int n, int m, const int map[][MAP_SIZE], int sta
  * showGraph: 是否调用动画效果，默认为0（不调用）
  * delBall(x, y, col): 删除元素的动画函数。前两个参数描述被删除元素的坐标 (x, y)，第三个参数描述被删除元素的颜色 col (map值)
  */
-void deleteBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, void (*delBall)(int, int, int) = NULL);
+void deleteBall(int n, int m, int showBorder, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, void (*delBall)(int, int, int, int) = NULL);
 
 /*
  * 将所有被删除元素 (sta 为 STA_NOW_DEL) 上方的元素下移至最高的没有被删除的元素上方
@@ -128,7 +132,7 @@ void deleteBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool sho
  * showGraph: 是否调用动画效果，默认为0（不调用）
  * slideDownBall(n, m, x, y, col): 前两个参数n, m描述矩阵大小，三四参数描述被操作元素的坐标 (x, y)，col 为该元素的颜色。函数效果是显示将这个位置的元素向下移动一格的动画
  */
-void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, void (*slideDownBall)(int, int, int, int, int) = NULL);
+void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, int showBorder = 1, void (*slideDownBall)(int, int, int, int, int, int) = NULL);
 
 /*
  * n*m 的矩阵，颜色存在 map 中，状态存在 sta 中
@@ -138,7 +142,7 @@ void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showG
  * slideDownBall(n, m, x, y, col): 前两个参数n, m描述矩阵大小，三四参数描述被操作元素的坐标 (x, y)，col 为该元素的颜色。函数效果是显示将这个位置的元素向下移动一格的动画
  */
 int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
-	int cates, void (*slideDownBall)(int, int, int, int, int), bool showGraph = 1);
+	int cates, void (*slideDownBall)(int, int, int, int, int, int), bool showGraph = 1, int showBorder = 1);
 
 /*
  * 绘制背景框架，矩阵为 n*m 大小，showBorder 为 1 则绘制边框
@@ -147,7 +151,7 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
  * gap 为绘制每个元素后的间隔
  */
 void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int* toty,
-	int coren, int corem, StyleCSS style, int gap = 0);
+	int coren, int corem, StyleCSS style, int gap = 0, int times = 1);
 
 
 /*
@@ -160,11 +164,12 @@ void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int
  * drawFrontBall(n, m, map, sta, showBorder, gap): 在n*m的矩阵map/sta上动画绘制所有前景球，showBorder为1则有边界，gap为停顿时间
  * extraMoving(n, m, map, sta, showGraph, delBall, slideDownBall): 在 fallBall 之后执行的函数，用于进行额外的消除操作，调用格式桶 fallBall()。默认为 NULL，不会进行任何操作
  */
-int oneDrawing(int n, int m, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool isGap, int cates,
-	void (*slideDownBall)(int, int, int, int, int),
-	void (*delBall)(int, int, int),
+int oneDrawing(int n, int m, int y_size, int showBorder, int map[][MAP_SIZE], int sta[][MAP_SIZE],
+	bool isGap, int cates,
+	void (*slideDownBall)(int, int, int, int, int, int),
+	void (*delBall)(int, int, int, int),
 	void (*drawFrontBall)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], bool, int),
-	void (*extraMoving)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], int, void(*)(int, int, int), void (*)(int, int, int, int, int)) = NULL);
+	void (*extraMoving)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], int, void(*)(int, int, int, int), void (*)(int, int, int, int, int, int)) = NULL);
 
 /*
  * 无动画选项下的文字绘画矩阵功能
