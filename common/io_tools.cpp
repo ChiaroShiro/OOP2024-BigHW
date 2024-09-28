@@ -51,7 +51,7 @@ void clearLine(int x, int y, const char* s)
 		cct_gotoxy(0, x);
 	else
 		cct_gotoxy(x, y);
-	cout << s;
+	shows(s);
 }
 
 char getcc(bool show)
@@ -59,7 +59,7 @@ char getcc(bool show)
 	if (show) {
 		char c = _getch();
 		if (c > 20 && c < 127)
-			cout << c;
+			showc(c);
 		return c;
 	}
 	else
@@ -75,7 +75,8 @@ void wait(int x)
 void showNum(int x, int y, int v, int w)
 {
 	cct_gotoxy(x, y);
-	cout << setw(w) << v;
+	cout << setw(w);
+	showi(v);
 }
 
 void waitLine(int x, const char* output, const char* hint, const char* input, bool show)
@@ -114,7 +115,7 @@ void waitLine(int x, const char* output, const char* hint, const char* input, bo
 			int tmpx, tmpy;
 			cout << endl;
 			cct_getxy(tmpx, tmpy);
-			cout << hint;
+			shows(hint);
 			wait(400);
 			clearLine(tmpy);
 		}
@@ -140,22 +141,52 @@ void waitLine(int x, const char* output, char input, bool show)
 void showLine(const char* s, int x, int y)
 {
 	cct_gotoxy(x, y);
-	cout << s;
+	shows(s);
 }
 
 void showLine(const char* s, int* retx, int* rety, int x, int y)
 {
 	if (x >= 0 && y >= 0)
 		cct_gotoxy(x, y);
-	cout << s;
+	shows(s);
 	cct_getxy(*retx, *rety);
+}
+
+void shows(const char* s) 
+{
+	int x, y, cx, cy;
+	cct_getxy(x, y);
+	cct_getcolor(cx, cy);
+	cct_showstr(x, y, s, cx, cy);
+}
+
+void showc(const char& c) 
+{
+	int x, y, cx, cy;
+	cct_getxy(x, y);
+	cct_getcolor(cx, cy);
+	cct_showch(x, y, c, cx, cy);
+}
+
+void showi (const int &p) 
+{
+	int x, y, cx, cy;
+	cct_getxy(x, y);
+	cct_getcolor(cx, cy);
+	cct_showint(x, y, p, cx, cy);
+}
+
+void showln()
+{
+	showc('\n');
 }
 
 int getLineNumber(int minli, int maxli, const char* msg)
 {
 	int n;
 	while (1) {
-		cout << msg << '\n';
+		shows(msg);
+		showln();
 		cin >> n;
 		if (!cin.fail() && n <= maxli && n >= minli)
 			break;
@@ -193,5 +224,5 @@ void showBottom(int n, const char* s, int showBorder, int bgcol, int frcol)
 {
 	gotoBottom(n, showBorder);
 	cct_setcolor(bgcol, frcol);
-	cout << s;
+	shows(s);
 }

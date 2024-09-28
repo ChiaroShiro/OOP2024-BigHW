@@ -108,9 +108,14 @@ void cct_getcolor(int &bg_color, int &fg_color)
 			横向x轴，对应列(0-119)
 			纵向y轴，对应行(0-29)
 ***************************************************************************/
+
+#include <cassert>
+
 void cct_gotoxy(const int X, const int Y)
 {
 	COORD coord;
+	assert(X >= 0);
+	assert(Y >= 0);
 	coord.X = X;
 	coord.Y = Y;
 	SetConsoleCursorPosition(__hout, coord);
@@ -233,8 +238,40 @@ void cct_showstr(const int X, const int Y, const char *str, const int bg_color, 
 		if (*p == 0) {
 			p = str; //如果p已经到\0，则回到头（此处已保证strlen(str)>0，即一定有内容）
 			rpt_count++;
+		}
+		// 原代码：
+		// putchar(rpt_count < rpt ? *p : ' '); //如果超过了rpt次数则用空格填充
+		if (rpt_count < rpt) {
+			bool flag = 0;
+			if (*(p + 1)) {
+				for (int j = 0; j < 44; j++) { // 遍历 44 个中文制表符
+					if (*p == CHINESE_TAB[j][0] && *(p + 1) == CHINESE_TAB[j][1]) {
+						flag = 1;
+
+						// ==================
+						/*
+						if (j == 21) {
+							static int cnt = 0;
+							if (++cnt > 64) {
+								exit(0);
+							}
+						}
+						*/
+						break;
+					}
+				}
 			}
-		putchar(rpt_count < rpt ? *p : ' '); //如果超过了rpt次数则用空格填充
+			if (flag) { // 当前输出的字符是中文制表符
+				putchar(*p);
+				putchar(*(p + 1));
+				putchar(' ');
+				i++, p++;
+			}
+			else
+				putchar(*p);
+		}
+		else
+			putchar(' ');
 	}
 }
 

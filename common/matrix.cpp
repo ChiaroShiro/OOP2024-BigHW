@@ -196,20 +196,21 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
 static void drawOneSolidLine(int m, int kind, bool showBorder, int elelen, int gap, int times, StyleCSS style)
 {
 	style.setOutput(kind);
-	cout << style.getHead();
+	shows(style.getHead());
 	wait(gap);
 	for (int i = 1; i < m; i++) {
 		for (int j = 0; j < elelen; j++)
-			cout << style.getLine();
+			shows(style.getLine());
 		if (showBorder) {
-			cout << style.getTran();
+			shows(style.getTran());
 		}
 		if (i % times == 0)
 			wait(gap);
 	}
 	for (int j = 0; j < elelen; j++)
-		cout << style.getLine();
-	cout << style.getTail() << '\n';
+		shows(style.getLine());
+	shows(style.getTail());
+	showln();
 	wait(gap);
 }
 
@@ -220,20 +221,20 @@ static void drawOneSolidLine(int m, int kind, bool showBorder, int elelen, int g
  */
 static void drawOneHollowLine(int m, bool showBorder, int elelen, int gap, int times, StyleCSS style)
 {
-	cout << style.getVert();
+	shows(style.getVert());
 	wait(gap);
 	for (int i = 1; i < m; i++) {
 		for (int j = 0; j < elelen; j++)
-			cout << "  ";
-		if (showBorder) {
-			cout << style.getVert();
-		}
+			shows("  ");
+		if (showBorder)
+			shows(style.getVert());
 		if (i % times == 0)
 			wait(gap);
 	}
 	for (int j = 0; j < elelen; j++)
-		cout << "  ";
-	cout << style.getVert() << '\n';
+		shows("  ");
+	shows(style.getVert());
+	showln();
 	wait(gap);
 }
 

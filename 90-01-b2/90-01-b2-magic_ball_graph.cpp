@@ -68,7 +68,7 @@ static void updateBall(int x, int y, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 		cct_setcolor(getcol(map[x][y]), COLOR_BLACK);
 	getpos(x, y, &x, &y, 1, 1, 1, 1);
 	cct_gotoxy(x, y);
-	cout << CORE[CDOUBLE];
+	shows(CORE[CDOUBLE]);
 	cct_setcolor();
 }
 
@@ -80,7 +80,7 @@ static void drawFrontBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE]
 			getpos(i, j, &x, &y, showBorder, showBorder, 1, 1);
 			cct_gotoxy(x, y);
 			cct_setcolor(getcol(map[i][j]), COLOR_BLACK);
-			cout << CORE[getGraph(sta[i][j])];
+			shows(CORE[getGraph(sta[i][j])]);
 			cct_setcolor();
 			wait(gap);
 		}
@@ -94,15 +94,15 @@ void eliminateBall(int x, int y, int val, int showBorder = 1)
 	cct_setcolor(getcol(val), COLOR_BLACK);
 	for (int i = 0; i < 6; i++) {
 		cct_gotoxy(posx, posy);
-		cout << CORE[CFOUR];
+		shows(CORE[CFOUR]);
 		wait(MID_GAP);
 		cct_gotoxy(posx, posy);
-		cout << CORE[CHOLLOW];
+		shows(CORE[CHOLLOW]);
 		wait(MID_GAP);
 	}
 	cct_gotoxy(posx, posy);
 	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-	cout << CORE[CVOID];
+	shows(CORE[CVOID]);
 	cct_setcolor();
 }
 
@@ -113,18 +113,18 @@ void slideDownBall(int n, int m, int x, int y, int val, int showBorder = 1)
 	if (x != 0) {
 		cct_gotoxy(posx, posy);
 		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-		cout << CORE[CVOID];
+		shows(CORE[CVOID]);
 	}
 	cct_gotoxy(posx, posy + 1);
 	cct_setcolor(getcol(val), COLOR_BLACK);
-	cout << CORE[CHOLLOW];
+	shows(CORE[CHOLLOW]);
 	wait(MID_GAP);
 	cct_gotoxy(posx, posy + 1);
 	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-	cout << DOUBLE_LINE;
+	shows(DOUBLE_LINE);
 	cct_gotoxy(posx, posy + 2);
 	cct_setcolor(getcol(val), COLOR_BLACK);
-	cout << CORE[CHOLLOW];
+	shows(CORE[CHOLLOW]);
 	wait(MID_GAP);
 	cct_setcolor();
 }

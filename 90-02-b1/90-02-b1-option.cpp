@@ -32,6 +32,7 @@ void AnimeOption(int n, int m, int optChoose)
 	style.setTran(SINGLE_TRAN);
 	style.setLine(SINGLE_LINE); 
 	style.setVert(SINGLE_VERT);
+	//style.setVert("||");
 	gaming(n, m, map, sta, optChoose, style, xborder, yborder);
 	cct_gotoxy(0, yborder - 4);
 	cct_setcolor();

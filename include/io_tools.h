@@ -121,3 +121,13 @@ void waitForEndlineOrClick();
  */
 void gotoBottom(int n, int showBorder);
 void showBottom(int n, const char* s, int showBorder, int bgcol = COLOR_BLACK, int frcol = COLOR_WHITE);
+
+
+
+/*
+ * 在当前光标位置以当前颜色输出
+ */
+void shows(const char* s);
+void showc(const char& c);
+void showi(const int& p);
+void showln();

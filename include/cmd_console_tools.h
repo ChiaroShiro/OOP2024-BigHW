@@ -51,6 +51,13 @@
 #define CURSOR_VISIBLE_NORMAL				2	//光标显示，横线（缺省为此方式）
 #define CURSOR_INVISIBLE					3	//光标不显示
 
+const char* const CHINESE_TAB[] = {
+	"╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬",
+	"┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋",
+	"╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪",
+	"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫"
+};
+
 /* cmd_console_tools.cpp下的函数声明 */
 
 /* 清屏、颜色设置、光标设置、字符/字符串显示 */

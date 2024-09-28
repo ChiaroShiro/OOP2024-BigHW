@@ -40,7 +40,7 @@ static void drawBallAtXY(int posx, int posy, int bgcolor, int frcolor)
 	cct_setcolor(bgcolor, frcolor);
 	for (int p = 0; p < 3; p++) {
 		cct_gotoxy(posx, posy + p);
-		cout << GRAPH[p];
+		shows(GRAPH[p]);
 	}
 	cct_setcolor();
 }
@@ -228,7 +228,7 @@ void eliminateBall(int x, int y, int col, int showBorder)
 	posy += 1;
 	for (int i = 0; i < 3; i++) {
 		cct_gotoxy(posx, posy + i);
-		cout << "      ";
+		shows("      ");
 	}
 	cct_setcolor();
 }
@@ -247,13 +247,15 @@ void slideDownBall(int n, int m, int x, int y, int col, int showBorder)
 		Sleep(10);
 		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 		cct_gotoxy(posx, posy + i - 1);
-		cout << "      ";
+		shows("      ");
 		drawBallAtXY(posx, posy + i, col, COLOR_BLACK);
 	}
 	if (showBorder) {
 		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 		cct_gotoxy(posx, posy + 3);
-		cout << SINGLE_LINE << SINGLE_LINE << SINGLE_LINE;
+		shows(SINGLE_LINE);
+		shows(SINGLE_LINE);
+		shows(SINGLE_LINE);
 	}
 }
 
@@ -270,14 +272,15 @@ void slideLeftBall(int n, int m, int x, int y, int col)
 		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 		for (int j = 0; j < 3; j++) {
 			cct_gotoxy(posx - i + 6, posy + j);
-			cout << ' ';
+			showc(' ');
 		}
 		drawBallAtXY(posx - i, posy, col, COLOR_BLACK);
 	}
 	cct_setcolor(COLOR_WHITE, COLOR_BLACK); 
 	for (int j = 0; j < 3; j++) {
 		cct_gotoxy(posx - 2, posy + j);
-		cout << SINGLE_VERT;
+		shows(SINGLE_VERT);
+		//shows("||");
 	}
 }
 
