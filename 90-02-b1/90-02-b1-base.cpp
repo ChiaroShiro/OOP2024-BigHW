@@ -19,7 +19,7 @@ static int readPosition(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 	int ret = 0;
 	int x = 0, y = 0;
 	while (1) {
-		cout << "请以字母+数字形式[例：c2]输入矩阵坐标：";
+		shows("请以字母+数字形式[例：c2]输入矩阵坐标：");
 		int clsx, clsy;
 		cct_getxy(clsx, clsy);
 		cin >> indata;
@@ -40,18 +40,22 @@ static int readPosition(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 				if (lencheck) {
 					ret = isErasable(n, m, x, y, map, sta);
 					if (ret > 0) {
-						cout << "输出为" << ltou(indata[0]) << "行" << indata[1] << "列\n\n";
+						shows("输出为");
+						showc(ltou(indata[0]));
+						shows("行");
+						showc(indata[1]);
+						shows("列\n\n");
 						break;
 					}
 					if (ret == -1)
-						cout << "输入的矩阵坐标位置为0（非法位置），请重新输入\n";
+						shows("输入的矩阵坐标位置为0（非法位置），请重新输入\n");
 					else
-						cout << "输入的矩阵坐标位置处无连续相同值，请重新输入\n";
+						shows("输入的矩阵坐标位置处无连续相同值，请重新输入\n");
 					continue;
 				}
 			}
 		}
-		cout << "输入错误请重新输入";
+		shows("输入错误请重新输入");
 		clearLine(clsx, clsy);
 		cct_gotoxy(0, clsy);
 	}
@@ -67,13 +71,13 @@ void baseDrawing(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], int opt
 		drawCanvas(n, m, map, sta, "\n\n当前数组");
 		nowScore = readPosition(n, m, map, sta);
 		drawStatus(n, m, sta, "查找结果数组");
-		cout << "\n";
+		showln();
 		drawCanvas(n, m, map, sta, "当前数组（不同色标识）:", STA_NEED_DEL);
 		
 		if (optChoose == 1)
 			break;
 
-		cout << "请确认是否把A1及周围的相同值消除(Y/N/Q)：";
+		shows("请确认是否把A1及周围的相同值消除(Y/N/Q)：");
 		char chs;
 		while (1) {
 			chs = getcc();
@@ -90,7 +94,11 @@ void baseDrawing(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], int opt
 		drawCanvas(n, m, map, sta, "\n\n相同值归并后的数组(不同色标识)：", STA_NOW_DEL);
 		nowScore = nowScore * nowScore * 5;
 		totScore += nowScore;
-		cout << "\n本次得分：" << nowScore << " 总得分：" << totScore << "\n\n";
+		shows("\n本次得分：");
+		showi(nowScore);
+		shows(" 总得分：");
+		showi(totScore);
+		shows("\n\n");
 		waitLine(0, "按回车键进行数组下落操作...", '\n', 0);
 		fallBall(n, m, map, sta);
 		squeezeBall(n, m, map, sta);

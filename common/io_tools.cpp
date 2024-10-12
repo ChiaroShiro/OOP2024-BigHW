@@ -113,7 +113,7 @@ void waitLine(int x, const char* output, const char* hint, const char* input, bo
 			c = getcc(show);
 		if (*hint) {
 			int tmpx, tmpy;
-			cout << endl;
+			showln();
 			cct_getxy(tmpx, tmpy);
 			shows(hint);
 			wait(400);
@@ -198,7 +198,12 @@ int getLineNumber(int minli, int maxli, const char* msg)
 
 void programExit()
 {
-	cout << "\n\n\n\n\n\n";
+	showln();
+	showln();
+	showln();
+	showln();
+	showln();
+	showln();
 	system("pause");
 }
 

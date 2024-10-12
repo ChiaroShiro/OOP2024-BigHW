@@ -247,32 +247,42 @@ void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int
 	*toty = max(*toty + 7, 14) + !!showFrame;
 	cct_setconsoleborder(*totx, *toty);
 	cct_gotoxy(0, 0);
-	cout << "屏幕：" << *totx << "行" << *toty << "列\n";
+	shows("屏幕：");
+	showi(*totx);
+	shows("行");
+	showi(*toty);
+	shows("列\n");
 	if (showFrame) {
 		for (int i = 0; i < m; i++) {
 			int xx, yy;
 			getpos(1, i + 1, &xx, &yy, addxy, addxy, coren, corem);
 			yy -= 1;
 			cct_gotoxy(xx + 2, yy);
-			if ((showFrame & 0xFF) == '1' && i == 9)
-				cout << setw(corem + 1) << 10;
-			else
-				cout << setw(corem + 1) << (char)((showFrame & 0xFF) + i);
+			if ((showFrame & 0xFF) == '1' && i == 9) {
+				cout << setw(corem + 1);
+				showi(10);
+			}
+			else {
+				cout << setw(corem + 1);
+				showc((showFrame & 0xFF) + i);
+			}
 		}
-		cout << endl;
+		showln();
 	}
 	if (showFrame)
-		cout << "  ";
+		shows("  ");
 	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 	drawOneSolidLine(m, BUP, showBorder, corem, gap, times, style);
 	for (int i = 1; i < n; i++) {
 		for (int j = 0; j < coren; j++) {
 			if (showFrame) {
 				cct_setcolor(COLOR_BLACK, COLOR_WHITE);
-				if (j == coren / 2)
-					cout << (char)(((showFrame >> 8) & 0xFF) + i - 1) << " ";
+				if (j == coren / 2) {
+					showc(((showFrame >> 8) & 0xFF) + i - 1);
+					shows(" ");
+				}
 				else
-					cout << "  ";
+					shows("  ");
 				cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 			}
 			drawOneHollowLine(m, showBorder, corem, gap, times, style);
@@ -280,7 +290,7 @@ void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int
 		if (showBorder) {
 			if (showFrame) {
 				cct_setcolor(COLOR_BLACK, COLOR_WHITE);
-				cout << "  ";
+				shows("  ");
 				cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 			}
 			drawOneSolidLine(m, BMID, showBorder, corem, gap, times, style);
@@ -289,17 +299,19 @@ void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int
 	for (int j = 0; j < coren; j++) {
 		if (showFrame) {
 			cct_setcolor(COLOR_BLACK, COLOR_WHITE);
-			if (j == coren / 2)
-				cout << (char)(((showFrame >> 8) & 0xFF) + n - 1) << " ";
+			if (j == coren / 2) {
+				showc(((showFrame >> 8) & 0xFF) + n - 1);
+				shows(" ");
+			}
 			else
-				cout << "  ";
+				shows("  ");
 			cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 		}
 		drawOneHollowLine(m, showBorder, corem, gap, times, style);
 	}
 	if (showFrame) {
 		cct_setcolor(COLOR_BLACK, COLOR_WHITE);
-		cout << "  ";
+		shows("  ");
 		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
 	}
 	drawOneSolidLine(m, BDOWN, showBorder, corem, gap, times, style);
@@ -337,23 +349,27 @@ int oneDrawing(int n, int m, int y_size, int showBorder, int map[][MAP_SIZE], in
 
 void drawCanvas(int n, int m, const int map[][MAP_SIZE], const int sta[][MAP_SIZE], const char* s, int colorTag)
 {
-	cout << s << '\n';
-	cout << "  |";
+	shows(s);
+	showln();
+	shows("  |");
+	for (int i = 1; i <= m; i++) {
+		cout << setw(3);
+		showi(i);
+	}
+	shows("\n--+-");
 	for (int i = 1; i <= m; i++)
-		cout << setw(3) << i;
-	cout << "\n--+-";
-	for (int i = 1; i <= m; i++)
-		cout << "---";
-	cout << '\n';
+		shows("---");
+	showln();
 	for (int i = 1; i <= n; i++) {
-		cout << char('A' + i - 1) << " |";
+		showc('A' + i - 1);
+		shows(" |");
 		for (int j = 1; j <= m; j++) {
-			cout << "  ";
+			shows("  ");
 			if(colorTag == -1 || colorTag == sta[i][j])
 				cct_setcolor(COLOR_RED * !!sta[i][j]);
-			cout << map[i][j];
+			showi(map[i][j]);
 			cct_setcolor();
 		}
-		cout << '\n';
+		showln();
 	}
 }

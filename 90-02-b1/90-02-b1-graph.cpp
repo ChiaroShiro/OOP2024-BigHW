@@ -21,7 +21,8 @@ static void __debugPrint(const char* s, int x = 0, int y = 0)
 	int orx, ory;
 	cct_getxy(orx, ory);
 	cct_gotoxy(x, y);
-	std::cout << s << '\n';
+	shows(s);
+	showln();
 	cct_gotoxy(orx, ory);
 }
 
@@ -31,7 +32,11 @@ static void updateScore(int nows, int& tots)
 	tots += nows;
 	cct_gotoxy(0, 0);
 	cct_setcolor();
-	cout << "本次得分: " << nows << "，总分: " << tots;
+	shows("本次得分: ");
+	showi(nows);
+	shows("，总分: ");
+	showi(tots);
+	shows("       ");
 }
 
 // 像素坐标绘球
@@ -168,10 +173,15 @@ static int findMouseClick(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE]
 	while (1) {
 		cct_setcolor();
 		gotoBottom(n, showBorder);
-		if (chsx >= 1 && chsx <= n && chsy >= 1 && chsy <= m && cor)
-			cout << "[当前坐标]: " << char(chsx + 'A' - 1) << "行" << chsy << "列              ";
+		if (chsx >= 1 && chsx <= n && chsy >= 1 && chsy <= m && cor) {
+			shows("[当前坐标]: ");
+			showc(chsx + 'A' - 1);
+			shows("行");
+			showi(chsy);
+			shows("列              ");
+		}
 		else
-			cout << "[当前坐标]: 位置非法           ";
+			shows("[当前坐标]: 位置非法           ");
 		if (cor) {
 			updateBall(lstx, lsty, n, m, showBorder, 1, 3, 3, map[lstx][lsty], COLOR_BLACK);
 			updateBall(chsx, chsy, n, m, showBorder, 1, 3, 3, map[chsx][chsy]);

@@ -1,0 +1,6 @@
+﻿  cmd_console_tools.cpp
+  cmd_gmw_tools.cpp
+  test-gmw.cpp
+  正在生成代码...
+lib_tgmw_tools.lib(lib_tgmw_tools.obj) : warning LNK4099: 未找到 PDB“”(使用“lib_tgmw_tools.lib(lib_tgmw_tools.obj)”或在“”中寻找)；正在链接对象，如同没有调试信息一样
+  test-gmw.vcxproj -> E:\work\tju\OOP\BigHW\Debug\test-gmw.exe

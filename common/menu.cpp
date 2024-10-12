@@ -24,23 +24,32 @@ int showMenu(int optmin, const char* content[], int optq, const char* qcontent)
 	}
 
 	for (int i = 0; i < cols + 3; i++)
-		cout << '-';
-	cout << '\n';
-	for (int i = 0; i < rows; i++)
-		cout << (char)(i + optmin) << ". " << content[i] << '\n';
-	if (optq != -1)
-		cout << (char)optq << ". " << qcontent << '\n';
+		showc('-');
+	showln();
+	for (int i = 0; i < rows; i++) {
+		showc(i + optmin);
+		shows(". ");
+		shows(content[i]);
+		showln();
+	}
+	if (optq != -1) {
+		showc(optq);
+		shows(". ");
+		shows(qcontent);
+		showln();
+	}
 	for (int i = 0; i < cols + 3; i++)
-		cout << '-';
+		showc('-');
 
-	cout << "\n[ÇëÑ¡Ôñ:] ";
+	shows("\n[ÇëÑ¡Ôñ:] ");
 	char c = getcc();
 	c = isLower(c) ? ltou(c) : c;
 	while ((c < optmin || c >= optmin + rows) && c != optq) {
 		c = getcc();
 		c = isLower(c) ? ltou(c) : c;
 	}
-	cout << c << '\n';
+	showc(c);
+	showln();
 	wait(200);
 	return c == optq ? -1 : c - optmin + 1;
 }

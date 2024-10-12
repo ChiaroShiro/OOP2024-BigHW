@@ -108,14 +108,9 @@ void cct_getcolor(int &bg_color, int &fg_color)
 			横向x轴，对应列(0-119)
 			纵向y轴，对应行(0-29)
 ***************************************************************************/
-
-#include <cassert>
-
 void cct_gotoxy(const int X, const int Y)
 {
 	COORD coord;
-	assert(X >= 0);
-	assert(Y >= 0);
 	coord.X = X;
 	coord.Y = Y;
 	SetConsoleCursorPosition(__hout, coord);
@@ -234,45 +229,57 @@ void cct_showstr(const int X, const int Y, const char *str, const int bg_color, 
 	if (maxlen < 0)
 		maxlen = strlen(str) * rpt; //未给出maxlen则为原始长度
 
+	/*	双线框架："╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬"
+		单线框架："┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋"
+		横双竖单: "╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪"
+		横单竖双："╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫"
+		*/
+	const char* special[] = { "╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬",
+							"┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋",
+							"╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪",
+							"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫",
+							NULL
+							};
+        /* 没有用效率最高的方法，用了比较容易读懂的方法 */
 	for (i = 0, p = str; i < maxlen; i++, p++) {	//重复rpt次，每次输出字符串，适用于在画边框时输出若干个"═"等情况
 		if (*p == 0) {
 			p = str; //如果p已经到\0，则回到头（此处已保证strlen(str)>0，即一定有内容）
 			rpt_count++;
 		}
-		// 原代码：
-		// putchar(rpt_count < rpt ? *p : ' '); //如果超过了rpt次数则用空格填充
-		if (rpt_count < rpt) {
-			bool flag = 0;
-			if (*(p + 1)) {
-				for (int j = 0; j < 44; j++) { // 遍历 44 个中文制表符
-					if (*p == CHINESE_TAB[j][0] && *(p + 1) == CHINESE_TAB[j][1]) {
-						flag = 1;
 
-						// ==================
-						/*
-						if (j == 21) {
-							static int cnt = 0;
-							if (++cnt > 64) {
-								exit(0);
-							}
-						}
-						*/
-						break;
-					}
-				}
-			}
-			if (flag) { // 当前输出的字符是中文制表符
-				putchar(*p);
-				putchar(*(p + 1));
-				putchar(' ');
-				i++, p++;
-			}
-			else
-				putchar(*p);
-		}
-		else
+		if (rpt_count >= rpt) { //如果超过了rpt次数则用空格填充
 			putchar(' ');
-	}
+			continue;
+		}
+
+		/* 如果未到字符串尾部且不是最后一个字符，则判断是否边框线 */
+		if ((*p != '\0') && (*(p+1) != '\0')) {
+			bool found = false;
+			int sp_no;
+			for (sp_no = 0; special[sp_no] != NULL; sp_no++)
+				if (strncmp(p, special[sp_no], strlen(special[sp_no])) == 0) {
+					found = true;
+					break;
+				}
+
+			/* 判断是否边框 */
+			if (found) {
+				/* 是边框线 */
+				putchar(*p);
+				++i; //多加一次
+				++p; //多加一次
+				putchar(*p);
+				putchar(' '); //多补一个空格
+			}
+			else { //不是边框
+				putchar(*p);
+			}
+		}//end of if
+		else if ( (*p != '\0') && (*(p+1) == '\0') ) {
+			/* 如果是最后一个字符 */
+			putchar(*p);
+		}
+	}//end of for
 }
 
 /***************************************************************************
@@ -415,7 +422,7 @@ void cct_getconsoletitle(char *title, int maxbuflen)
 
 /***************************************************************************
   函数名称：
-  功    能：
+  功    能：设置当前cmd窗口的标题
   输入参数：
   返 回 值：
   说    明：
@@ -428,9 +435,9 @@ void cct_setconsoletitle(const char *title)
 /***************************************************************************
 函数名称：
 功    能：允许使用鼠标
-输入参数：const HANDLE hin ：cmd窗口输入句柄
+输入参数：
 返 回 值：
-说    明：某些cmd窗口控制语句执行后，可能会取消鼠标支持，则调用本函数回再次加入
+说    明：如果想使用鼠标，必须先调用本函数打开，才能读到鼠标动作
 ***************************************************************************/
 void cct_enable_mouse(void)
 {
@@ -442,10 +449,10 @@ void cct_enable_mouse(void)
 
 /***************************************************************************
 函数名称：
-功    能：允许使用鼠标
-输入参数：const HANDLE hin ：cmd窗口输入句柄
+功    能：禁止使用鼠标
+输入参数：
 返 回 值：
-说    明：某些cmd窗口控制语句执行后，可能会取消鼠标支持，则调用本函数回再次加入
+说    明：用cct_enable_mouse允许使用鼠标后，如果不需要，用本函数关闭
 ***************************************************************************/
 void cct_disable_mouse(void)
 {

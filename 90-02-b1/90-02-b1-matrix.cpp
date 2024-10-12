@@ -45,24 +45,28 @@ int isErasable(int n, int m, int x, int y, const int map[][MAP_SIZE], int sta[][
 
 void drawStatus(int n, int m, int sta[][MAP_SIZE], const char* s)
 {
-	cout << s << '\n';
-	cout << "  |";
+	shows(s);
+	showln();
+	shows("  |");
+	for (int i = 1; i <= m; i++) {
+		cout << setw(3);
+		showi(i);
+	}
+	shows("\n--+-");
 	for (int i = 1; i <= m; i++)
-		cout << setw(3) << i;
-	cout << "\n--+-";
-	for (int i = 1; i <= m; i++)
-		cout << "---";
-	cout << '\n';
+		shows("---");
+	showln();
 	for (int i = 1; i <= n; i++) {
-		cout << char('A' + i - 1) << " |";
+		showc('A' + i - 1);
+		shows(" |");
 		for (int j = 1; j <= m; j++) {
-			cout << "  ";
+			shows("  ");
 			if (sta[i][j] == STA_NEED_DEL)
-				cout << "*";
+				shows("*");
 			else
-				cout << "0";
+				shows("0");
 		}
-		cout << '\n';
+		showln();
 	}
 }
 
