@@ -114,8 +114,8 @@ typedef struct _console_frame_info_ {
 		   例如：int data1;
 				 int data2;
 				 char pad[56]; 】 */
-	int tot_wid; // 框架总宽度
- 	int tot_high; // 框架总高度
+	int tot_wid; // 框架(仅框线部分)总宽度
+ 	int tot_high; // 框架(仅框线部分)总高度
 	char pad[56];
 
 } CONSOLE_FRAME_INFO;
@@ -265,7 +265,6 @@ typedef struct _console_graphics_info_ {
 	bool set_rowcol;
 	bool set_color;
 	bool set_font;
-	bool set_ext_rowcol;
 	bool set_frame_linetype;
 	bool set_frame_style;
 	bool set_frame_color;
