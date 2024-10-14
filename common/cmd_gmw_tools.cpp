@@ -1,7 +1,8 @@
-/* 学号 姓名 班级 */
+/* 2351871 郎若谷 计科 */
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <climits>
+#include <cstring>
 #include <conio.h>
 #include "../include/cmd_console_tools.h"
 #include "../include/cmd_gmw_tools.h"
@@ -19,6 +20,45 @@ using namespace std;
 		3、必须是static函数，确保只在本源文件中使用
    -------------------------------------------------- */
 
+const char* const DEFAULT_TAB[5][11] = {
+	{},
+	{"╔", "╚", "╗", "╝", "═", "║", "╦", "╩", "╠", "╣", "╬"},
+	{"┏", "┗", "┓", "┛", "━", "┃", "┳", "┻", "┣", "┫", "╋"},
+	{"╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪"},
+	{"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫"}
+}; // 1 - 全线 2 - 全单线 3 - 横双竖单 4 - 横单竖双
+
+/*
+ *  赋值 2 字节
+ *  若 src 是 NULL 则赋 "  "
+ *  少于 2 字节补全空格
+ */
+static void fillTabString(char* const dest, const char* src)
+{
+	if(src == NULL) {
+		strcpy(dest, "  ");
+		return;
+	}
+	if(*src) 
+		*dest = *src;
+	else 
+		*dest = ' ';
+	++src;
+	if(*src) 
+		*dest = *src;
+	else 
+		*dest = ' ';
+}
+
+static void calcFrameSize(CONSOLE_GRAPHICS_INFO *const pCGI)
+{
+	pCGI->CFI.tot_high = pCGI->row_num * pCGI->CFI.block_high;
+	pCGI->CFI.tot_high += (pCGI->row_num - 1) * pCGI->CFI.separator + 2;
+	pCGI->CFI.tot_wid = pCGI->col_num * pCGI->CFI.block_width;
+	pCGI->CFI.tot_high += ((pCGI->col_num - 1) * pCGI->CFI.separator + 2) * 2;
+	pCGI->lines += pCGI->CFI.tot_high;
+	pCGI->cols  += pCGI->CFI.tot_wid;
+}
 
 /* ----------------------------------------------- 
 		实现下面给出的函数（函数声明不准动）
@@ -38,7 +78,11 @@ int gmw_set_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int c
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->row_num = max(0, row);
+	pCGI->col_num = max(0, col);
+	pCGI->have_set_rowcol = 1;
+	if(pCGI->have_set_blocksize)
+		calcFrameSize(pCGI);
 	return 0; //此句可根据需要修改
 }
 
@@ -59,12 +103,22 @@ int gmw_set_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int c
 					前景色正好是状态栏醒目前景色，导致无法看到醒目提示
 					...
 ***************************************************************************/
+
+/*<<<醒目文字颜色没有设置，不知道该设置成啥>>>*/
 int gmw_set_color(CONSOLE_GRAPHICS_INFO *const pCGI, const int bgcolor, const int fgcolor, const bool cascade)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->area_bgcolor = bgcolor;
+	pCGI->area_fgcolor = fgcolor;
+	if(cascade) {
+		pCGI->SLI.top_normal_bgcolor = pCGI->SLI.lower_catchy_bgcolor = bgcolor;
+		pCGI->SLI.top_normal_fgcolor = pCGI->SLI.lower_catchy_fgcolor = fgcolor;
+		pCGI->SLI.top_catchy_bgcolor = pCGI->SLI.lower_catchy_bgcolor = bgcolor;
+		pCGI->CFI.bgcolor = bgcolor;
+		pCGI->CFI.fgcolor = fgcolor;
+	}
 	return 0; //此句可根据需要修改
 }
 
@@ -83,8 +137,12 @@ int gmw_set_font(CONSOLE_GRAPHICS_INFO *const pCGI, const char *fontname, const 
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
+		return -1;  
+	if(strcmp(fontname, "Terminal") && strcmp(fontname, "新宋体"))
 		return -1;
-
+	strcpy(pCGI->CFT.font_type, fontname);
+	pCGI->CFT.font_size_width = fs_width;
+	pCGI->CFT.font_size_high  = fs_high;
 	return 0; //此句可根据需要修改
 }
 
@@ -105,7 +163,12 @@ int gmw_set_delay(CONSOLE_GRAPHICS_INFO *const pCGI, const int type, const int d
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	if (type == DELAY_OF_DRAW_FRAME)
+		pCGI->delay_of_draw_frame  = delay_ms;
+	else if (type == DELAY_OF_DRAW_BLOCK)
+		pCGI->delay_of_draw_block  = delay_ms;
+	else if (type == DELAY_OF_BLOCK_MOVED)
+		pCGI->delay_of_block_moved = delay_ms;
 	return 0; //此句可根据需要修改
 }
 
@@ -125,7 +188,16 @@ int gmw_set_ext_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int up_lines, co
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->extern_up_lines = up_lines;
+	pCGI->extern_down_lines = down_lines;
+	pCGI->extern_left_cols = left_cols;
+	pCGI->extern_right_cols = right_cols;
 
+	pCGI->start_x += left_cols;
+	pCGI->start_y += up_lines;
+
+	pCGI->lines += up_lines + down_lines;
+	pCGI->cols += left_cols + right_cols;
 	return 0; //此句可根据需要修改
 }
 
@@ -142,7 +214,11 @@ int gmw_set_frame_default_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const int 
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	char* ptr = (char*)&pCGI->CFI;
+	for (int i = 0; i < 11; i++) {
+		strcpy(ptr, DEFAULT_TAB[type][0]);
+		ptr += CFI_LEN;
+	}
 	return 0; //此句可根据需要修改
 }
 
@@ -164,7 +240,18 @@ int gmw_set_frame_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const char *top_le
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	CONSOLE_FRAME_INFO *const p = &pCGI->CFI;
+	fillTabString(p->top_left, top_left);
+	fillTabString(p->lower_left, lower_left);
+	fillTabString(p->top_right, top_right);
+	fillTabString(p->lower_right, lower_right);
+	fillTabString(p->h_normal, h_normal);
+	fillTabString(p->v_normal, v_normal);
+	fillTabString(p->h_top_separator, h_top_separator);
+	fillTabString(p->h_lower_separator, h_lower_separator);
+	fillTabString(p->v_left_separator, v_left_separator);
+	fillTabString(p->v_right_separator, v_right_separator);
+	fillTabString(p->mid_separator, mid_separator);
 	return 0; //此句可根据需要修改
 }
 
@@ -183,7 +270,16 @@ int gmw_set_frame_style(CONSOLE_GRAPHICS_INFO *const pCGI, const int block_width
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->CFI.block_width = block_width + (block_width & 1);
+	pCGI->CFI.block_high  = block_high;
+	pCGI->CFI.separator   = separator;
+	pCGI->CFI.block_width_ext = separator * 2;
+	pCGI->CFI.block_high_ext  = separator;
+	pCGI->CFI.bwidth = pCGI->CFI.block_width + pCGI->CFI.block_width_ext;
+	pCGI->CFI.bhigh  = pCGI->CFI.block_high  + pCGI->CFI.block_high_ext;
+	pCGI->have_set_blocksize = 1;
+	if(pCGI->have_set_rowcol)
+		calcFrameSize(pCGI);
 	return 0; //此句可根据需要修改
 }
 
@@ -202,7 +298,8 @@ int gmw_set_frame_color(CONSOLE_GRAPHICS_INFO *const pCGI, const int bgcolor, co
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->CFI.bgcolor = (bgcolor == -1 ? pCGI->area_bgcolor : bgcolor);
+	pCGI->CFI.fgcolor = (fgcolor == -1 ? pCGI->area_fgcolor : fgcolor);
 	return 0; //此句可根据需要修改
 }
 
@@ -219,7 +316,11 @@ int gmw_set_block_default_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const int 
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	char* ptr = (char*)&pCGI->CBI;
+	for(int i = 0; i < 6; i++) {
+		strcpy(ptr, DEFAULT_TAB[type][i]);
+		ptr += CBI_LEN;
+	}
 	return 0; //此句可根据需要修改
 }
 
@@ -239,7 +340,12 @@ int gmw_set_block_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const char *top_le
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	fillTabString(pCGI->CBI.top_right, top_right);
+	fillTabString(pCGI->CBI.top_left, top_left);
+	fillTabString(pCGI->CBI.lower_left, lower_left);
+	fillTabString(pCGI->CBI.lower_right, lower_right);
+	fillTabString(pCGI->CBI.h_normal, h_normal);
+	fillTabString(pCGI->CBI.v_normal, v_normal);
 	return 0; //此句可根据需要修改
 }
 
@@ -256,7 +362,7 @@ int gmw_set_block_border_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->CBI.block_border = on_off;
 	return 0; //此句可根据需要修改
 }
 
@@ -278,7 +384,12 @@ int gmw_set_status_line_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const int type
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	bool *chip = (bool*)&pCGI->top_status_line;
+	bool *slip = (bool*)&pCGI->SLI.is_top_status_line;
+	*(chip + type) = on_off;
+	*(slip + type) = on_off;
+	pCGI->start_y += !type * on_off;
+	pCGI->lines += on_off;
 	return 0; //此句可根据需要修改
 }
 
@@ -301,7 +412,10 @@ int gmw_set_status_line_color(CONSOLE_GRAPHICS_INFO *const pCGI, const int type,
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->SLI.lower_normal_bgcolor = pCGI->SLI.top_normal_bgcolor = normal_bgcolor;
+	pCGI->SLI.lower_normal_fgcolor = pCGI->SLI.top_normal_fgcolor = normal_fgcolor;
+	pCGI->SLI.lower_catchy_bgcolor = pCGI->SLI.top_catchy_bgcolor = catchy_bgcolor;
+	pCGI->SLI.lower_catchy_fgcolor = pCGI->SLI.top_catchy_fgcolor = catchy_fgcolor;
 	return 0; //此句可根据需要修改
 }
 
@@ -319,7 +433,9 @@ int gmw_set_rowno_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on_off)
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->draw_frame_with_row_no = on_off;
+	pCGI->cols += on_off * 2;
+	pCGI->start_x += on_off * 2;
 	return 0; //此句可根据需要修改
 }
 
@@ -337,7 +453,9 @@ int gmw_set_colno_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on_off)
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	pCGI->draw_frame_with_col_no = on_off;
+	pCGI->lines += on_off;
+	pCGI->start_y += on_off;
 	return 0; //此句可根据需要修改
 }
 
@@ -373,7 +491,14 @@ int gmw_init(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col, co
 {
 	/* 首先置标记 */
 	pCGI->inited = CGI_INITED;
-
+	gmw_set_rowcol(pCGI, row, col);
+	gmw_set_color(pCGI, bgcolor, fgcolor, 1);
+	gmw_set_font(pCGI);
+	gmw_set_ext_rowcol(pCGI);
+	gmw_set_status_line_switch(pCGI, 0);
+	gmw_set_status_line_switch(pCGI, 1);
+	gmw_set_frame_style(pCGI);
+	gmw_set_block_border_switch(pCGI);
 	return 0; //此句可根据需要修改
 }
 

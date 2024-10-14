@@ -1,4 +1,4 @@
-/* 学号 姓名 班级 */
+/* 2351871 郎若谷 计科 */
 #pragma once
 #include <iostream>
 #include "cmd_console_tools.h"
@@ -6,7 +6,7 @@ using namespace std;
 
 /* 定义状态栏信息 */
 #define TOP_STATUS_LINE			0	//上状态栏，位置固定在游戏主框架区域的最上方（如果有列标，则在列标之上）
-#define LOWER_STATUS_LINE		1   //上状态栏，位置固定在游戏主框架区域的最下方
+#define LOWER_STATUS_LINE		1   //下状态栏，位置固定在游戏主框架区域的最下方
 
 /* 定义描述状态栏信息的结构体 */
 typedef struct _status_line_info_ {
@@ -34,11 +34,11 @@ typedef struct _status_line_info_ {
 	int lower_start_x;
 	int lower_start_y;
 
-	/* 上状态栏正常信息配色 */
+	/* 下状态栏正常信息配色 */
 	int lower_normal_bgcolor;
 	int lower_normal_fgcolor;
 
-	/* 上状态栏醒目信息配色 */
+	/* 下状态栏醒目信息配色 */
 	int lower_catchy_bgcolor;
 	int lower_catchy_fgcolor;
 
@@ -48,7 +48,8 @@ typedef struct _status_line_info_ {
 		 /* 状态栏所占的宽度（该值由计算得到，是游戏区域的宽度，不包括扩展区域，信息超过宽度则截断） */
 	int width;
 
-	/* 【下面允许添加你认为需要的值，这些值不能通过设置函数直接设置（例：根据各种信息算出状态栏的宽度，用于控制在显示状态栏信息时不要超过指定宽度）
+	/* 【下面允许添加你认为需要的值，这些值不能通过设置函数直接设置
+		（例：根据各种信息算出状态栏的宽度，用于控制在显示状态栏信息时不要超过指定宽度）
 		 因为引入了 cmd_tgmw_tools.lib，为了保持两者的结构体一致，设置这部分大小为64字节（目前是pad），
 		 如果需要添加相应内容，请保持添加内容+填充字节=64字节，
 		   例如：int data1;
@@ -113,7 +114,9 @@ typedef struct _console_frame_info_ {
 		   例如：int data1;
 				 int data2;
 				 char pad[56]; 】 */
-	char pad[64];
+	int tot_wid; // 框架总宽度
+ 	int tot_high; // 框架总高度
+	char pad[56];
 
 } CONSOLE_FRAME_INFO;
 
@@ -225,14 +228,24 @@ typedef struct _console_graphics_info_ {
 	bool draw_frame_with_col_no;
 
 	/* 延时时间设置 */
-	int delay_of_draw_frame;		//画外框是的延时
+	/* 前面的信息：
+			定义延时的种类
+			#define DELAY_OF_DRAW_FRAME			0	//画游戏主框架时的延时
+			#define DELAY_OF_DRAW_BLOCK			1	//画色块时的延时
+			#define DELAY_OF_BLOCK_MOVED		2	//色块移动时的延时
+	*/
+	int delay_of_draw_frame;		//画外框时的延时
 	int delay_of_draw_block;		//画游戏块的延时
 	int delay_of_block_moved;	//游戏块移动的延时
 
 	/* 【下面这四个值不是通过设置函数直接设置的】 */
 	/* 整个图形界面的主框架区域的参考坐标起始位置(左上角）
-	   - 注：游戏主框架，除了有包含m行n列的色块的外框外，还有上状态栏（0/1行）/下状态栏（0/1行）/行号显示（0/2列）/列标显示区域（0/1行）
-	   -     在上述值各不相同的情况下，start_x/start_y的值是不同的 */
+	   - 注：游戏主框架，除了有包含m行n列的色块的外框外，
+	   		还有上状态栏（0/1行）/下状态栏（0/1行）/行号显示（0/2列）/列标显示区域（0/1行）
+	   -     在上述值各不相同的情况下，start_x/start_y的值是不同的 
+
+	   : 内部实现中该对值的定义是仅算框架的左上角起始位置
+	   */
 	int start_x;
 	int start_y;
 
@@ -246,7 +259,9 @@ typedef struct _console_graphics_info_ {
 		   例如：int data1;
 				 int data2;
 				 char pad[56]; 】 */
-	char pad[64];
+	bool have_set_rowcol;
+	bool have_set_blocksize;
+	char pad[62];
 
 } CONSOLE_GRAPHICS_INFO;
 

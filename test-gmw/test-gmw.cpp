@@ -137,7 +137,6 @@ static void test_by_fixed(void)
 {
 	CONSOLE_GRAPHICS_INFO MyCGI; //声明一个CGI变量
 	char temp[256];
-
 	/* 先做初始化，这样后续可以在此基础上任意修改部分设置，其余采用预设值
 		游戏区域（主框架）为10*10，带分隔线，每个色块的大小为2列*1行，色块不带边框
 		窗口背景色黑，前景色白
@@ -191,7 +190,7 @@ static void test_by_fixed(void)
 		gmw_set_frame_default_linetype(&MyCGI, 2);			//设置框架线型为预置值2（全部为单线）
 		gmw_set_rowno_switch(&MyCGI, true);					//显示行号
 		gmw_set_colno_switch(&MyCGI, true);					//显示列标
-			gmw_set_delay(&MyCGI, DELAY_OF_DRAW_FRAME, 200);		//画边框的延时
+		gmw_set_delay(&MyCGI, DELAY_OF_DRAW_FRAME, 200);		//画边框的延时
 		gmw_set_block_border_switch(&MyCGI, true);			//设置色块需要小边框
 
 		/* 显示框架 */
@@ -215,7 +214,7 @@ static void test_by_fixed(void)
 			int i, j;
 			for (i = 0; i < row; i++)
 				for (j = 0; j < col; j++)
-						gmw_draw_block(&MyCGI, i, j, (i*row + j) % 5, bdi);
+					gmw_draw_block(&MyCGI, i, j, (i*row + j) % 5, bdi);
 		}
 
 		/* 下状态栏显示内容 */
@@ -1429,13 +1428,12 @@ int main(int argc, char** argv)
 		cout << "CONSOLE_GRAPHICS_INFO 不是492字节，如果使用 lib_tgmw_tools.lib 中的函数则可能出错" << endl;
 		return -1;
 	}
-
 	/* 也可以不关闭光标，观察光标打开时的效果 */
 	cct_setcursor(CURSOR_INVISIBLE);
 
 	/* 用固定值测试框架 */
 	test_by_fixed();
-
+	exit(0);
 	/* 用键盘输入值测试框架 */
 	test_by_input();
 
