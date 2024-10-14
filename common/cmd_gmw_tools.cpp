@@ -4,6 +4,7 @@
 #include <climits>
 #include <cstring>
 #include <conio.h>
+#include <windows.h>
 #include "../include/cmd_console_tools.h"
 #include "../include/cmd_gmw_tools.h"
 using namespace std;
@@ -12,6 +13,7 @@ using namespace std;
 		此处可以给出需要的静态全局变量（尽可能少，最好没有）、静态全局只读变量/宏定义（个数不限）等
    -------------------------------------------------- */
 
+#define debug 1
 
 /* --------------------------------------------------
 		此处可以给出需要的内部辅助工具函数
@@ -27,6 +29,89 @@ const char* const DEFAULT_TAB[5][11] = {
 	{"╒", "╘", "╕", "╛", "═", "│", "╤", "╧", "╞", "╡", "╪"},
 	{"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫"}
 }; // 1 - 全线 2 - 全单线 3 - 横双竖单 4 - 横单竖双
+
+static void shows(const char* s) 
+{
+	int x, y, cx, cy;
+	cct_getxy(x, y);
+	cct_getcolor(cx, cy);
+	cct_showstr(x, y, s, cx, cy);
+}
+
+static void showc(const char& c) 
+{
+	int x, y, cx, cy;
+	cct_getxy(x, y);
+	cct_getcolor(cx, cy);
+	cct_showch(x, y, c, cx, cy);
+}
+
+static void showi (const int &p) 
+{
+	int x, y, cx, cy;
+	cct_getxy(x, y);
+	cct_getcolor(cx, cy);
+	cct_showint(x, y, p, cx, cy);
+}
+
+static void showln()
+{
+	showc('\n');
+}
+
+static void initCGI (CONSOLE_GRAPHICS_INFO *const pCGI) 
+{
+	int tmp = pCGI->inited;
+	memset((void*)pCGI, 0, sizeof(CONSOLE_GRAPHICS_INFO));
+	pCGI->inited = tmp;
+	pCGI->lines = 4;
+	pCGI->cols = 2;
+}
+
+static bool __debugCheckGWMInit(const CONSOLE_GRAPHICS_INFO *const pCGI) 
+{
+	bool flag = 0;
+	if(!pCGI->set_rowcol) {
+		flag = 1;
+		shows("<ERROR>: no set_rowcol\n");
+	}
+	if(!pCGI->set_color) {
+		flag = 1;
+		shows("<ERROR>: no set_color\n");
+	}
+	if(!pCGI->set_font) {
+		flag = 1;
+		shows("<ERROR>: no set_font\n");
+	}
+	if(!pCGI->set_ext_rowcol) {
+		flag = 1;
+		shows("<ERROR>: no set_ext_rowcol\n");
+	}
+	if(!pCGI->set_frame_linetype) {
+		flag = 1;
+		shows("<ERROR>: no set_frame_linetype\n");
+	}
+	if(!pCGI->set_frame_style) {
+		flag = 1;
+		shows("<ERROR>: no set_frame_style\n");
+	}
+	if(!pCGI->set_frame_color) {
+		flag = 1;
+		shows("<ERROR>: no set_frame_color\n");
+	}
+	if(!pCGI->set_block_border_switch) {
+		flag = 1;
+		shows("<ERROR>: no set_block_border_switch\n");
+	}
+	if(!pCGI->set_status_line_color) {
+		flag = 1;
+		shows("<ERROR>: no set_status_line_color\n");
+	}
+	if(!flag) {
+		shows("FINISH CHECKING: NO ERROR\n");
+	}
+	return flag;
+}
 
 /*
  *  赋值 2 字节
@@ -55,9 +140,71 @@ static void calcFrameSize(CONSOLE_GRAPHICS_INFO *const pCGI)
 	pCGI->CFI.tot_high = pCGI->row_num * pCGI->CFI.block_high;
 	pCGI->CFI.tot_high += (pCGI->row_num - 1) * pCGI->CFI.separator + 2;
 	pCGI->CFI.tot_wid = pCGI->col_num * pCGI->CFI.block_width;
-	pCGI->CFI.tot_high += ((pCGI->col_num - 1) * pCGI->CFI.separator + 2) * 2;
+	pCGI->CFI.tot_wid += ((pCGI->col_num - 1) * pCGI->CFI.separator + 2) * 2;
 	pCGI->lines += pCGI->CFI.tot_high;
 	pCGI->cols  += pCGI->CFI.tot_wid;
+}
+
+/*
+ * 画一实心行
+ */
+static void drawOneSolidLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const char* left, const char* right, const char* mid)
+{
+	const CONSOLE_FRAME_INFO* const pc = &pCGI->CFI;
+	shows(left);
+	Sleep(pCGI->delay_of_draw_frame);
+	for(int i = 0; i < pCGI->col_num; i++) {
+		for(int j = 0; j < pc->block_width; j += 2)
+			shows(pc->h_normal);
+		Sleep(pCGI->delay_of_draw_frame);
+		if(pc->separator && i < pCGI->col_num - 1) {
+			shows(mid);
+		}
+	}
+	shows(right);
+	Sleep(pCGI->delay_of_draw_frame);
+	showln();
+}
+
+/*
+ * 画一空心行
+ */
+static void drawOneHollowLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const char* left, const char* right, const char* mid)
+{
+	const CONSOLE_FRAME_INFO* const pc = &pCGI->CFI;
+	shows(left);
+	Sleep(pCGI->delay_of_draw_frame);
+	for(int i = 0; i < pCGI->col_num; i++) {
+		for(int j = 0; j < pc->block_width; j += 2)
+			shows("  ");
+		Sleep(pCGI->delay_of_draw_frame);
+		if(pc->separator && i < pCGI->col_num - 1) {
+			shows(mid);
+		}
+	}
+	shows(right);
+	Sleep(pCGI->delay_of_draw_frame);
+	showln();
+}
+
+static void drawColNoid(const CONSOLE_GRAPHICS_INFO *const pCGI)
+{
+	if(pCGI->draw_frame_with_col_no) {
+		for(int i = 0; i < pCGI->col_num; i++) {
+			cct_gotoxy(pCGI->start_x + 4 + pCGI->CFI.bwidth * i + pCGI->CFI.bwidth / 2 - 2, pCGI->start_y);
+			showi(i);
+		}
+	}
+}
+
+static void drawRowNoid(const CONSOLE_GRAPHICS_INFO *const pCGI)
+{
+	if(pCGI->draw_frame_with_row_no) {
+		for(int i = 0; i < pCGI->row_num; i++) {
+			cct_gotoxy(pCGI->start_x, pCGI->start_y + 2 + pCGI->CFI.bhigh / 2 + pCGI->CFI.bhigh * i - 1);
+			showc(i < 26 ? 'A' + i : 'a' + i - 26);
+		}
+	}
 }
 
 /* ----------------------------------------------- 
@@ -76,8 +223,10 @@ static void calcFrameSize(CONSOLE_GRAPHICS_INFO *const pCGI)
 int gmw_set_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
+	initCGI(pCGI);
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_rowcol = 1;
 	pCGI->row_num = max(0, row);
 	pCGI->col_num = max(0, col);
 	pCGI->have_set_rowcol = 1;
@@ -103,16 +252,16 @@ int gmw_set_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int c
 					前景色正好是状态栏醒目前景色，导致无法看到醒目提示
 					...
 ***************************************************************************/
-
-/*<<<醒目文字颜色没有设置，不知道该设置成啥>>>*/
 int gmw_set_color(CONSOLE_GRAPHICS_INFO *const pCGI, const int bgcolor, const int fgcolor, const bool cascade)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_color = 1;
 	pCGI->area_bgcolor = bgcolor;
 	pCGI->area_fgcolor = fgcolor;
 	if(cascade) {
+		pCGI->set_frame_color = pCGI->set_status_line_color = 1;
 		pCGI->SLI.top_normal_bgcolor = pCGI->SLI.lower_catchy_bgcolor = bgcolor;
 		pCGI->SLI.top_normal_fgcolor = pCGI->SLI.lower_catchy_fgcolor = fgcolor;
 		pCGI->SLI.top_catchy_bgcolor = pCGI->SLI.lower_catchy_bgcolor = bgcolor;
@@ -140,6 +289,7 @@ int gmw_set_font(CONSOLE_GRAPHICS_INFO *const pCGI, const char *fontname, const 
 		return -1;  
 	if(strcmp(fontname, "Terminal") && strcmp(fontname, "新宋体"))
 		return -1;
+	pCGI->set_font = 1;
 	strcpy(pCGI->CFT.font_type, fontname);
 	pCGI->CFT.font_size_width = fs_width;
 	pCGI->CFT.font_size_high  = fs_high;
@@ -188,6 +338,7 @@ int gmw_set_ext_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int up_lines, co
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_ext_rowcol = 1;
 	pCGI->extern_up_lines = up_lines;
 	pCGI->extern_down_lines = down_lines;
 	pCGI->extern_left_cols = left_cols;
@@ -195,6 +346,8 @@ int gmw_set_ext_rowcol(CONSOLE_GRAPHICS_INFO *const pCGI, const int up_lines, co
 
 	pCGI->start_x += left_cols;
 	pCGI->start_y += up_lines;
+	pCGI->frame_x += left_cols;
+	pCGI->frame_y += up_lines;
 
 	pCGI->lines += up_lines + down_lines;
 	pCGI->cols += left_cols + right_cols;
@@ -214,9 +367,13 @@ int gmw_set_frame_default_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const int 
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_frame_linetype = 1;
 	char* ptr = (char*)&pCGI->CFI;
 	for (int i = 0; i < 11; i++) {
-		strcpy(ptr, DEFAULT_TAB[type][0]);
+		strcpy(ptr, DEFAULT_TAB[type][i]);
+		// shows(DEFAULT_TAB[type][i]);
+		// shows(ptr);
+		// Sleep(1000);
 		ptr += CFI_LEN;
 	}
 	return 0; //此句可根据需要修改
@@ -240,6 +397,7 @@ int gmw_set_frame_linetype(CONSOLE_GRAPHICS_INFO *const pCGI, const char *top_le
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_frame_linetype = 1;
 	CONSOLE_FRAME_INFO *const p = &pCGI->CFI;
 	fillTabString(p->top_left, top_left);
 	fillTabString(p->lower_left, lower_left);
@@ -270,6 +428,7 @@ int gmw_set_frame_style(CONSOLE_GRAPHICS_INFO *const pCGI, const int block_width
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_frame_style = 1;
 	pCGI->CFI.block_width = block_width + (block_width & 1);
 	pCGI->CFI.block_high  = block_high;
 	pCGI->CFI.separator   = separator;
@@ -298,6 +457,7 @@ int gmw_set_frame_color(CONSOLE_GRAPHICS_INFO *const pCGI, const int bgcolor, co
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_frame_color = 1;
 	pCGI->CFI.bgcolor = (bgcolor == -1 ? pCGI->area_bgcolor : bgcolor);
 	pCGI->CFI.fgcolor = (fgcolor == -1 ? pCGI->area_fgcolor : fgcolor);
 	return 0; //此句可根据需要修改
@@ -362,6 +522,7 @@ int gmw_set_block_border_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_block_border_switch = 1;
 	pCGI->CBI.block_border = on_off;
 	return 0; //此句可根据需要修改
 }
@@ -388,6 +549,7 @@ int gmw_set_status_line_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const int type
 	bool *slip = (bool*)&pCGI->SLI.is_top_status_line;
 	*(chip + type) = on_off;
 	*(slip + type) = on_off;
+	pCGI->frame_y += !type * on_off;
 	pCGI->start_y += !type * on_off;
 	pCGI->lines += on_off;
 	return 0; //此句可根据需要修改
@@ -412,6 +574,7 @@ int gmw_set_status_line_color(CONSOLE_GRAPHICS_INFO *const pCGI, const int type,
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	pCGI->set_status_line_color = 1;
 	pCGI->SLI.lower_normal_bgcolor = pCGI->SLI.top_normal_bgcolor = normal_bgcolor;
 	pCGI->SLI.lower_normal_fgcolor = pCGI->SLI.top_normal_fgcolor = normal_fgcolor;
 	pCGI->SLI.lower_catchy_bgcolor = pCGI->SLI.top_catchy_bgcolor = catchy_bgcolor;
@@ -435,7 +598,7 @@ int gmw_set_rowno_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on_off)
 		return -1;
 	pCGI->draw_frame_with_row_no = on_off;
 	pCGI->cols += on_off * 2;
-	pCGI->start_x += on_off * 2;
+	pCGI->frame_x += on_off * 2;
 	return 0; //此句可根据需要修改
 }
 
@@ -455,7 +618,7 @@ int gmw_set_colno_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on_off)
 		return -1;
 	pCGI->draw_frame_with_col_no = on_off;
 	pCGI->lines += on_off;
-	pCGI->start_y += on_off;
+	pCGI->frame_y += on_off;
 	return 0; //此句可根据需要修改
 }
 
@@ -472,7 +635,34 @@ int gmw_print(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	cct_cls();
+	cct_gotoxy(0, 0);
+	for(int i = 1; i <= 4; i++) {
+		for(int j = 0; j < 11; j++) {
+			shows(DEFAULT_TAB[i][j]);
+			putchar(' ');
+		}
+		puts("");
+	}
+	puts("GMW DEBUG INFO:\n");
+	printf("bgcolor = %d, fgcolor = %d\n", pCGI->area_bgcolor, pCGI->area_fgcolor);
+	printf("游戏主框架区域包含的块的行列数 row_num = %d, col_num = %d\n", pCGI->row_num, pCGI->col_num);
+	printf("cmd窗口的大小 lines = %d, cols = %d\n", pCGI->lines, pCGI->cols);
+	printf("主框架起始位置 (x = %d, y = %d)，框线起始位置 (x = %d, y = %d)\n", pCGI->start_x, pCGI->start_y, pCGI->frame_x, pCGI->frame_y);
+	printf("框线样式：");
+	char *ptr = (char*)&pCGI->CFI;
+	for(int i = 0; i < 11; i++) {
+		shows(ptr);
+		ptr += CFI_LEN;
+	}
+	puts("");
+	shows(pCGI->CFI.top_left);
+	puts("");
+	printf("框架总大小：wid = %d, high = %d\n", pCGI->CFI.tot_wid, pCGI->CFI.tot_high);
+	printf("是否有分割线：%c\n", "FT"[pCGI->CFI.separator]);
+	printf("色块宽度和高度 wid = %d, high = %d\n", pCGI->CFI.block_width, pCGI->CFI.block_high);
+	printf("色块总大小： wid = %d, high = %d\n", pCGI->CFI.bwidth, pCGI->CFI.bhigh);
+	_getch();
 	return 0; //此句可根据需要修改
 }
 
@@ -499,6 +689,7 @@ int gmw_init(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col, co
 	gmw_set_status_line_switch(pCGI, 1);
 	gmw_set_frame_style(pCGI);
 	gmw_set_block_border_switch(pCGI);
+	gmw_set_frame_default_linetype(pCGI, 1);
 	return 0; //此句可根据需要修改
 }
 
@@ -512,9 +703,35 @@ int gmw_init(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col, co
 int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO *const pCGI)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
+	gmw_print(pCGI);
+#if debug
+	if(__debugCheckGWMInit(pCGI)) {
+		_getch();
+		return -1;
+	}
+#endif
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	cct_setcolor(pCGI->area_bgcolor, pCGI->area_fgcolor);
+	cct_cls();
+	cct_setconsoleborder(pCGI->cols, pCGI->lines);
+	drawColNoid(pCGI);
+	drawRowNoid(pCGI);
+	cct_gotoxy(pCGI->frame_x, pCGI->frame_y);
+	drawOneSolidLine(pCGI, pCGI->CFI.top_left, pCGI->CFI.top_right, pCGI->CFI.h_top_separator);
+	int linecnt = 1;
+	for(int i = 0; i < pCGI->row_num; i++) {
+		for(int j = 0; j < pCGI->CFI.block_high; j++) {
+			cct_gotoxy(pCGI->frame_x, pCGI->frame_y + linecnt++);
+			drawOneHollowLine(pCGI, pCGI->CFI.v_normal, pCGI->CFI.v_normal, pCGI->CFI.v_normal);
+		}
+		if(i < pCGI->row_num - 1) {
+			cct_gotoxy(pCGI->frame_x, pCGI->frame_y + linecnt++);
+			drawOneSolidLine(pCGI, pCGI->CFI.v_left_separator, pCGI->CFI.v_right_separator, pCGI->CFI.mid_separator);
+		}
+	}
+	cct_gotoxy(pCGI->frame_x, pCGI->frame_y + linecnt++);
+	drawOneSolidLine(pCGI, pCGI->CFI.lower_left, pCGI->CFI.lower_right, pCGI->CFI.h_lower_separator);
 	return 0; //此句可根据需要修改
 }
 

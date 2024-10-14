@@ -243,8 +243,6 @@ typedef struct _console_graphics_info_ {
 	   - 注：游戏主框架，除了有包含m行n列的色块的外框外，
 	   		还有上状态栏（0/1行）/下状态栏（0/1行）/行号显示（0/2列）/列标显示区域（0/1行）
 	   -     在上述值各不相同的情况下，start_x/start_y的值是不同的 
-
-	   : 内部实现中该对值的定义是仅算框架的左上角起始位置
 	   */
 	int start_x;
 	int start_y;
@@ -259,9 +257,25 @@ typedef struct _console_graphics_info_ {
 		   例如：int data1;
 				 int data2;
 				 char pad[56]; 】 */
+
+	//: 该对值的定义是仅算框架的左上角起始位置
+	int frame_x;
+	int frame_y;
+
+	bool set_rowcol;
+	bool set_color;
+	bool set_font;
+	bool set_ext_rowcol;
+	bool set_frame_linetype;
+	bool set_frame_style;
+	bool set_frame_color;
+	bool set_block_border_switch;
+	bool set_status_line_color;
 	bool have_set_rowcol;
 	bool have_set_blocksize;
-	char pad[62];
+
+
+	char pad[45];
 
 } CONSOLE_GRAPHICS_INFO;
 

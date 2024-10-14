@@ -28,7 +28,7 @@ using namespace std;
 		4、从对应的 lib 目录中删除 lib_tgmw_tools.lib
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------- */
-#define ENABLE_LIB_TGMW_TOOLS			 1
+#define ENABLE_LIB_TGMW_TOOLS			 0
 
 #if ENABLE_LIB_TGMW_TOOLS
 #include "../include/lib_tgmw_tools.h"
@@ -484,7 +484,7 @@ static void test_by_input(void)
 		cin >> border_bg_color;
 		cout << "输入游戏区前景色[-1..16，-1表示用窗口前景色] : ";
 		cin >> border_fg_color;
-		gmw_set_frame_color(&TestCGI, border_bg_color, border_bg_color);
+		gmw_set_frame_color(&TestCGI, border_bg_color, border_fg_color);
 	}
 
 	/* 显示初始化的框架 */
@@ -1425,6 +1425,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	if (sizeof(CONSOLE_GRAPHICS_INFO) != 492) {
+		std::cout << sizeof(CONSOLE_GRAPHICS_INFO) << '\n';
 		cout << "CONSOLE_GRAPHICS_INFO 不是492字节，如果使用 lib_tgmw_tools.lib 中的函数则可能出错" << endl;
 		return -1;
 	}
@@ -1433,7 +1434,7 @@ int main(int argc, char** argv)
 
 	/* 用固定值测试框架 */
 	test_by_fixed();
-	exit(0);
+	
 	/* 用键盘输入值测试框架 */
 	test_by_input();
 
