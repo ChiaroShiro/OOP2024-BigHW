@@ -151,7 +151,7 @@ static void test_by_fixed(void)
 		色块为双框线，颜色（未完）		*/
 	gmw_init(&MyCGI);
 
-	if (0) {
+	if (1) {
 		/* 显示初始化的框架 */
 		gmw_draw_frame(&MyCGI);
 
@@ -190,7 +190,7 @@ static void test_by_fixed(void)
 		gmw_set_frame_default_linetype(&MyCGI, 2);			//设置框架线型为预置值2（全部为单线）
 		gmw_set_rowno_switch(&MyCGI, true);					//显示行号
 		gmw_set_colno_switch(&MyCGI, true);					//显示列标
-		gmw_set_delay(&MyCGI, DELAY_OF_DRAW_FRAME, 10);		//画边框的延时
+		gmw_set_delay(&MyCGI, DELAY_OF_DRAW_FRAME, 100);		//画边框的延时
 		gmw_set_block_border_switch(&MyCGI, true);			//设置色块需要小边框
 
 		/* 显示框架 */
@@ -210,7 +210,7 @@ static void test_by_fixed(void)
 				{4,  COLOR_HRED, -1, NULL},				//如果给出数字4，则直接显示4（NULL表示直接显示数字）
 				{BDI_VALUE_END, -1, -1, NULL}			//以BDI_VALUE_END结束，一定要有!!!
 			};
-			gmw_set_delay(&MyCGI, DELAY_OF_DRAW_BLOCK, 15);		//画色块的延时
+			gmw_set_delay(&MyCGI, DELAY_OF_DRAW_BLOCK, 150);		//画色块的延时
 			int i, j;
 			for (i = 0; i < row; i++)
 				for (j = 0; j < col; j++)
@@ -1433,10 +1433,10 @@ int main(int argc, char** argv)
 	cct_setcursor(CURSOR_INVISIBLE);
 
 	/* 用固定值测试框架 */
-	test_by_fixed();
+	//test_by_fixed();
 	
 	/* 用键盘输入值测试框架 */
-	test_by_input();
+	//test_by_input();
 
 	/* 用 color_linez 来测试游戏区域 */
 	test_color_linez();

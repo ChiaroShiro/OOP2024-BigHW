@@ -159,6 +159,17 @@ static bool __debugCheckGWMInit(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	return flag;
 }
 
+static BLOCK_DISPLAY_INFO findBDIBlock(const BLOCK_DISPLAY_INFO *const bdi, const int bdi_value)
+{
+	int i = 0;
+	while(bdi[i].value != BDI_VALUE_END) {
+		if(bdi[i].value == bdi_value)
+			break;
+		i++;
+	}
+	return bdi[i];
+}
+
 /*
  *  赋值 2 字节
  *  若 src 是 NULL 则赋 "  "
@@ -183,7 +194,7 @@ static void fillTabString(char* dest, const char* src)
 }
 
 static void update_tothw(CONSOLE_GRAPHICS_INFO *const pCGI)
-{
+{ // 更新框架（仅框线部分）总大小
 	pCGI->CFI.tot_high = pCGI->row_num * pCGI->CFI.block_high;
 	pCGI->CFI.tot_high += (pCGI->row_num - 1) * pCGI->CFI.separator + 2;
 	pCGI->CFI.tot_wid = pCGI->col_num * pCGI->CFI.block_width;
@@ -191,40 +202,50 @@ static void update_tothw(CONSOLE_GRAPHICS_INFO *const pCGI)
 }
 
 static void update_linecol(CONSOLE_GRAPHICS_INFO *const pCGI)
-{
+{ // 更新 cmd 窗口大小
 	pCGI->lines = pCGI->extern_up_lines + pCGI->extern_down_lines + pCGI->CFI.tot_high + 
 				  pCGI->top_status_line + pCGI->lower_status_line + pCGI->draw_frame_with_col_no + 4;
 	pCGI->cols  = pCGI->CFI.tot_wid + pCGI->extern_left_cols + pCGI->extern_right_cols + pCGI->draw_frame_with_row_no * 2 + 1;
 }
 
 static void update_startxy(CONSOLE_GRAPHICS_INFO *const pCGI)
-{
+{ // 更新主体部分（框线 + 标号）起始位置（左上角）
 	pCGI->start_x = pCGI->extern_left_cols;
 	pCGI->start_y = pCGI->extern_up_lines + pCGI->top_status_line;
 }
 
 static void update_framexy(CONSOLE_GRAPHICS_INFO *const pCGI)
-{
+{ // 更新框架（仅框线）部分起始位置（左上角）
 	pCGI->frame_x = pCGI->extern_left_cols + pCGI->draw_frame_with_row_no * 2;
 	pCGI->frame_y = pCGI->extern_up_lines + pCGI->top_status_line + pCGI->draw_frame_with_col_no;
 }
 
 static void update_sliwid(CONSOLE_GRAPHICS_INFO *const pCGI)
-{
+{ // 更新状态栏长度
 	pCGI->SLI.width = pCGI->cols - pCGI->extern_left_cols - pCGI->extern_right_cols;
 }
 
+static void update_status(CONSOLE_GRAPHICS_INFO *const pCGI)
+{ // 更新状态栏位置
+	pCGI->SLI.top_start_x = pCGI->extern_left_cols;
+	pCGI->SLI.top_start_y = pCGI->extern_up_lines;
+	pCGI->SLI.lower_start_x = pCGI->extern_left_cols;
+	pCGI->SLI.lower_start_y = pCGI->extern_up_lines + pCGI->CFI.tot_high + pCGI->top_status_line + pCGI->draw_frame_with_col_no;
+}
+
 static void updateAll(CONSOLE_GRAPHICS_INFO *const pCGI)
-{
+{ // 全部更新
 	update_tothw(pCGI);
 	update_linecol(pCGI);
 	update_framexy(pCGI);
 	update_startxy(pCGI);
 	update_sliwid(pCGI);
+	update_status(pCGI);
 }
 
 /*
  * 画一实心行
+ * 左侧头部字符是 left，右侧尾部字符是 right，中间穿插分隔符是 mid
  */
 static void drawOneSolidLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const char* left, const char* right, const char* mid)
 {
@@ -246,6 +267,7 @@ static void drawOneSolidLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const char
 
 /*
  * 画一空心行
+ * 左侧头部字符是 left，右侧尾部字符是 right，中间穿插分隔符是 mid
  */
 static void drawOneHollowLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const char* left, const char* right, const char* mid)
 {
@@ -265,6 +287,9 @@ static void drawOneHollowLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const cha
 	showln();
 }
 
+/*
+ * 画列标号
+ */
 static void drawColNoid(const CONSOLE_GRAPHICS_INFO *const pCGI)
 {
 	if(pCGI->draw_frame_with_col_no) {
@@ -278,6 +303,9 @@ static void drawColNoid(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	}
 }
 
+/*
+ * 画行标号
+ */
 static void drawRowNoid(const CONSOLE_GRAPHICS_INFO *const pCGI)
 {
 	if(pCGI->draw_frame_with_row_no) {
@@ -780,6 +808,7 @@ int gmw_init(CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col, co
 	gmw_set_frame_style(pCGI);
 	gmw_set_block_border_switch(pCGI);
 	gmw_set_frame_default_linetype(pCGI, 1);
+	gmw_set_delay(pCGI, DELAY_OF_BLOCK_MOVED, 100);
 	updateAll(pCGI);
 	return 0; //此句可根据需要修改
 }
@@ -803,12 +832,15 @@ int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO *const pCGI)
 #endif
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	
 	cct_setcolor(pCGI->area_bgcolor, pCGI->area_fgcolor);
 	cct_cls();
 	cct_setconsoleborder(pCGI->cols, pCGI->lines);
 	cct_setfontsize(pCGI->CFT.font_type, pCGI->CFT.font_size_high, pCGI->CFT.font_size_width);
+
 	drawColNoid(pCGI);
 	drawRowNoid(pCGI);
+	cct_setcolor(pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
 	cct_gotoxy(pCGI->frame_x, pCGI->frame_y);
 	drawOneSolidLine(pCGI, pCGI->CFI.top_left, pCGI->CFI.top_right, pCGI->CFI.h_top_separator);
 	int linecnt = 1;
@@ -846,8 +878,8 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 	int posx, posy;
 	int length = pCGI->SLI.width - 1 - (msg ? strlen(msg) : 0) - (catchy_msg ? strlen(catchy_msg) : 0);
 	if(!type && pCGI->top_status_line) {
-		posx = pCGI->extern_left_cols;
-		posy = pCGI->extern_up_lines;
+		posx = pCGI->SLI.top_start_x;
+		posy = pCGI->SLI.top_start_y;
 		if (catchy_msg) {
 			cct_showstr(posx, posy, catchy_msg, pCGI->SLI.top_catchy_bgcolor, pCGI->SLI.top_catchy_fgcolor);
 			cct_getxy(posx, posy);
@@ -858,8 +890,8 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 			showc(' ');
 	}
 	if(type && pCGI->lower_status_line) {
-		posx = pCGI->extern_left_cols;
-		posy = pCGI->extern_up_lines + pCGI->CFI.tot_high + pCGI->top_status_line + pCGI->draw_frame_with_col_no;
+		posx = pCGI->SLI.lower_start_x;
+		posy = pCGI->SLI.lower_start_y;
 		if (catchy_msg) {
 			cct_showstr(posx, posy, catchy_msg, pCGI->SLI.lower_catchy_bgcolor, pCGI->SLI.lower_catchy_fgcolor);
 			cct_getxy(posx, posy);
@@ -882,17 +914,18 @@ static void drawBlockXY(const CONSOLE_GRAPHICS_INFO *const pCGI, const int x, co
 	int posx = x, posy = y, colx, coly;
 	int cn = pCGI->CFI.block_width / 2;
 	int rn = pCGI->CFI.block_high;
+	cct_getcolor(colx, coly);
+	cct_setcolor(block.bgcolor == -1 ? pCGI->CFI.bgcolor : block.bgcolor, 
+				 block.fgcolor == -1 ? pCGI->CFI.fgcolor : block.fgcolor);
 	if(block.value == BDI_VALUE_BLANK) {
 		for(int i = 0; i < rn; i++) {
 			cct_gotoxy(posx, posy + i);
 			for(int j = 0; j < cn; j++)
 				shows("  ");
 		}
+		cct_setcolor(colx, coly);
 		return;
 	}
-	cct_getcolor(colx, coly);
-	cct_setcolor(block.bgcolor == -1 ? pCGI->area_bgcolor : block.bgcolor, 
-				 block.fgcolor == -1 ? pCGI->area_fgcolor : block.fgcolor);
 	if(pCGI->CBI.block_border) {
 		cct_gotoxy(posx, posy);
 		shows(pCGI->CBI.top_left);
@@ -952,8 +985,70 @@ int gmw_draw_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no,
 		return -1;
 	int posx, posy;
 	getBlockXY(pCGI, row_no, col_no, posx, posy);
-	drawBlockXY(pCGI, posx, posy, bdi[bdi_value]);
+	drawBlockXY(pCGI, posx, posy, findBDIBlock(bdi, bdi_value));
 	return 0; //此句可根据需要修改
+}
+
+// /* .h 中定义色块的四种移动方向 */
+// #define DOWN_TO_UP		0
+// #define UP_TO_DOWN		1
+// #define RIGHT_TO_LEFT	2
+// #define LEFT_TO_RIGHT	3
+// 不同方向时 (x, y) 的偏移量：
+const int FORWARD_BIAS_COL[4] = {0, 0, -1, 1};
+const int FORWARD_BIAS_ROW[4] = {-1, 1, 0, 0};
+
+/*
+ * 把一个格子移动一格坐标值
+ * 将位于 (x, y) 的格子按照 direction 方向移动一个坐标
+ * 动画按照 block 显示
+ */
+static void moveBlockOnePixel(const CONSOLE_GRAPHICS_INFO *const pCGI, const int x, const int y, const BLOCK_DISPLAY_INFO block, const int direction)
+{
+	drawBlockXY(pCGI, x, y, {BDI_VALUE_BLANK, -1, -1, NULL});
+	drawBlockXY(pCGI, x + FORWARD_BIAS_COL[direction], y + FORWARD_BIAS_ROW[direction], block);
+}
+
+/*
+ * 把一个格子移动一格
+ * 将位于 (row_no, col_no) 的格子按照 direction 方向移动一格
+ * 动画按照 block 显示
+ */
+static void moveOneBlock(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, const int col_no, const BLOCK_DISPLAY_INFO block, const int direction)
+{
+	int len = direction < 2 ? pCGI->CFI.bhigh : pCGI->CFI.bwidth;
+	int nowx, nowy;
+	getBlockXY(pCGI, row_no, col_no, nowx, nowy);
+	for(int i = 0; i < len; i++) { 
+		if(i)
+			waitMoved(pCGI);
+		moveBlockOnePixel(pCGI, nowx, nowy, block, direction);
+		nowx = nowx + FORWARD_BIAS_COL[direction];
+		nowy = nowy + FORWARD_BIAS_ROW[direction];
+	}
+	if (pCGI->CFI.separator) { // 补全分割线
+		cct_setcolor(pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
+		if (direction < 2) { // 0 向上，1 向下
+			int r = row_no + direction; // 重绘制 (r, c) 上方的横条
+			int c = col_no;
+			getBlockXY(pCGI, r, c, nowx, nowy);
+			nowy--;
+			cct_gotoxy(nowx, nowy);
+			for (int i = 0; i < pCGI->CFI.block_width / 2; i++)
+				shows(pCGI->CFI.h_normal);
+		}
+		else { // 2 向左，3 向右
+			int r = row_no;
+			int c = col_no + (direction == 3); // 重绘制 (r, c) 左侧的竖条
+			getBlockXY(pCGI, r, c, nowx, nowy);
+			nowx -= 2;
+			for (int i = 0; i < pCGI->CFI.block_high; i++) {
+				cct_gotoxy(nowx, nowy + i);
+				shows(pCGI->CFI.v_normal);
+			}
+		}
+	}
+	waitMoved(pCGI);
 }
 
 /***************************************************************************
@@ -975,7 +1070,12 @@ int gmw_move_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, co
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-	
+	int nowr = row_no, nowc = col_no;
+	for(int i = 0; i < distance; i++) {
+		moveOneBlock(pCGI, nowr, nowc, findBDIBlock(bdi, bdi_value), direction);
+		nowr = nowr + FORWARD_BIAS_ROW[direction];
+		nowc = nowc + FORWARD_BIAS_COL[direction];
+	}
 	return 0; //此句可根据需要修改
 }
 
