@@ -272,9 +272,12 @@ typedef struct _console_graphics_info_ {
 	bool set_status_line_color;
 	bool have_set_rowcol;
 	bool have_set_blocksize;
+	bool init_delay_frame;
+	bool init_delay_block;
+	bool init_delay_moved;
 
 
-	char pad[45];
+	char pad[43];
 
 } CONSOLE_GRAPHICS_INFO;
 

@@ -30,6 +30,12 @@ const char* const DEFAULT_TAB[5][11] = {
 	{"╓", "╙", "╖", "╜", "─", "║", "╥", "╨", "╟", "╢", "╫"}
 }; // 1 - 全线 2 - 全单线 3 - 横双竖单 4 - 横单竖双
 
+static void getBlockXY(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row, const int col, int &x, int &y)
+{
+	x = pCGI->frame_x + 2 + col * pCGI->CFI.bwidth;
+	y = pCGI->frame_y + 1 + row * pCGI->CFI.bhigh;
+}
+
 static void shows(const char* s) 
 {
 	int x, y, cx, cy;
@@ -38,7 +44,7 @@ static void shows(const char* s)
 	cct_showstr(x, y, s, cx, cy);
 }
 
-static void showc(const char& c) 
+static void showc(const char c) 
 {
 	int x, y, cx, cy;
 	cct_getxy(x, y);
@@ -46,7 +52,7 @@ static void showc(const char& c)
 	cct_showch(x, y, c, cx, cy);
 }
 
-static void showi (const int &p) 
+static void showi (const int p) 
 {
 	int x, y, cx, cy;
 	cct_getxy(x, y);
@@ -54,22 +60,62 @@ static void showi (const int &p)
 	cct_showint(x, y, p, cx, cy);
 }
 
+static void showiLen(const int p, const int len)
+{
+	int x, y, cx, cy, endx, endy;
+	cct_getxy(x, y);
+	cct_getcolor(cx, cy);
+	cct_showint(x, y, p, cx, cy);
+	cct_getxy(endx, endy);
+	int n = len - (endx - x);
+	while(n --> 0) 
+		showc(' ');
+}
+
 static void showln()
 {
 	showc('\n');
 }
 
-static void initCGI (CONSOLE_GRAPHICS_INFO *const pCGI) 
+static void waitFrame(const CONSOLE_GRAPHICS_INFO *const pCGI)
 {
-	pCGI->set_rowcol = pCGI->set_color = pCGI->set_font = pCGI->set_frame_linetype = pCGI->set_frame_style = 0;
-	pCGI->set_frame_color = pCGI->set_block_border_switch = pCGI->set_status_line_color = 0;
-	pCGI->have_set_rowcol = pCGI->have_set_blocksize = 0;
+	if(pCGI->init_delay_frame && pCGI->delay_of_draw_frame)
+		Sleep(pCGI->delay_of_draw_frame);
+}
 
-	pCGI->top_status_line = pCGI->lower_status_line = 0;
-	pCGI->draw_frame_with_row_no = pCGI->draw_frame_with_col_no = 0;
-	pCGI->delay_of_draw_frame = pCGI->delay_of_draw_block = pCGI->delay_of_block_moved = 0;
+static void waitBlock(const CONSOLE_GRAPHICS_INFO *const pCGI)
+{
+	if(pCGI->init_delay_block && pCGI->delay_of_draw_block)
+		Sleep(pCGI->delay_of_draw_block);
+}
 
-	pCGI->extern_down_lines = pCGI->extern_left_cols = pCGI->extern_right_cols = pCGI->extern_up_lines = 0;
+static void waitMoved(const CONSOLE_GRAPHICS_INFO *const pCGI)
+{
+	if(pCGI->init_delay_moved && pCGI->delay_of_block_moved)
+		Sleep(pCGI->delay_of_block_moved);
+}
+
+static void initCGI(CONSOLE_GRAPHICS_INFO *const pCGI) 
+{
+	char *ptr = (char*)&pCGI->top_status_line;
+	for(int i = 0; i < 4; i++, ptr++) {
+		if(*ptr != 0 && *ptr != 1) 
+			*ptr = 0;
+	}
+	ptr = (char*)&pCGI->set_rowcol;
+	for(int i = 0; i < 13; i++, ptr++) {
+		if(*ptr != 0 && *ptr != 1)
+			*ptr = 0;
+	}
+	// pCGI->set_rowcol = pCGI->set_color = pCGI->set_font = pCGI->set_frame_linetype = pCGI->set_frame_style = 0;
+	// pCGI->set_frame_color = pCGI->set_block_border_switch = pCGI->set_status_line_color = 0;
+	// pCGI->have_set_rowcol = pCGI->have_set_blocksize = 0;
+
+	// pCGI->top_status_line = pCGI->lower_status_line = 0;
+	// pCGI->draw_frame_with_row_no = pCGI->draw_frame_with_col_no = 0;
+	// pCGI->delay_of_draw_frame = pCGI->delay_of_draw_block = pCGI->delay_of_block_moved = 0;
+
+	// pCGI->extern_down_lines = pCGI->extern_left_cols = pCGI->extern_right_cols = pCGI->extern_up_lines = 0;
 }
 
 static bool __debugCheckGWMInit(const CONSOLE_GRAPHICS_INFO *const pCGI) 
@@ -184,17 +230,17 @@ static void drawOneSolidLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const char
 {
 	const CONSOLE_FRAME_INFO* const pc = &pCGI->CFI;
 	shows(left);
-	Sleep(pCGI->delay_of_draw_frame);
+	waitFrame(pCGI);
 	for(int i = 0; i < pCGI->col_num; i++) {
 		for(int j = 0; j < pc->block_width; j += 2)
 			shows(pc->h_normal);
-		Sleep(pCGI->delay_of_draw_frame);
+		waitFrame(pCGI);
 		if(pc->separator && i < pCGI->col_num - 1) {
 			shows(mid);
 		}
 	}
 	shows(right);
-	Sleep(pCGI->delay_of_draw_frame);
+	waitFrame(pCGI);
 	showln();
 }
 
@@ -205,17 +251,17 @@ static void drawOneHollowLine(const CONSOLE_GRAPHICS_INFO *const pCGI, const cha
 {
 	const CONSOLE_FRAME_INFO* const pc = &pCGI->CFI;
 	shows(left);
-	Sleep(pCGI->delay_of_draw_frame);
+	waitFrame(pCGI);
 	for(int i = 0; i < pCGI->col_num; i++) {
 		for(int j = 0; j < pc->block_width; j += 2)
 			shows("  ");
-		Sleep(pCGI->delay_of_draw_frame);
+		waitFrame(pCGI);
 		if(pc->separator && i < pCGI->col_num - 1) {
 			shows(mid);
 		}
 	}
 	shows(right);
-	Sleep(pCGI->delay_of_draw_frame);
+	waitFrame(pCGI);
 	showln();
 }
 
@@ -326,13 +372,19 @@ int gmw_set_font(CONSOLE_GRAPHICS_INFO *const pCGI, const char *fontname, const 
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
-		return -1;  
+		return -1;
 	if(strcmp(fontname, "Terminal") && strcmp(fontname, "新宋体"))
 		return -1;
 	pCGI->set_font = 1;
 	strcpy(pCGI->CFT.font_type, fontname);
-	pCGI->CFT.font_size_width = fs_width;
-	pCGI->CFT.font_size_high  = fs_high;
+	if(strcmp(fontname, "新宋体") == 0) {
+		pCGI->CFT.font_size_high = fs_high;
+		pCGI->CFT.font_size_width = 0;
+	}
+	else {
+		pCGI->CFT.font_size_width = fs_width;
+		pCGI->CFT.font_size_high = fs_high;
+	}
 	return 0; //此句可根据需要修改
 }
 
@@ -353,12 +405,18 @@ int gmw_set_delay(CONSOLE_GRAPHICS_INFO *const pCGI, const int type, const int d
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-	if (type == DELAY_OF_DRAW_FRAME)
-		pCGI->delay_of_draw_frame  = delay_ms;
-	else if (type == DELAY_OF_DRAW_BLOCK)
-		pCGI->delay_of_draw_block  = delay_ms;
-	else if (type == DELAY_OF_BLOCK_MOVED)
+	if (type == DELAY_OF_DRAW_FRAME) {
+		pCGI->delay_of_draw_frame = delay_ms;
+		pCGI->init_delay_frame = 1;
+	}
+	else if (type == DELAY_OF_DRAW_BLOCK) {
+		pCGI->delay_of_draw_block = delay_ms;
+		pCGI->init_delay_block = 1;
+	}
+	else if (type == DELAY_OF_BLOCK_MOVED) {
 		pCGI->delay_of_block_moved = delay_ms;
+		pCGI->init_delay_moved = 1;
+	}
 	return 0; //此句可根据需要修改
 }
 
@@ -552,6 +610,7 @@ int gmw_set_block_border_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on
 		return -1;
 	pCGI->set_block_border_switch = 1;
 	pCGI->CBI.block_border = on_off;
+	gmw_set_block_default_linetype(pCGI, 1);
 	return 0; //此句可根据需要修改
 }
 
@@ -660,6 +719,7 @@ int gmw_print(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	if (pCGI->inited != CGI_INITED)
 		return -1;
 	cct_cls();
+	cct_setfontsize("新宋体", 16);
 	cct_gotoxy(0, 0);
 	for(int i = 1; i <= 4; i++) {
 		for(int j = 0; j < 11; j++) {
@@ -671,6 +731,7 @@ int gmw_print(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	puts("GMW DEBUG INFO:\n");
 	printf("bgcolor = %d, fgcolor = %d\n", pCGI->area_bgcolor, pCGI->area_fgcolor);
 	printf("游戏主框架区域包含的块的行列数 col_num = %d, row_num = %d\n", pCGI->col_num, pCGI->row_num);
+	printf("附加去：up = %d, down = %d, left = %d, right = %d\n", pCGI->extern_up_lines, pCGI->extern_down_lines, pCGI->extern_left_cols, pCGI->extern_right_cols);
 	printf("cmd窗口的大小 cols = %d, lines = %d\n", pCGI->cols, pCGI->lines);
 	printf("主框架起始位置 (startx = %d, starty = %d)，框线起始位置 (framex = %d, framey = %d)\n", pCGI->start_x, pCGI->start_y, pCGI->frame_x, pCGI->frame_y);
 	printf("框线样式：");
@@ -683,7 +744,8 @@ int gmw_print(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	shows(pCGI->CFI.top_left);
 	puts("");
 	printf("框架总大小：wid = %d, high = %d\n", pCGI->CFI.tot_wid, pCGI->CFI.tot_high);
-	printf("是否有分割线：%c\n", "FT"[pCGI->CFI.separator]);
+	printf("是否有分割线：%c, 是否有上状态栏 %c, 是否有下状态栏 %c，是否有行号 %c，是否有列号 %c\n", 
+			"FT"[pCGI->CFI.separator], "FT"[pCGI->top_status_line], "FT"[pCGI->lower_status_line], "FT"[pCGI->draw_frame_with_row_no], "FT"[pCGI->draw_frame_with_col_no]);
 	printf("色块宽度和高度 wid = %d, high = %d\n", pCGI->CFI.block_width, pCGI->CFI.block_high);
 	printf("色块总大小： wid = %d, high = %d\n", pCGI->CFI.bwidth, pCGI->CFI.bhigh);
 	printf("区域总色 area_bg = %d, area_fg = %d\n", pCGI->area_bgcolor, pCGI->area_fgcolor);
@@ -742,9 +804,9 @@ int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	if (pCGI->inited != CGI_INITED)
 		return -1;
 	cct_setcolor(pCGI->area_bgcolor, pCGI->area_fgcolor);
-	cct_setfontsize(pCGI->CFT.font_type, pCGI->CFT.font_size_high, pCGI->CFT.font_size_width);
 	cct_cls();
 	cct_setconsoleborder(pCGI->cols, pCGI->lines);
+	cct_setfontsize(pCGI->CFT.font_type, pCGI->CFT.font_size_high, pCGI->CFT.font_size_width);
 	drawColNoid(pCGI);
 	drawRowNoid(pCGI);
 	cct_gotoxy(pCGI->frame_x, pCGI->frame_y);
@@ -811,6 +873,65 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 	return 0; //此句可根据需要修改
 }
 
+/*
+ * 在给定 (x, y) 坐标上绘制一个指定 block
+ * (x, y) 是左上角
+ */
+static void drawBlockXY(const CONSOLE_GRAPHICS_INFO *const pCGI, const int x, const int y, const BLOCK_DISPLAY_INFO block)
+{
+	int posx = x, posy = y, colx, coly;
+	int cn = pCGI->CFI.block_width / 2;
+	int rn = pCGI->CFI.block_high;
+	if(block.value == BDI_VALUE_BLANK) {
+		for(int i = 0; i < rn; i++) {
+			cct_gotoxy(posx, posy + i);
+			for(int j = 0; j < cn; j++)
+				shows("  ");
+		}
+		return;
+	}
+	cct_getcolor(colx, coly);
+	cct_setcolor(block.bgcolor == -1 ? pCGI->area_bgcolor : block.bgcolor, 
+				 block.fgcolor == -1 ? pCGI->area_fgcolor : block.fgcolor);
+	if(pCGI->CBI.block_border) {
+		cct_gotoxy(posx, posy);
+		shows(pCGI->CBI.top_left);
+		waitBlock(pCGI);
+		for(int i = 2; i < cn; i++) {
+			shows(pCGI->CBI.h_normal);
+			waitBlock(pCGI);
+		}
+		shows(pCGI->CBI.top_right);
+		waitBlock(pCGI);
+		for(int i = 2; i < rn; i++) {
+			cct_gotoxy(posx, posy + i - 1);
+			shows(pCGI->CBI.v_normal);
+			waitBlock(pCGI);
+			cct_gotoxy(posx + 2 * cn - 2, posy + i - 1);
+			shows(pCGI->CBI.v_normal);
+			waitBlock(pCGI);
+		}
+		cct_gotoxy(posx, posy + rn - 1);
+		shows(pCGI->CBI.lower_left);
+		waitBlock(pCGI);
+		for(int i = 2; i < cn; i++) {
+			shows(pCGI->CBI.h_normal);
+			waitBlock(pCGI);
+		}
+		shows(pCGI->CBI.lower_right);
+		waitBlock(pCGI);
+		posy ++;
+		posx += 2;
+	}
+	cct_gotoxy(posx, posy);
+	if(block.content)
+		shows(block.content);
+	else
+		showiLen(block.value, pCGI->CFI.block_width - 4);
+	waitBlock(pCGI);
+	cct_setcolor(colx, coly);
+}
+
 /***************************************************************************
   函数名称：
   功    能：显示某一个色块(内容为字符串，坐标为row/col)
@@ -823,12 +944,15 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
   说    明：1、BLOCK_DISPLAY_INFO 的含义见头文件，用法参考测试样例
             2、bdi_value为 BDI_VALUE_BLANK 表示空白块，要特殊处理
 ***************************************************************************/
-int gmw_draw_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, const int col_no, const int bdi_value, const BLOCK_DISPLAY_INFO *const bdi)
+int gmw_draw_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, 
+				const int col_no, const int bdi_value, const BLOCK_DISPLAY_INFO *const bdi)
 {
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	int posx, posy;
+	getBlockXY(pCGI, row_no, col_no, posx, posy);
+	drawBlockXY(pCGI, posx, posy, bdi[bdi_value]);
 	return 0; //此句可根据需要修改
 }
 
@@ -851,7 +975,7 @@ int gmw_move_block(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_no, co
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
-
+	
 	return 0; //此句可根据需要修改
 }
 
