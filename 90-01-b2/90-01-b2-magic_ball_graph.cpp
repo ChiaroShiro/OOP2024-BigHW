@@ -129,6 +129,32 @@ void slideDownBall(int n, int m, int x, int y, int val, int showBorder = 1)
 	cct_setcolor();
 }
 
+static int oneDrawing(int n, int m, int y_size, int showBorder, int map[][MAP_SIZE], int sta[][MAP_SIZE],
+	bool isGap, int cates,
+	void (*slideDownBall)(int, int, int, int, int, int),
+	void (*delBall)(int, int, int, int),
+	void (*drawFrontBall)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], bool, int))
+{
+	int ret = 0;
+	drawFrontBall(n, m, map, sta, 1, 0);
+	if (isGap)
+		wait(400);
+	else {
+		cct_gotoxy(0, y_size - 3);
+		waitLine(0, "按回车键进行消除和下落除0操作", '\n');
+	}
+	deleteBall(n, m, showBorder, map, sta, 1, delBall);
+	fallBall(n, m, map, sta, 1, 1, slideDownBall);
+	if (!isGap) {
+		cct_gotoxy(0, y_size - 3);
+		waitLine(0, "按回车键进行新值填充", '\n');
+	}
+	ret += fillVoidBall(n, m, map, sta, cates, slideDownBall);
+	if (isGap)
+		wait(400);
+	return ret;
+}
+
 int finishDrawing(int n, int m, int x_size, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE],
 	int coren, int corem, bool isGap)
 {

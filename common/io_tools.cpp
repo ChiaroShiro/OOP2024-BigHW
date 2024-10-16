@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <conio.h>
 #include "../include/cmd_console_tools.h"
+#include "../include/cmd_gmw_tools.h"
 #include "../include/io_tools.h"
 using namespace std;
 
@@ -77,6 +78,32 @@ void showNum(int x, int y, int v, int w)
 	cct_gotoxy(x, y);
 	cout << setw(w);
 	showi(v);
+}
+
+void to_be_continued(const char* prompt, const CONSOLE_GRAPHICS_INFO* const bgi)
+{
+	if (bgi->inited == CGI_INITED) { //初始化过
+		cct_setcolor(bgi->area_bgcolor, bgi->area_fgcolor); //恢复初始颜色
+
+		cct_gotoxy(0, bgi->SLI.lower_start_y + 2);//光标设到指定位置
+		cout << setw(bgi->cols - 1) << ' '; //先用空格清空整行
+
+		cct_gotoxy(0, bgi->SLI.lower_start_y + 2);//光标设到指定位置
+	}
+	else { //未初始化过
+		cct_setcolor(); //缺省颜色
+		cct_gotoxy(0, 0);//光标设到指定位置
+	}
+
+	if (prompt)
+		cout << prompt << "，按回车键继续...   ";
+	else
+		cout << "按回车键继续...   ";
+
+	while (_getch() != '\r')
+		;
+
+	return;
 }
 
 void waitLine(int x, const char* output, const char* hint, const char* input, bool show)

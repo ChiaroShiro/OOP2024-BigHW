@@ -909,10 +909,10 @@ int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	cct_setfontsize(pCGI->CFT.font_type, pCGI->CFT.font_size_high, pCGI->CFT.font_size_width);
 	cct_setconsoleborder(pCGI->cols, pCGI->lines);
 	
-	drawColNoid(pCGI);
+	drawColNoid(pCGI); // 画行列标号
 	drawRowNoid(pCGI);
 	cct_setcolor(pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
-	cct_gotoxy(pCGI->frame_x, pCGI->frame_y);
+	cct_gotoxy(pCGI->frame_x, pCGI->frame_y); // 画框架线
 	drawOneSolidLine(pCGI, pCGI->CFI.top_left, pCGI->CFI.top_right, pCGI->CFI.h_top_separator);
 	int linecnt = 1;
 	for(int i = 0; i < pCGI->row_num; i++) {
@@ -946,8 +946,28 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 	/* 防止在未调用 gmw_init 前调用其它函数 */
 	if (pCGI->inited != CGI_INITED)
 		return -1;
+	char* realmsg = NULL;
+	if (msg) {
+		realmsg = new(nothrow) char[strlen(msg) + 3];
+		strcpy(realmsg, msg);
+		char* ptr = realmsg;
+		bool hanzi = 0;
+		for (; ptr - realmsg < pCGI->SLI.width - 1; ptr++) {
+			if (*ptr == 0)
+				break;
+			if (*ptr < 0 || *ptr > 128) // 是汉字的情况
+				hanzi ^= 1; // 两位是一个汉字
+			else
+				hanzi = 0;
+		}
+		if (ptr - realmsg == pCGI->SLI.width - 1) { // msg 字符串太长，需要截断
+			*ptr = 0;
+			if (hanzi) // 最后一个字符是汉字的后半部分
+				*(ptr - 1) = 0;
+		}
+	}
 	int posx, posy;
-	int length = pCGI->SLI.width - 1 - (msg ? strlen(msg) : 0) - (catchy_msg ? strlen(catchy_msg) : 0);
+	int length = pCGI->SLI.width - 1 - (realmsg ? strlen(realmsg) : 0) - (catchy_msg ? strlen(catchy_msg) : 0);
 	if(!type && pCGI->top_status_line) {
 		posx = pCGI->SLI.top_start_x;
 		posy = pCGI->SLI.top_start_y;
@@ -955,8 +975,8 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 			cct_showstr(posx, posy, catchy_msg, pCGI->SLI.top_catchy_bgcolor, pCGI->SLI.top_catchy_fgcolor);
 			cct_getxy(posx, posy);
 		}
-		if(msg)
-			cct_showstr(posx, posy, msg, pCGI->SLI.top_normal_bgcolor, pCGI->SLI.top_normal_fgcolor);
+		if(realmsg)
+			cct_showstr(posx, posy, realmsg, pCGI->SLI.top_normal_bgcolor, pCGI->SLI.top_normal_fgcolor);
 		while(length --> 0)
 			showc(' ');
 	}
@@ -967,12 +987,14 @@ int gmw_status_line(const CONSOLE_GRAPHICS_INFO *const pCGI, const int type, con
 			cct_showstr(posx, posy, catchy_msg, pCGI->SLI.lower_catchy_bgcolor, pCGI->SLI.lower_catchy_fgcolor);
 			cct_getxy(posx, posy);
 		}
-		if(msg)
-			cct_showstr(posx, posy, msg, pCGI->SLI.lower_normal_bgcolor, pCGI->SLI.lower_normal_fgcolor);
+		if(realmsg)
+			cct_showstr(posx, posy, realmsg, pCGI->SLI.lower_normal_bgcolor, pCGI->SLI.lower_normal_fgcolor);
 		while(length --> 0)
 			showc(' ');
 	}
 	showln();
+	if (realmsg)
+		delete[] realmsg;
 	return 0; //此句可根据需要修改
 }
 
@@ -1110,9 +1132,9 @@ static void moveOneBlock(const CONSOLE_GRAPHICS_INFO *const pCGI, const int row_
 		nowx = nowx + FORWARD_BIAS_COL[direction];
 		nowy = nowy + FORWARD_BIAS_ROW[direction];
 	}
-	if (pCGI->CFI.separator) { // 补全分割线
+	if (pCGI->CFI.separator || row_no < 0 || col_no < 0) { // 补全分割线
 		cct_setcolor(pCGI->CFI.bgcolor, pCGI->CFI.fgcolor);
-		if (direction < 2) { // 0 向上，1 向下
+		if (direction < 2 || row_no < 0) { // 0 向上，1 向下
 			int r = row_no + direction; // 重绘制 (r, c) 上方的横条
 			int c = col_no;
 			getBlockXY(pCGI, r, c, nowx, nowy);

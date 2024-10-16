@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "../include/cmd_gmw_tools.h"
+
 /*
  * 判断是否是大写字母
  */
@@ -110,6 +112,8 @@ int getLineNumber(int minli, int maxli, const char* msg);
  * 程序结束函数
  */
 void programExit();
+
+void to_be_continued(const char* prompt, const CONSOLE_GRAPHICS_INFO* const bgi);
 
 /*
  * 等待回车换左键单击

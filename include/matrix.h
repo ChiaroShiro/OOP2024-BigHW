@@ -9,6 +9,7 @@
  * 
  */
 
+#include "../include/cmd_gmw_tools.h"
 
 #pragma once
 
@@ -110,6 +111,8 @@ void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans);
 void dfsFindBlock(int x, int y, int n, int m, int showBorder, const int map[][MAP_SIZE], int sta[][MAP_SIZE], 
 	              void (*delBall)(int, int, int, int));
 
+void dfsFindBlock(int x, int y, CONSOLE_GRAPHICS_INFO* const pCGI, const int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*delBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int));
+
 /*
  * 在 n* m 的矩阵中，寻找所有状态（sta值）为 STA_NEED_DEL 的同色连通块，并依次删除
  * sta 置为 STA_NOW_DEL
@@ -121,6 +124,8 @@ void dfsFindBlock(int x, int y, int n, int m, int showBorder, const int map[][MA
  * delBall(x, y, col): 删除元素的动画函数。前两个参数描述被删除元素的坐标 (x, y)，第三个参数描述被删除元素的颜色 col (map值)
  */
 void deleteBall(int n, int m, int showBorder, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph = 0, void (*delBall)(int, int, int, int) = NULL);
+
+void deleteBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*delBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int));
 
 /*
  * 将所有被删除元素 (sta 为 STA_NOW_DEL) 上方的元素下移至最高的没有被删除的元素上方
@@ -145,6 +150,24 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
 	int cates, void (*slideDownBall)(int, int, int, int, int, int), bool showGraph = 1, int showBorder = 1);
 
 /*
+ * pCGI 存所有信息
+ * map存颜色，sta存状态
+ * cates是球的种类
+ * slideDownBall是下移一个球的函数
+ * 第一个参数是pCGI，第二三参数是坐标，第四个参数是颜色
+ */
+int fillVoidBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE],
+	int cates, void (*slideDownBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int));
+
+/*
+ * pCGI存框架所有信息
+ * map存颜色，sta存状态，slideDownBall 是下坠一格的函数
+ * slideDownBall(CGI* const pCGI, int x, int y, int val)
+ * pCGI存所有信息，完成从(x,y)往下的一格坠落操作，颜色是 val
+ */
+void fallBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*slideDownBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int));
+
+/*
  * 绘制背景框架，矩阵为 n*m 大小，showBorder 为 1 则绘制边框
  * totx 和 toty 存储重新变化后的屏幕大小
  * coren 和 corem 描述每个元素的大小
@@ -152,24 +175,6 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
  */
 void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int* toty,
 	int coren, int corem, StyleCSS style, int gap = 0, int times = 1);
-
-
-/*
- * 完成一次前景球更新
- * 矩阵大小 n*m，屏幕行数 y_size，元素颜色存储在 map 中，元素状态存储在 sta 中
- * isGap 为 1 则会自动化动画显示并添加一些 Sleep，为 0 则无动画化显示
- * cates 为球的种类数
- * slideDownBall(n, m, x, y, col): n*m矩阵上(x,y)位置颜色为col的球下降一格的动画
- * delBall(x, y, col): 坐标(x,y)的颜色为col的球的删除动画
- * drawFrontBall(n, m, map, sta, showBorder, gap): 在n*m的矩阵map/sta上动画绘制所有前景球，showBorder为1则有边界，gap为停顿时间
- * extraMoving(n, m, map, sta, showGraph, delBall, slideDownBall): 在 fallBall 之后执行的函数，用于进行额外的消除操作，调用格式桶 fallBall()。默认为 NULL，不会进行任何操作
- */
-int oneDrawing(int n, int m, int y_size, int showBorder, int map[][MAP_SIZE], int sta[][MAP_SIZE],
-	bool isGap, int cates,
-	void (*slideDownBall)(int, int, int, int, int, int),
-	void (*delBall)(int, int, int, int),
-	void (*drawFrontBall)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], bool, int),
-	void (*extraMoving)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], int, void(*)(int, int, int, int), void (*)(int, int, int, int, int, int)) = NULL);
 
 /*
  * 无动画选项下的文字绘画矩阵功能

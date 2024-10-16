@@ -1,4 +1,6 @@
 /*2351871 郎若谷 计科*/
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -7,6 +9,7 @@
 #include <windows.h>
 #include <conio.h>
 #include "../include/cmd_console_tools.h"
+#include "../include/cmd_gmw_tools.h"
 #include "../include/io_tools.h"
 #include "../include/matrix.h"
 #include "90-01-b2-magic_ball.h"
@@ -42,202 +45,182 @@ static void endHint(int y_size)
 	waitLine(0, "本小题结束，请输入End继续...", "输入错误", "End");
 }
 
-static int checkClickable(int x, int y, int n, int m, int sta[][MAP_SIZE])
+static void updateScore(int score, CONSOLE_GRAPHICS_INFO* const pCGI)
 {
-	int mapx, mapy;
-	rgetpos(x, y, &mapx, &mapy, 1, 1, 1, 1);
-	if (mapx < 1 || mapy < 1 || mapx > n || mapy > m)
-		return CLICK_UNABLE;
-	if ((y % 2) || (x % 4 < 2))
-		return CLICK_UNABLE;
-	return sta[mapx][mapy] == STA_NORMAL ? CLICK_SINGLE : CLICK_DOUBLE;
+	static char str[50];
+	sprintf(str, "当前分数：%d\0", score);
+	gmw_status_line(pCGI, TOP_STATUS_LINE, str);
 }
 
-static void updateScore(int s)
+static void updateBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 {
-	cct_gotoxy(20, 0);
-	cct_setcolor();
-	cout << "当前分数: " << s;
-}
-
-static void updateBall(int x, int y, int map[][MAP_SIZE], int sta[][MAP_SIZE])
-{
-	if (sta[x][y] == STA_CHOOSE)
-		cct_setcolor(getcol(map[x][y]), COLOR_WHITE);
-	else
-		cct_setcolor(getcol(map[x][y]), COLOR_BLACK);
-	getpos(x, y, &x, &y, 1, 1, 1, 1);
-	cct_gotoxy(x, y);
-	shows(CORE[CDOUBLE]);
+	gmw_draw_block(pCGI, x - 1, y - 1, map[x][y] + (sta[x][y] == STA_CHOOSE) * 10, BDI);
 	cct_setcolor();
 }
 
-static void drawFrontBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showBorder, int gap = 0)
+static void drawOneBlock(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int col, int sta)
 {
-	for (int i = 1; i <= n; i++) {
-		for (int j = 1; j <= m; j++) {
-			int x, y;
-			getpos(i, j, &x, &y, showBorder, showBorder, 1, 1);
-			cct_gotoxy(x, y);
-			cct_setcolor(getcol(map[i][j]), COLOR_BLACK);
-			shows(CORE[getGraph(sta[i][j])]);
-			cct_setcolor();
-			wait(gap);
+	if (sta == STA_NORMAL)
+		gmw_draw_block(pCGI, x - 1, y - 1, col, BDI_NORMAL);
+	if (sta == STA_NEED_DEL)
+		gmw_draw_block(pCGI, x - 1, y - 1, col, BDI_SELECTED);
+	if (sta == STA_SWAP)
+		gmw_draw_block(pCGI, x - 1, y - 1, col, BDI_PROMPT);
+}
+
+static void drawFrontBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE])
+{
+	for (int i = 1; i <= pCGI->row_num; i++) {
+		for (int j = 1; j <= pCGI->col_num; j++) {
+			drawOneBlock(pCGI, i, j, map[i][j], sta[i][j]);
 		}
 	}
 }
 
-void eliminateBall(int x, int y, int val, int showBorder = 1)
+static void eliminateBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int val)
 {
-	int posx, posy;
-	getpos(x, y, &posx, &posy, 1, 1, 1, 1);
 	cct_setcolor(getcol(val), COLOR_BLACK);
 	for (int i = 0; i < 6; i++) {
-		cct_gotoxy(posx, posy);
-		shows(CORE[CFOUR]);
+		gmw_draw_block(pCGI, x - 1, y - 1, val, BDI_EXPLODED);
 		wait(MID_GAP);
-		cct_gotoxy(posx, posy);
-		shows(CORE[CHOLLOW]);
+		gmw_draw_block(pCGI, x - 1, y - 1, val, BDI_NORMAL);
 		wait(MID_GAP);
 	}
-	cct_gotoxy(posx, posy);
-	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-	shows(CORE[CVOID]);
+	gmw_draw_block(pCGI, x - 1, y - 1, BDI_VALUE_BLANK, BDI_NORMAL);
 	cct_setcolor();
 }
 
-void slideDownBall(int n, int m, int x, int y, int val, int showBorder = 1)
+static void slideDownBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int val)
 {
-	int posx, posy;
-	getpos(x, y, &posx, &posy, 1, 1, 1, 1);
-	if (x != 0) {
-		cct_gotoxy(posx, posy);
-		cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-		shows(CORE[CVOID]);
-	}
-	cct_gotoxy(posx, posy + 1);
-	cct_setcolor(getcol(val), COLOR_BLACK);
-	shows(CORE[CHOLLOW]);
-	wait(MID_GAP);
-	cct_gotoxy(posx, posy + 1);
-	cct_setcolor(COLOR_WHITE, COLOR_BLACK);
-	shows(DOUBLE_LINE);
-	cct_gotoxy(posx, posy + 2);
-	cct_setcolor(getcol(val), COLOR_BLACK);
-	shows(CORE[CHOLLOW]);
-	wait(MID_GAP);
-	cct_setcolor();
+	gmw_move_block(pCGI, x - 1, y - 1, val, 0, BDI_NORMAL, UP_TO_DOWN, 1);
 }
 
-int finishDrawing(int n, int m, int x_size, int y_size, int map[][MAP_SIZE], int sta[][MAP_SIZE],
-	int coren, int corem, bool isGap)
+static int finishDrawing(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 {
 	int ret = 0;
-	while (findBlock(n, m, map, sta)) {
-		ret += oneDrawing(n, m, y_size, 1, map, sta, isGap, BALL_CATEGORY_SIZE, slideDownBall, eliminateBall, drawFrontBall);
+	while (findBlock(pCGI->row_num, pCGI->col_num, map, sta)) {
+		drawFrontBall(pCGI, map, sta);
+		wait(400);
+		deleteBall(pCGI, map, sta, eliminateBall);
+		fallBall(pCGI, map, sta, slideDownBall);
+		ret += fillVoidBall(pCGI, map, sta, BALL_CATEGORY_SIZE, slideDownBall);
+		wait(400);
 	}
-	clearStatus(n, m, sta, STA_NORMAL);
-	findAvailable(n, m, map, sta);
-	drawFrontBall(n, m, map, sta, 1);
+	clearStatus(pCGI->row_num, pCGI->col_num, sta, STA_NORMAL);
+	findAvailable(pCGI->row_num, pCGI->col_num, map, sta);
+	drawFrontBall(pCGI, map, sta);
 	return ret;
 }
 
-static bool trySwap(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], Pair tpos[])
+static bool trySwap(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], Pair tpos[])
 {
 	swap(map[tpos[1].x][tpos[1].y], map[tpos[2].x][tpos[2].y]);
-	if (tryFindBlock(n, m, map))
+	if (tryFindBlock(pCGI->row_num, pCGI->col_num, map))
 		return 1;
 	swap(map[tpos[1].x][tpos[1].y], map[tpos[2].x][tpos[2].y]);
 	sta[tpos[1].x][tpos[1].y] = sta[tpos[2].x][tpos[2].y] = STA_SWAP;
-	updateBall(tpos[1].x, tpos[1].y, map, sta);
-	updateBall(tpos[2].x, tpos[2].y, map, sta);
+	updateBall(pCGI, tpos[1].x, tpos[1].y, map, sta);
+	updateBall(pCGI, tpos[2].x, tpos[2].y, map, sta);
 	return 0;
 }
 
-static bool mouseLoop(int n, int m, int x_text, int y_text, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool isLoop)
+static bool mouseLoop(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 {
-	int x, y, mevent, keya, keyb, tmpx, tmpy;
+	int mx = -1, my = -1, mevent, keya, keyb;
 	Pair tpos[3], * pt = tpos + 1, * p = tpos + 2;
 	while (1) {
-		cct_enable_mouse();
-		cct_read_keyboard_and_mouse(x, y, mevent, keya, keyb);
+		gmw_read_keyboard_and_mouse(pCGI, mevent, mx, my, keya, keyb, 1);
+		int x = mx + 1, y = my + 1;
 		if (mevent == MOUSE_RIGHT_BUTTON_CLICK) {
 			wait(150);
 			cct_enable_mouse();
 			return 1;
 		}
-		int possta = checkClickable(x, y, n, m, sta);
-		cct_gotoxy(x_text, y_text);
-		if (possta == CLICK_UNABLE) {
-			cout << "位置非法                      ";
-			continue;
-		}
-		rgetpos(x, y, &x, &y, 1, 1, 1, 1);
-		cout << char('A' + x - 1) << "行" << char(y + '0') << "列";
-		cct_getxy(tmpx, tmpy);
-		clearLine(tmpx, tmpy);
 		if (mevent != MOUSE_LEFT_BUTTON_CLICK)
 			continue;
-		cct_gotoxy(tmpx, tmpy);
-		if (possta == CLICK_SINGLE) {
-			cout << ", 该位置不能被选择";
-			wait(BIG_GAP);
+		if (sta[x][y] == STA_NORMAL) {
+			gmw_status_line(pCGI, LOWER_STATUS_LINE, "不能选择该位置");
+			if (p == pt) {
+				++p;
+				sta[p->x][p->y] = STA_SWAP;
+				updateBall(pCGI, p->x, p->y, map, sta);
+			}
+			pt = tpos + 1;
+			p = tpos + 2;
+			wait(150);
 			continue;
 		}
 		if (sta[x][y] == STA_CHOOSE) {
 			sta[x][y] = STA_SWAP;
-			updateBall(x, y, map, sta);
+			updateBall(pCGI, x, y, map, sta);
 			++p;
 		}
 		else {
 			sta[x][y] = STA_CHOOSE;
-			updateBall(x, y, map, sta);
-			if (!isLoop)
-				return 1;
+			updateBall(pCGI, x, y, map, sta);
 			if (p == pt) {
 				if (!isNeighbor(*(p + 1), Pair{ x, y })) {
 					++p;
 					sta[p->x][p->y] = STA_SWAP;
-					updateBall(p->x, p->y, map, sta);
+					updateBall(pCGI, p->x, p->y, map, sta);
 				}
 			}
 			p->x = x, p->y = y;
 			if (--p < pt) {
-				if (trySwap(n, m, map, sta, tpos))
+				if (trySwap(pCGI, map, sta, tpos))
 					return 0;
 				p = tpos + 2;
-				cct_gotoxy(x_text, y_text);
-				cout << "不能交换这两个位置!";
+				gmw_status_line(pCGI, LOWER_STATUS_LINE, "不能交换这两个位置");
 				wait(BIG_GAP);
 				continue;
 			}
-			cct_gotoxy(tmpx, tmpy);
-			cout << ", 该位置被选择";
+			gmw_status_line(pCGI, LOWER_STATUS_LINE, "该位置被选择");
 			wait(BIG_GAP);
 		}
 	}
 }
 
-void mainWork(int n, int m, bool isLoop)
+
+/*
+ * 初始化框架
+ */
+static void initCGI(CONSOLE_GRAPHICS_INFO* const pCGI, int n ,int m) 
+{
+	gmw_init(pCGI, n, m, COLOR_WHITE, COLOR_BLACK);
+	gmw_set_block_default_linetype(pCGI, 1);			// 设置线型
+	gmw_set_block_border_switch(pCGI, 0);				// 无色块边框边框
+	gmw_set_colno_switch(pCGI, 0);						// 无列标
+	gmw_set_color(pCGI, COLOR_BLACK, COLOR_WHITE, 0);	// 主体区域颜色后黑前白
+	gmw_set_delay(pCGI, DELAY_OF_BLOCK_MOVED, 80);		// 下落延时 50
+	gmw_set_font(pCGI, "新宋体", 32);					// 设置字体
+	gmw_set_ext_rowcol(pCGI, 2, 2, 8, 8);				// 设置附加区域
+	gmw_set_frame_color(pCGI, COLOR_WHITE, COLOR_BLACK);// 游戏区颜色后白前黑
+	gmw_set_frame_style(pCGI, 2, 1, 0);					// 色块大小 2*1，无分割线
+	gmw_set_rowno_switch(pCGI, 0);						// 无行标
+	gmw_set_status_line_color(pCGI, TOP_STATUS_LINE);	// 有上状态栏
+	gmw_set_status_line_color(pCGI, LOWER_STATUS_LINE); // 有下状态栏
+}
+
+void mainWork(int n, int m)
 {
 	int map[MAP_SIZE][MAP_SIZE] = { 0 }, sta[MAP_SIZE][MAP_SIZE] = { 0 };
-	int x_size, y_size, x_text, y_text, score = 0, flag = 0;
+	int score = 0, flag = 0;
+	CONSOLE_GRAPHICS_INFO CGI;
 	generate(n, m, map, BALL_CATEGORY_SIZE);
+	initCGI(&CGI, n, m);
 	cct_cls();
-	drawBackground(n, m, 1, 0, &x_size, &y_size, 1, 1, StyleCSS());
-	updateScore(score);
+	gmw_draw_frame(&CGI);
+	updateScore(score, &CGI);
 	while (1) {
-		cct_gotoxy(0, y_size - 5);
-		cout << "[当前光标] ";
-		cct_getxy(x_text, y_text);
+		// 下状态栏更新
 		if (flag)
-			score += finishDrawing(n, m, x_size, y_size, map, sta, 1, 1, 1);
+			score += finishDrawing(&CGI, map, sta);
 		else
-			finishDrawing(n, m, x_size, y_size, map, sta, 1, 1, 1), flag = 1;
-		updateScore(score);
-		if (!tryFindAvailable(n, m, map) || mouseLoop(n, m, x_text, y_text, map, sta, isLoop))
+			finishDrawing(&CGI, map, sta), flag = 1;
+		updateScore(score, &CGI);
+		if (!tryFindAvailable(n, m, map) || mouseLoop(&CGI, map, sta))
 			break;
 		clearStatus(n, m, sta, STA_NORMAL);
 	}
-	endHint(y_size);
+	to_be_continued("游戏结束", &CGI);
 }

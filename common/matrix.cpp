@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <conio.h>
 #include "../include/cmd_console_tools.h"
+#include "../include/cmd_gmw_tools.h"
 #include "../include/io_tools.h"
 #include "../include/matrix.h"
 using namespace std;
@@ -134,6 +135,34 @@ void deleteBall(int n, int m, int showBorder, int map[][MAP_SIZE], int sta[][MAP
 	}
 }
 
+void dfsFindBlock(int x, int y, CONSOLE_GRAPHICS_INFO* const pCGI, const int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*delBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int))
+{
+	static const int FX[] = { 0, 0, -1, 1 };
+	static const int FY[] = { 1, -1, 0, 0 };
+	sta[x][y] = STA_NOW_DEL;
+	delBall(pCGI, x, y, map[x][y]);
+	for (int i = 0; i < 4; i++) {
+		int nextx = x + FX[i];
+		int nexty = y + FY[i];
+		if (nextx >= 1 && nexty >= 1 && nextx <= pCGI->row_num && nexty <= pCGI->col_num)
+			if (sta[nextx][nexty] == STA_NEED_DEL && map[nextx][nexty] == map[x][y])
+				dfsFindBlock(nextx, nexty, pCGI, map, sta, delBall);
+	}
+}
+
+void deleteBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*delBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int))
+{
+	for (int i = 1; i <= pCGI->row_num; i++) {
+		for (int j = 1; j <= pCGI->col_num; j++) {
+			if (sta[i][j] == STA_NEED_DEL) {
+				sta[i][j] = STA_NOW_DEL;
+				dfsFindBlock(i, j, pCGI, map, sta, delBall);
+				map[i][j] = 0;
+			}
+		}
+	}
+}
+
 void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph, int showBorder, void (*slideDownBall)(int, int, int, int, int, int))
 {
 	for (int j = 1; j <= m; j++) {
@@ -161,6 +190,33 @@ void fallBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showG
 				map[i][j] = 0;
 }
 
+void fallBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*slideDownBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int))
+{
+	for (int j = 1; j <= pCGI->col_num; j++) {
+		int downGap = 0, now = pCGI->row_num;
+		while (now) {
+			if (sta[now][j] == STA_NOW_DEL) {
+				++downGap;
+				sta[now][j] = STA_VOID;
+			}
+			else {
+				if (downGap) {
+					for (int i = 0; i < downGap; i++)
+						slideDownBall(pCGI, now + i, j, map[now][j]);
+					sta[now + downGap][j] = sta[now][j];
+					map[now + downGap][j] = map[now][j];
+					sta[now][j] = STA_VOID;
+				}
+			}
+			--now;
+		}
+	}
+	for (int i = 1; i <= pCGI->row_num; i++)
+		for (int j = 1; j <= pCGI->col_num; j++)
+			if (sta[i][j] == STA_VOID)
+				map[i][j] = 0;
+}
+
 static void newBall(int n, int m, int x, int y, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph, int showBorder, int cates, void (*slideDownBall)(int, int, int, int, int, int))
 {
 	map[x][y] = rand() % cates + 1;
@@ -182,6 +238,31 @@ int fillVoidBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE],
 		--now;
 		while (now) {
 			newBall(n, m, now, j, map, sta, showBorder, showGraph, cates, slideDownBall);
+			--now;
+		}
+	}
+	return ret;
+}
+
+static void newBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int map[][MAP_SIZE], int sta[][MAP_SIZE], int cates, void (*slideDownBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int))
+{
+	map[x][y] = rand() % cates + 1;
+	sta[x][y] = STA_NEW;
+	for (int i = 0; i < x; i++)
+		slideDownBall(pCGI, i, y, map[x][y]);
+}
+
+int fillVoidBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE],
+	int cates, void (*slideDownBall)(CONSOLE_GRAPHICS_INFO* const, int, int, int))
+{
+	int ret = 0;
+	for (int j = 1; j <= pCGI->col_num; j++) {
+		int now = 1;
+		while (sta[now][j] == STA_VOID)
+			++now, ++ret;
+		--now;
+		while (now) {
+			newBall(pCGI, now, j, map, sta, cates, slideDownBall);
 			--now;
 		}
 	}
@@ -316,35 +397,6 @@ void drawBackground(int n, int m, bool showBorder, int showFrame, int* totx, int
 	}
 	drawOneSolidLine(m, BDOWN, showBorder, corem, gap, times, style);
 	cct_setcolor();
-}
-
-int oneDrawing(int n, int m, int y_size, int showBorder, int map[][MAP_SIZE], int sta[][MAP_SIZE], 
-			   bool isGap, int cates, 
-			   void (*slideDownBall)(int, int, int, int, int, int), 
-			   void (*delBall)(int, int, int, int), 
-			   void (*drawFrontBall)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], bool, int),
-			   void (*extraMoving)(int, int, int[][MAP_SIZE], int[][MAP_SIZE], int, void(*)(int, int, int, int), void (*)(int, int, int, int, int, int)))
-{
-	int ret = 0;
-	drawFrontBall(n, m, map, sta, 1, 0);
-	if (isGap)
-		wait(400);
-	else {
-		cct_gotoxy(0, y_size - 3);
-		waitLine(0, "按回车键进行消除和下落除0操作", '\n');
-	}
-	deleteBall(n, m, showBorder, map, sta, 1, delBall);
-	fallBall(n, m, map, sta, 1, 1, slideDownBall);
-	if (extraMoving != NULL)
-		extraMoving(n, m, map, sta, 1, delBall, slideDownBall);
-	if (!isGap) {
-		cct_gotoxy(0, y_size - 3);
-		waitLine(0, "按回车键进行新值填充", '\n');
-	}
-	ret += fillVoidBall(n, m, map, sta, cates, slideDownBall);
-	if (isGap)
-		wait(400);
-	return ret;
 }
 
 void drawCanvas(int n, int m, const int map[][MAP_SIZE], const int sta[][MAP_SIZE], const char* s, int colorTag)
