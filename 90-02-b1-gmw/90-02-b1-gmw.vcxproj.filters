@@ -24,9 +24,6 @@
     <ClCompile Include="90-02-b1-matrix.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="90-02-b1-option.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\cmd_console_tools.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

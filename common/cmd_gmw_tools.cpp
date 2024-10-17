@@ -904,7 +904,7 @@ int gmw_draw_frame(const CONSOLE_GRAPHICS_INFO *const pCGI)
 	if (pCGI->inited != CGI_INITED)
 		return -1;
 	
-	cct_setcolor(pCGI->area_bgcolor, pCGI->area_fgcolor);
+	cct_setcolor(pCGI->area_bgcolor, pCGI->area_fgcolor);    
 	cct_cls();
 	cct_setfontsize(pCGI->CFT.font_type, pCGI->CFT.font_size_high, pCGI->CFT.font_size_width);
 	cct_setconsoleborder(pCGI->cols, pCGI->lines);
@@ -1253,7 +1253,6 @@ int gmw_read_keyboard_and_mouse(const CONSOLE_GRAPHICS_INFO *const pCGI, int &MA
 			}
 		}
 		else if(MAction == MOUSE_LEFT_BUTTON_DOUBLE_CLICK || MAction == MOUSE_LEFT_BUTTON_CLICK) { // °´×ó¼ü
-			MAction = MOUSE_LEFT_BUTTON_CLICK;
 			if(allow)
 				return CCT_MOUSE_EVENT;
 			if(update_lower_status_line) {
@@ -1262,7 +1261,6 @@ int gmw_read_keyboard_and_mouse(const CONSOLE_GRAPHICS_INFO *const pCGI, int &MA
 			}
 		}
 		else if(MAction == MOUSE_RIGHT_BUTTON_DOUBLE_CLICK || MAction == MOUSE_RIGHT_BUTTON_CLICK) { // °´ÓÒ¼ü
-			MAction = MOUSE_RIGHT_BUTTON_CLICK;
 			return CCT_MOUSE_EVENT;
 		}
 		lstallow = allow;

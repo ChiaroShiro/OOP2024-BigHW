@@ -20,7 +20,7 @@ int main()
 		cct_cls();
 		n = getLineNumber(8, 10, "请输入行数（8-10）:");
 		m = getLineNumber(8, 10, "请输入列数（8-10）:");
-		AnimeOption(n, m, 7);
+		AnimeOption(n, m);
 	}
 	return 0;
 }

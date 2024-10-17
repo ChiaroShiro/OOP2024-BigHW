@@ -134,7 +134,6 @@
     <ClCompile Include="90-02-b1-graph.cpp" />
     <ClCompile Include="90-02-b1-main.cpp" />
     <ClCompile Include="90-02-b1-matrix.cpp" />
-    <ClCompile Include="90-02-b1-option.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\cmd_console_tools.h" />

@@ -1,4 +1,11 @@
 /* 2351871 郎若谷 计科 */
+
+/*
+ * 不涉及动画化的后端矩阵操作
+ * 所有必要的动画化函数都已经提供函数指针接口
+ * gmw 化时基本没必要修改
+ */
+
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -7,6 +14,7 @@
 #include <windows.h>
 #include <conio.h>
 #include "../include/cmd_console_tools.h"
+#include "../include/cmd_gmw_tools.h"
 #include "../include/io_tools.h"
 #include "../include/matrix.h"
 #include "../include/menu.h"
@@ -43,33 +51,6 @@ int isErasable(int n, int m, int x, int y, const int map[][MAP_SIZE], int sta[][
 	return area;
 }
 
-void drawStatus(int n, int m, int sta[][MAP_SIZE], const char* s)
-{
-	shows(s);
-	showln();
-	shows("  |");
-	for (int i = 1; i <= m; i++) {
-		cout << setw(3);
-		showi(i);
-	}
-	shows("\n--+-");
-	for (int i = 1; i <= m; i++)
-		shows("---");
-	showln();
-	for (int i = 1; i <= n; i++) {
-		showc('A' + i - 1);
-		shows(" |");
-		for (int j = 1; j <= m; j++) {
-			shows("  ");
-			if (sta[i][j] == STA_NEED_DEL)
-				shows("*");
-			else
-				shows("0");
-		}
-		showln();
-	}
-}
-
 bool isPossible(int n, int m, const int map[][MAP_SIZE], const int sta[][MAP_SIZE])
 {
 	int tmp[MAP_SIZE][MAP_SIZE] = { 0 };
@@ -95,22 +76,21 @@ static bool checkColumnVoid(int x, int n, const int sta[][MAP_SIZE])
 }
 
 // 处理空列
-void squeezeBall(int n, int m, int map[][MAP_SIZE], int sta[][MAP_SIZE], bool showGraph, void (*slideLeftBall)(int, int, int, int, int))
+void squeezeBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], void (*slideLeftBall)(CONSOLE_GRAPHICS_INFO* const pCGI, int, int, int))
 {
 	int slidecnt = 0;
-	for (int j = 1; j <= m; j++) {
-		if (checkColumnVoid(j, n, sta)) {
+	for (int j = 1; j <= pCGI->col_num; j++) {
+		if (checkColumnVoid(j, pCGI->row_num, sta)) {
 			++slidecnt;
 			continue;
 		}
 		if (slidecnt == 0) 
 			continue;
-		for (int i = 1; i <= n; i++) {
+		for (int i = 1; i <= pCGI->row_num; i++) {
 			if (sta[i][j] == STA_VOID)
 				continue;
-			if(showGraph)
-				for (int p = 0; p < slidecnt; p++)
-					slideLeftBall(n, m, i, j - p, map[i][j]);
+			for (int p = 0; p < slidecnt; p++)
+				slideLeftBall(pCGI, i, j - p, map[i][j]);
 			sta[i][j - slidecnt] = sta[i][j];
 			map[i][j - slidecnt] = map[i][j];
 			sta[i][j] = STA_VOID;

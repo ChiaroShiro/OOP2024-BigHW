@@ -15,11 +15,6 @@
 #include "90-01-b2-magic_ball.h"
 using namespace std;
 
-static int getcol(int x)
-{
-	return x + (x >= 7) + (x >= 8) * 3 + (x == 9);
-}
-
 static bool isNeighbor(Pair a, Pair b)
 {
 	return (((a.x == b.x) + (a.y == b.y))
@@ -27,7 +22,6 @@ static bool isNeighbor(Pair a, Pair b)
 			((abs(a.x - b.x) == 1) + (abs(a.y - b.y) == 1))
 							== 1);
 }
-
 static int getGraph(int x)
 {
 	if (x == STA_NORMAL)
@@ -37,12 +31,6 @@ static int getGraph(int x)
 	if (x == STA_SWAP)
 		return CDOUBLE;
 	return CHOLLOW;
-}
-
-static void endHint(int y_size)
-{
-	cct_gotoxy(0, y_size - 3);
-	waitLine(0, "本小题结束，请输入End继续...", "输入错误", "End");
 }
 
 static void updateScore(int score, CONSOLE_GRAPHICS_INFO* const pCGI)
@@ -70,16 +58,13 @@ static void drawOneBlock(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int co
 
 static void drawFrontBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE])
 {
-	for (int i = 1; i <= pCGI->row_num; i++) {
-		for (int j = 1; j <= pCGI->col_num; j++) {
+	for (int i = 1; i <= pCGI->row_num; i++)
+		for (int j = 1; j <= pCGI->col_num; j++)
 			drawOneBlock(pCGI, i, j, map[i][j], sta[i][j]);
-		}
-	}
 }
 
 static void eliminateBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int val)
 {
-	cct_setcolor(getcol(val), COLOR_BLACK);
 	for (int i = 0; i < 6; i++) {
 		gmw_draw_block(pCGI, x - 1, y - 1, val, BDI_EXPLODED);
 		wait(MID_GAP);
@@ -87,7 +72,6 @@ static void eliminateBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int v
 		wait(MID_GAP);
 	}
 	gmw_draw_block(pCGI, x - 1, y - 1, BDI_VALUE_BLANK, BDI_NORMAL);
-	cct_setcolor();
 }
 
 static void slideDownBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int val)
@@ -179,7 +163,6 @@ static bool mouseLoop(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], in
 		}
 	}
 }
-
 
 /*
  * 初始化框架
