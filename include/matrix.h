@@ -94,12 +94,12 @@ void generate(int n, int m, int map[][MAP_SIZE], int cates);
  * 清空 n*m 的矩阵 sta
  * 所有元素变成 x
  */
-void clearStatus(int n, int m, int sta[][MAP_SIZE], int x);
+void clearStatus(int n, int m, int sta[][MAP_SIZE], int x, int beginpos = 1);
 
 /*
  * 将 n*m 矩阵中 sta 的 ori 全部换成 trans
  */
-void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans);
+void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans, int beginpos = 1);
 
 /*
  * 在 n*m 的矩阵中从 (x,y) 点开始向四周寻找颜色（map值）相同且状态（sta值）被标记为 STA_NEED_DEL 的元素

@@ -827,7 +827,7 @@ int gmw_print(const CONSOLE_GRAPHICS_INFO *const pCGI)
 		}
 		puts("");
 	}
-	puts("GMW DEBUG INFO:\n");
+	puts("GMW DEBUG INFO:\n"); // debug 函数里面用下 printf 应该没问题吧，其他地方都没有用，最终版也没有哪个地方会调用这个函数
 	printf("bgcolor = %d, fgcolor = %d\n", pCGI->area_bgcolor, pCGI->area_fgcolor);
 	printf("游戏主框架区域包含的块的行列数 col_num = %d, row_num = %d\n", pCGI->col_num, pCGI->row_num);
 	printf("附加去：up = %d, down = %d, left = %d, right = %d\n", pCGI->extern_up_lines, pCGI->extern_down_lines, pCGI->extern_left_cols, pCGI->extern_right_cols);
@@ -1053,10 +1053,24 @@ static void drawBlockXY(const CONSOLE_GRAPHICS_INFO *const pCGI, const int x, co
 	posy = posy + yPlus - !pCGI->CBI.block_border; // 定位到中间
 	if(yPlus >= 1) {
 		cct_gotoxy(posx, posy);
-		if(block.content)
+		if (block.content) {
+			int bias = (pCGI->CFI.block_width - pCGI->CBI.block_border * 4 - strlen(block.content)) / 2;
+			while (bias-- > 0)
+				showc(' ');
 			shows(block.content);
-		else
-			showiLen(block.value, pCGI->CFI.block_width - pCGI->CBI.block_border * 4);
+		}
+		else {
+			int v = block.value, cnt = 0;
+			do {
+				cnt++;
+				v /= 10;
+			} while (v);
+			int bias = (pCGI->CFI.block_width - pCGI->CBI.block_border * 4 - cnt) / 2;
+			int bbias = bias;
+			while (bbias-- > 0)
+				showc(' ');
+			showiLen(block.value, pCGI->CFI.block_width - pCGI->CBI.block_border * 4 - bias);
+		}
 		for(int i = 1; i < yPlus; i++) // 其他行补全空格
 			cct_showstr(posx, y + i - !pCGI->CBI.block_border, " ", nowcolbg, nowcolfg, pCGI->CFI.block_width - pCGI->CBI.block_border * 4);
 		for(int i = yPlus + 1; i < pCGI->CFI.block_high - pCGI->CBI.block_border; i++)

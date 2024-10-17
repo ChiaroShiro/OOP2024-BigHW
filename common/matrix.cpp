@@ -91,17 +91,17 @@ void generate(int n, int m, int map[][MAP_SIZE], int cates)
 			map[i][j] = rand() % cates + 1;
 }
 
-void clearStatus(int n, int m, int sta[][MAP_SIZE], int x)
+void clearStatus(int n, int m, int sta[][MAP_SIZE], int x, int beginpos)
 {
-	for (int i = 1; i <= n; i++)
-		for (int j = 1; j <= m; j++)
+	for (int i = beginpos; i <= n - 1 + beginpos; i++)
+		for (int j = beginpos; j <= m - 1 + beginpos; j++)
 			sta[i][j] = x;
 }
 
-void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans)
+void TransferStatus(int n, int m, int sta[][MAP_SIZE], int ori, int trans, int beginpos)
 {
-	for (int i = 1; i <= n; i++)
-		for (int j = 1; j <= m; j++)
+	for (int i = beginpos; i <= n - 1 + beginpos; i++)
+		for (int j = beginpos; j <= m - 1 + beginpos; j++)
 			if (sta[i][j] == ori)
 				sta[i][j] = trans;
 }
