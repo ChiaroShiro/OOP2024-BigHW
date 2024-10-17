@@ -84,32 +84,67 @@ static void slideLeftBall(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int c
 	gmw_move_block(pCGI, x - 1, y - 1, col, 0, BDI_NORMAL, RIGHT_TO_LEFT, 1);
 }
 
+static bool checkAbleToBe(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y, int sta[MAP_SIZE][MAP_SIZE])
+{
+	return x >= 0 && y >= 0 && x < pCGI->row_num && y < pCGI->col_num && sta[x + 1][y + 1] != STA_VOID;
+}
+
+/*
+ * 当前坐标 chsx, chsy 有变化时的处理
+ */
+static void coordinateMoved(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], int chsx, int chsy, int& lstx, int& lsty, int& clicktimes)
+{
+	if (clicktimes == 1)
+		dfsDisplay(pCGI, lstx + 1, lsty + 1, map, sta, UPDATE_DARK);
+	updateBall(pCGI, lstx + 1, lsty + 1, map, UPDATE_DARK);
+	updateBall(pCGI, chsx + 1, chsy + 1, map, UPDATE_LIGHT);
+	clicktimes = 0;
+	lstx = chsx;
+	lsty = chsy;
+}
+
 // 找到双击选择的坐标
 static int findMouseClick(CONSOLE_GRAPHICS_INFO* const pCGI, int map[][MAP_SIZE], int sta[][MAP_SIZE], int& chsx, int& chsy)
 {
 	int ret, mac, kc1, kc2, clicktimes = 0, lstx = chsx, lsty = chsy;
 	while (1) {
-		ret = gmw_read_keyboard_and_mouse(pCGI, mac, chsx, chsy, kc1, kc2, 1);
+		int mx, my;
+		ret = gmw_read_keyboard_and_mouse(pCGI, mac, mx, my, kc1, kc2, 1);
 		if (ret == CCT_KEYBOARD_EVENT) {
 			if (kc1 == 'q' || kc1 == 'Q') // 直接退出
 				return 1;
+			if (chsx != lstx || chsy != lsty) // 处理有移动的情况
+				coordinateMoved(pCGI, map, sta, chsx, chsy, lstx, lsty, clicktimes);
 			if (kc1 == '\n' || kc1 == '\r') {
-
+				if (clicktimes) {
+					dfsDisplay(pCGI, chsx + 1, chsy + 1, map, sta, UPDATE_DARK);
+					return 0;
+				}
+				clicktimes = 1;
+				dfsDisplay(pCGI, chsx + 1, chsy + 1, map, sta, UPDATE_LIGHT);
+			}
+			else if (kc1 == 224) {
+				static const int fy[] = { 0, 0, -1, 1 };
+				static const int fx[] = { -1, 1, 0, 0 };
+				chsx = chsx + fx[keyMapToForward(kc2)];
+				chsy = chsy + fy[keyMapToForward(kc2)];
+				if (checkAbleToBe(pCGI, chsx, chsy, sta))
+					coordinateMoved(pCGI, map, sta, chsx, chsy, lstx, lsty, clicktimes);
+				else {
+					chsx = chsx - fx[keyMapToForward(kc2)];
+					chsy = chsy - fy[keyMapToForward(kc2)];
+				}
 			}
 		}
 		else {
-			if (mac == MOUSE_ONLY_MOVED) { // 只有鼠标移动的情形
-				updateBall(pCGI, lstx + 1, lsty + 1, map, UPDATE_DARK);
-				updateBall(pCGI, chsx + 1, chsy + 1, map, UPDATE_LIGHT);
-				if (clicktimes == 1)
-					dfsDisplay(pCGI, lstx + 1, lsty + 1, map, sta, UPDATE_DARK);
-				clicktimes = 0;
-				lstx = chsx;
-				lsty = chsy;
-			}
+			chsx = mx, chsy = my;
+			if (mac == MOUSE_ONLY_MOVED) // 只有鼠标移动的情形
+				coordinateMoved(pCGI, map, sta, chsx, chsy, lstx, lsty, clicktimes);
 			else if (mac == MOUSE_RIGHT_BUTTON_CLICK) // 直接退出
 				return 1;
 			else { // 点击
+				if (chsx != lstx || chsy != lsty) // 处理有移动的情况
+					coordinateMoved(pCGI, map, sta, chsx, chsy, lstx, lsty, clicktimes);
 				if (clicktimes) {
 					dfsDisplay(pCGI, chsx + 1, chsy + 1, map, sta, UPDATE_DARK);
 					return 0;

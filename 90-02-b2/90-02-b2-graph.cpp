@@ -109,11 +109,6 @@ static int readForward(CONSOLE_GRAPHICS_INFO* const pCGI)
  * LEFT_TO_RIGHT	3
  */
 
-const int colbias[] = { 0, 0, -1, 1 };
-const int colbegin[] = { 0, 0, 0, 1 };
-const int rowbias[] = { -1, 1, 0, 0 };
-const int rowbegin[] = { 0, 1, 0, 0 };
-
 static void mergeBall(CONSOLE_GRAPHICS_INFO* const pCGI, int map[MAP_SIZE][MAP_SIZE], int sta[MAP_SIZE][MAP_SIZE], int fr, int fc, int fwd, int num)
 {
 	slideBall(pCGI, fr, fc, num, fwd);

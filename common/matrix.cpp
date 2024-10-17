@@ -71,6 +71,22 @@ const char* StyleCSS::getVert()
 	return this->vert;
 }
 
+/*
+ * 按照方向键对应到相应的方向宏
+ */
+int keyMapToForward(int x)
+{
+	if (x == 72)
+		return DOWN_TO_UP;
+	if (x == 80)
+		return UP_TO_DOWN;
+	if (x == 75)
+		return RIGHT_TO_LEFT;
+	if (x == 77)
+		return LEFT_TO_RIGHT;
+	return 0;
+}
+
 void rgetpos(int i, int j, int* x, int* y, int addx, int addy, int cn, int cm)
 {
 	*x = (j - 2) / (cm + addx) + 1;

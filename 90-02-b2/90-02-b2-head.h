@@ -30,11 +30,15 @@ const BLOCK_DISPLAY_INFO BDI[] = {
 
 const int NUM2K[] = { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
 
+const int colbias[] = { 0, 0, -1, 1 };
+const int colbegin[] = { 0, 0, 0, 1 };
+const int rowbias[] = { -1, 1, 0, 0 };
+const int rowbegin[] = { 0, 1, 0, 0 };
+
 int calcRestSize(CONSOLE_GRAPHICS_INFO* const pCGI, int sta[MAP_SIZE][MAP_SIZE]);
 bool checkFull(CONSOLE_GRAPHICS_INFO* const pCGI, int sta[MAP_SIZE][MAP_SIZE]);
 int calcScore(CONSOLE_GRAPHICS_INFO* const pCGI, int map[MAP_SIZE][MAP_SIZE]);
 bool checkFail(CONSOLE_GRAPHICS_INFO* const pCGI, int map[MAP_SIZE][MAP_SIZE], int sta[MAP_SIZE][MAP_SIZE]);
-int keyMapToForward(int x);
 bool inBorder(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y);
 
 void game2048(int n, int m, int v, int p);

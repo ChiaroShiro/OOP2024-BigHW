@@ -74,19 +74,3 @@ bool inBorder(CONSOLE_GRAPHICS_INFO* const pCGI, int x, int y)
 {
 	return x >= 0 && y >= 0 && x < pCGI->row_num && y < pCGI->col_num;
 }
-
-/*
- * 按照方向键对应到相应的方向宏
- */
-int keyMapToForward(int x)
-{
-	if (x == 72)
-		return DOWN_TO_UP;
-	if (x == 80)
-		return UP_TO_DOWN;
-	if (x == 75)
-		return RIGHT_TO_LEFT;
-	if (x == 77)
-		return LEFT_TO_RIGHT;
-	return 0;
-}
