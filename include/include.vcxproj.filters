@@ -27,9 +27,6 @@
     <ClInclude Include="matrix.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="lib_tgmw_tools.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="cmd_gmw_tools.h">
       <Filter>头文件</Filter>
     </ClInclude>

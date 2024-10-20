@@ -146,10 +146,6 @@
   <ItemGroup>
     <ClInclude Include="..\include\cmd_console_tools.h" />
     <ClInclude Include="..\include\cmd_gmw_tools.h" />
-    <ClInclude Include="..\include\lib_tgmw_tools.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\lib\lib_tgmw_tools.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

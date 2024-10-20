@@ -142,7 +142,6 @@
     <ClInclude Include="cmd_console_tools.h" />
     <ClInclude Include="cmd_gmw_tools.h" />
     <ClInclude Include="io_tools.h" />
-    <ClInclude Include="lib_tgmw_tools.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="menu.h" />
   </ItemGroup>
