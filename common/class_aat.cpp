@@ -1,4 +1,4 @@
-/* 学号 姓名 班级 */
+/* 2351871 郎若谷 计科*/
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <sstream>
@@ -14,7 +14,6 @@ using namespace std;
 	 允许加入其它需要static函数（内部工具用）
    ---------------------------------------------------------------- */
 
-
 /***************************************************************************
   函数名称：
   功    能：
@@ -24,6 +23,8 @@ using namespace std;
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools()
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 1;
 }
 
 /***************************************************************************
@@ -35,6 +36,14 @@ args_analyse_tools::args_analyse_tools()
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const bool def)
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 0;
+	this->args_name = string(name);
+	this->extargs_type = type;
+	this->extargs_num = ext_num;
+	this->args_existed = 0;
+
+	this->extargs_bool_default = def;
 }
 
 /***************************************************************************
@@ -46,6 +55,16 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const int def, const int _min, const int _max)
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 0;
+	this->args_name = string(name);
+	this->extargs_type = type;
+	this->extargs_num = ext_num;
+	this->args_existed = 0;
+
+	extargs_int_default = def;
+	extargs_int_min = _min;
+	extargs_int_max = _max;
 }
 
 /***************************************************************************
@@ -57,6 +76,22 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_TYPE type, const int ext_num, const int def_of_set_pos, const int* const set)
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 0;
+	this->args_name = string(name);
+	this->extargs_type = type;
+	this->extargs_num = ext_num;
+	this->args_existed = 0;
+
+	extargs_int_default = set[def_of_set_pos];
+	int cnt = 1;
+	const int* p = set;
+	while (*p != INVALID_INT_VALUE_OF_SET) {
+		++cnt;
+		p++;
+	}
+	extargs_int_set = new int[cnt];
+	memcpy(extargs_int_set, set, cnt * sizeof(int));
 }
 
 /***************************************************************************
@@ -68,6 +103,19 @@ args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_T
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const string def)
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 0;
+	this->args_name = string(name);
+	this->extargs_type = type;
+	this->extargs_num = ext_num;
+	this->args_existed = 0;
+
+	extargs_string_default = string(def);
+	//cout << "find STR GOUZAO: " << def << " :: " << extargs_string_default << endl;
+	if (type == ST_EXTARGS_TYPE::ipaddr_with_default || type == ST_EXTARGS_TYPE::ipaddr_with_error) {
+		//cout << "GET in!!\n";
+		extargs_ipaddr_default = get_int_ipaddr();
+	}
 }
 
 /***************************************************************************
@@ -79,6 +127,24 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const int def_of_set_pos, const string* const set)
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 0;
+	this->args_name = string(name);
+	this->extargs_type = type;
+	this->extargs_num = ext_num;
+	this->args_existed = 0;
+
+	extargs_string_default = set[def_of_set_pos];
+	int cnt = 1;
+	const string* p = set;
+	while (*p != string("")) {
+		++cnt;
+		p++;
+	}
+	extargs_string_set = new string[cnt];
+	p = set;
+	for (int i = 0; i < cnt; i++)
+		extargs_string_set[i] = string(set[i]);
 }
 
 /***************************************************************************
@@ -90,6 +156,16 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const double	def, const double _min, const double _max)
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 0;
+	this->args_name = string(name);
+	this->extargs_type = type;
+	this->extargs_num = ext_num;
+	this->args_existed = 0;
+
+	extargs_double_default = def;
+	extargs_double_min = _min;
+	extargs_double_max = _max;
 }
 
 /***************************************************************************
@@ -101,6 +177,22 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
  ***************************************************************************/
 args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_TYPE type, const int ext_num, const int def_of_set_pos, const double* const set)
 {
+	memset(this, 0, sizeof(*this));
+	this->endOfAll = 0;
+	this->args_name = string(name);
+	this->extargs_type = type;
+	this->extargs_num = ext_num;
+	this->args_existed = 0;
+
+	extargs_double_default = set[def_of_set_pos];
+	int cnt = 1;
+	const double* p = set;
+	while (*p != INVALID_DOUBLE_VALUE_OF_SET) {
+		++cnt;
+		p++;
+	}
+	extargs_double_set = new double[cnt];
+	memcpy(extargs_double_set, set, cnt * sizeof(double));
 }
 
 /***************************************************************************
@@ -112,6 +204,12 @@ args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_T
  ***************************************************************************/
 args_analyse_tools::~args_analyse_tools()
 {
+	if (this->extargs_int_set != NULL)
+		delete[] this->extargs_int_set;
+	if (this->extargs_double_set != NULL)
+		delete[] this->extargs_double_set;
+	if (this->extargs_string_set != NULL)
+		delete[] this->extargs_string_set;
 }
 
 /* ---------------------------------------------------------------
@@ -200,9 +298,50 @@ const unsigned int args_analyse_tools::get_ipaddr() const
  ***************************************************************************/
 const string args_analyse_tools::get_str_ipaddr() const
 {
-	return ""; //此句根据需要修改
+	string ret;
+	int ipval = extargs_ipaddr_value;
+	for (int i = 0; i < 4; i++) {
+		ret = to_string(ipval & ((1u << 8) - 1)) + ret;
+		if (i != 3)
+			ret = "." + ret;
+		ipval >>= 8;
+	}
+	return ret; //此句根据需要修改
 }
 
+/***************************************************************************
+  函数名称：
+  功    能：
+  输入参数：
+  返 回 值：
+  说    明：将 extargs_string_default 的值从 "127.0.0.1" 转为 0x7f000001
+ ***************************************************************************/
+const u_int args_analyse_tools::get_int_ipaddr() const
+{
+	int pos = 0, nxtpos = 0;
+	u_int ret = 0;
+	while ((nxtpos = extargs_string_default.find('.', pos)) != -1) {
+		//cout << "pos = " << pos << ", nextpos = " << nxtpos << endl;
+		ret = (ret << 8) + atoi(extargs_string_default.substr(pos, nxtpos - pos).c_str());
+		pos = nxtpos + 1;
+	}
+	nxtpos = extargs_string_default.size();
+	ret = (ret << 8) + atoi(extargs_string_default.substr(pos, nxtpos - pos).c_str());
+
+	//cout << "Tester: s = " << extargs_string_default << ", val = " << hex << ret << dec << endl;
+	//extargs_ipaddr_value = ret;
+	//cout << "reS = " << get_str_ipaddr() << endl;
+
+	return ret;
+}
+
+void args_analyse_tools::giveInitValue()
+{
+	extargs_int_value = extargs_int_default;
+	extargs_double_value = extargs_double_default;
+	extargs_string_value = extargs_string_default;
+	extargs_ipaddr_value = extargs_ipaddr_default;
+}
 
 /***************************************************************************
   函数名称：
@@ -215,6 +354,7 @@ const string args_analyse_tools::get_str_ipaddr() const
 ***************************************************************************/
 int args_analyse_process(const int argc, const char* const *const argv, args_analyse_tools* const args, const int follow_up_args)
 {
+	for(int i = 1; i <= )
 	return 0; //此句根据需要修改
 }
 
@@ -228,6 +368,12 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 ***************************************************************************/
 int args_analyse_print(const args_analyse_tools* const args)
 {
+	int* ptr = args[4].extargs_int_set;
+	while (*ptr != INVALID_INT_VALUE_OF_SET) {
+		cout << *ptr << ", ";
+		ptr++;
+	}
+	cout << endl;
 	return 0; //此句根据需要修改
 }
 

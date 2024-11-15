@@ -66,6 +66,8 @@ int main(int argc, char* argv[])
 		args_analyse_tools()  //最后一个，用于结束
 	};
 
+
+
 	int need_fixed_args = 0;	//试试改为1
 	int cur_argc;
 

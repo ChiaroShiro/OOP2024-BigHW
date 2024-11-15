@@ -1,4 +1,4 @@
-/* 学号 姓名 班级 */
+/* 2351871 郎若谷 计科 */
 #pragma once
 
 #include <string>
@@ -16,7 +16,7 @@ using namespace std;
 		1、本项(ENABLE_LIB_COMMON_TOOLS)必须置0
 		2、从对应的 lib 目录中删除 lib_common_tools.lib
 ----------------------------------------------------------------------------------------------------------------------------------------------------------- */
-#define ENABLE_LIB_COMMON_TOOLS			 1
+#define ENABLE_LIB_COMMON_TOOLS			 0
 
 #if ENABLE_LIB_COMMON_TOOLS
 
@@ -88,7 +88,7 @@ private:
 	/* 下面这些是变量 */
 	int    args_existed;			//本参数是否出现过（防止相同参数 -n ** -n ** 重复出现）
 	int    extargs_int_value;		//int型额外参数读到的值
-	double extargs_double_value;		//int型额外参数读到的值
+	double extargs_double_value;		//double型额外参数读到的值
 	string extargs_string_value;		//string型额外参数读到的值
 	u_int  extargs_ipaddr_value;		//IP地址额外参数读到的值
 
@@ -97,7 +97,10 @@ private:
 		   1、为了与lib库中的class相同，最多允许定义额外的68字节成员
 		   2、如果需要自定义数据成员，则相应扣减pad数组的大小，维持总大小200字节不变
 	   ---------------------------------------------------------------- */
-	char pad[68];
+	void giveInitValue();
+	const u_int get_int_ipaddr() const;
+	bool endOfAll;
+	char pad[67];
 
 public:
 	args_analyse_tools();
