@@ -89,6 +89,8 @@ args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_T
 		p++;
 	}
 	extargs_int_set = new int[cnt];
+	if(extargs_int_set == NULL)
+		return;
 	memcpy(extargs_int_set, set, cnt * sizeof(int));
 }
 
@@ -108,10 +110,8 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 	this->args_existed = 0;
 
 	extargs_string_default = string(def);
-	//cout << "find STR GOUZAO: " << def << " :: " << extargs_string_default << endl;
 	if (type == ST_EXTARGS_TYPE::ipaddr_with_default || type == ST_EXTARGS_TYPE::ipaddr_with_error) {
-		//cout << "GET in!!\n";
-		extargs_ipaddr_default = get_int_ipaddr();
+		extargs_ipaddr_default = getIntIPAddr(extargs_string_default);
 	}
 }
 
@@ -138,6 +138,8 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 		p++;
 	}
 	extargs_string_set = new string[cnt];
+	if(extargs_string_set == NULL) 
+		return;
 	p = set;
 	for (int i = 0; i < cnt; i++)
 		extargs_string_set[i] = string(set[i]);
@@ -186,6 +188,8 @@ args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_T
 		p++;
 	}
 	extargs_double_set = new double[cnt];
+	if(extargs_double_set == NULL)
+		return;
 	memcpy(extargs_double_set, set, cnt * sizeof(double));
 }
 
@@ -283,6 +287,34 @@ const unsigned int args_analyse_tools::get_ipaddr() const
 	return this->extargs_ipaddr_value;
 }
 
+// IP addr: uint->string
+static string getStringIPAddr(const u_int ip)
+{
+	string ret;
+	u_int ipval = ip;
+	for (int i = 0; i < 4; i++) {
+		ret = to_string(ipval & ((1u << 8) - 1)) + ret;
+		if (i != 3)
+			ret = "." + ret;
+		ipval >>= 8;
+	}
+	return ret; 
+}
+
+// IP addr: string->uint
+static u_int getIntIPAddr(const string s)
+{
+	int pos = 0, nxtpos = 0;
+	u_int ret = 0;
+	while ((nxtpos = s.find('.', pos)) != -1) {
+		ret = (ret << 8) + atoi(s.substr(pos, nxtpos - pos).c_str());
+		pos = nxtpos + 1;
+	}
+	nxtpos = s.size();
+	ret = (ret << 8) + atoi(s.substr(pos, nxtpos - pos).c_str());
+	return ret;
+}
+
 /***************************************************************************
   函数名称：
   功    能：
@@ -292,41 +324,7 @@ const unsigned int args_analyse_tools::get_ipaddr() const
  ***************************************************************************/
 const string args_analyse_tools::get_str_ipaddr() const
 {
-	string ret;
-	int ipval = extargs_ipaddr_value;
-	for (int i = 0; i < 4; i++) {
-		ret = to_string(ipval & ((1u << 8) - 1)) + ret;
-		if (i != 3)
-			ret = "." + ret;
-		ipval >>= 8;
-	}
-	return ret; //此句根据需要修改
-}
-
-/***************************************************************************
-  函数名称：
-  功    能：
-  输入参数：
-  返 回 值：
-  说    明：将 extargs_string_default 的值从 "127.0.0.1" 转为 0x7f000001
- ***************************************************************************/
-const u_int args_analyse_tools::get_int_ipaddr() const
-{
-	int pos = 0, nxtpos = 0;
-	u_int ret = 0;
-	while ((nxtpos = extargs_string_default.find('.', pos)) != -1) {
-		//cout << "pos = " << pos << ", nextpos = " << nxtpos << endl;
-		ret = (ret << 8) + atoi(extargs_string_default.substr(pos, nxtpos - pos).c_str());
-		pos = nxtpos + 1;
-	}
-	nxtpos = extargs_string_default.size();
-	ret = (ret << 8) + atoi(extargs_string_default.substr(pos, nxtpos - pos).c_str());
-
-	//cout << "Tester: s = " << extargs_string_default << ", val = " << hex << ret << dec << endl;
-	//extargs_ipaddr_value = ret;
-	//cout << "reS = " << get_str_ipaddr() << endl;
-
-	return ret;
+	return getStringIPAddr(extargs_ipaddr_value);
 }
 
 void args_analyse_tools::giveInitValue()
@@ -340,7 +338,7 @@ void args_analyse_tools::giveInitValue()
 static args_analyse_tools* findOption(args_analyse_tools* const args, const char* const str)
 {
 	args_analyse_tools* ptr = args;
-	while(ptr->get_name() != string("")) {
+	while(ptr->get_name() != invalidVal <string> ()) {
 		if(string(str) == ptr->get_name()) {
 			return ptr;
 		}
@@ -356,9 +354,79 @@ static bool checkIsCommand(const char* const cmd)
 	return cmd[0] == '-' && cmd[1] == '-';
 }
 
-static string printTypeInfo(const args_analyse_tools x)
+static string getType(const ST_EXTARGS_TYPE t)
 {
-	static string TYPE_NAME[] = {"bool", "int", "double", "string"};
+	if(t == ST_EXTARGS_TYPE::int_with_default || t == ST_EXTARGS_TYPE::int_with_error || t == ST_EXTARGS_TYPE::int_with_set_default || t == ST_EXTARGS_TYPE::int_with_set_error) {
+		return "int";
+	}
+	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_error || t == ST_EXTARGS_TYPE::double_with_set_default || t == ST_EXTARGS_TYPE::double_with_set_error) {
+		return "double";
+	}
+	if(t == ST_EXTARGS_TYPE::str || t == ST_EXTARGS_TYPE::str_with_set_default || t == ST_EXTARGS_TYPE::str_with_set_error) {
+		return "string";
+	}
+	if(t == ST_EXTARGS_TYPE::ipaddr_with_default || t == ST_EXTARGS_TYPE::ipaddr_with_error) {
+		return "IP地址";
+	}
+	return "TypeError!";
+}
+
+static bool isDefualt(const ST_EXTARGS_TYPE t)
+{
+	if(t == ST_EXTARGS_TYPE::int_with_default || t == ST_EXTARGS_TYPE::int_with_set_default)
+		return 1;
+	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_set_default)
+		return 1;
+	if(t == ST_EXTARGS_TYPE::str_with_set_default || t == ST_EXTARGS_TYPE::ipaddr_with_default)
+		return 1;
+	return 0;
+}
+
+static bool isSet(const ST_EXTARGS_TYPE t)
+{
+	if(t == ST_EXTARGS_TYPE::int_with_set_default || t == ST_EXTARGS_TYPE::int_with_set_error)
+		return 1;
+	if(t == ST_EXTARGS_TYPE::double_with_set_default || t == ST_EXTARGS_TYPE::double_with_set_error)
+		return 1;
+	if(t == ST_EXTARGS_TYPE::str_with_set_default || t == ST_EXTARGS_TYPE::str_with_set_error)
+		return 1;
+	return 0;
+}
+
+static bool isRange(const ST_EXTARGS_TYPE t)
+{
+	if(t == ST_EXTARGS_TYPE::int_with_default || t == ST_EXTARGS_TYPE::int_with_error)
+		return 1;
+	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_error)
+		return 1;
+	return 0;
+}
+
+template <class _T>
+static _T invalidVal() // 返回对应类型的末尾数值
+{
+	if(typeid(_T) == typeid(int))
+		return INVALID_INT_VALUE_OF_SET;
+	if(typeid(_T) == typeid(double))
+		return INVALID_DOUBLE_VALUE_OF_SET;
+	if(typeid(_T) == typeid(string))
+		return string("");
+	return _T();
+}
+
+template <class _T>
+static void printList(void* ptr) // 打印 a/b/c/d 这种东西
+{
+	_T *p = ptr;
+	bool flag = 1;
+	while(*p != invalidVal <_T> ()) {
+		if(flag)
+			flag = 0;
+		else 
+			cout << "/";
+		cout << *p;
+		p++;
+	}
 }
 
 /***************************************************************************
@@ -383,11 +451,49 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 		opt->args_existed = 1;
 		if(opt->extargs_num == 0)
 			continue;
-		if(retcnt + 1 >= argc) {
-			cout << "参数[" << argv[retcnt] << "]缺少附加参数. (";
-			printTypeInfo(*opt);
+		
+		string type = getType(opt->extargs_type);
+		if(retcnt + 1 >= argc || checkIsCommand(argv[retcnt + 1]) || checkInputTypeError(argv[retcnt + 1], type) || (isSet(opt->extargs_type) && checkNotInSet(argv[retcnt + 1], type)) || (isRange(opt->extargs_type) && checkNotInRange(argv[retcnt + 1], type))) { // 参数不足时错误处理，只有这个函数有友元不知道有什么更简明的实现方式了
+			if(retcnt + 1 >= argc)
+				cout << "参数[" << argv[retcnt] << "]的附加参数不足. (";
+			else 
+				cout << "参数[" << argv[retcnt] << "]缺少附加参数. (";
+			cout << "类型:" << type;
+			if(isSet(opt->extargs_type) || isRange(opt->extargs_type) || isDefualt(opt->extargs_type))
+				cout << ",";
+			if(isSet(opt->extargs_type)) {
+				cout << " 可取值[";
+				if(type == "int") 
+					printList <int> (opt->extargs_int_set);
+				if(type == "double")
+					printList <double> (opt->extargs_double_set);
+				if(type == "string")
+					printList <string> (opt->extargs_string_set);
+				cout << "]";
+			}
+			if(isRange(opt->extargs_type)) {
+				cout << " 范围[";
+				if(type == "int")
+					cout << opt->extargs_int_min << ".." << opt->extargs_int_max;
+				if(type == "double")
+					cout << opt->extargs_double_min << ".." << opt->extargs_double_max;
+				cout << "]";
+			}
+			if(isDefualt(opt->extargs_type)) {
+				cout << " 缺省:";
+				if(type == "int")
+					cout << opt->extargs_int_default;
+				if(type == "double")
+					cout << opt->extargs_double_default;
+				if(type == "string")
+					cout << opt->extargs_string_default;
+				if(type == "IP地址") 
+					cout << getStringIPAddr(opt->extargs_ipaddr_default);
+			}
 			cout << ")\n";
+			return -1;
 		}
+		
 	}
 	if(retcnt == argc || follow_up_args)
 		return retcnt;

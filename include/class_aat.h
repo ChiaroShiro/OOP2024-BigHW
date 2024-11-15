@@ -98,8 +98,7 @@ private:
 		   2、如果需要自定义数据成员，则相应扣减pad数组的大小，维持总大小200字节不变
 	   ---------------------------------------------------------------- */
 	void giveInitValue();
-	const u_int get_int_ipaddr() const;
-	char pad[67];
+	char pad[68];
 
 public:
 	args_analyse_tools();
