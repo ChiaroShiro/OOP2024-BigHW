@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="class_aat.cpp" />
     <ClCompile Include="cmd_console_tools.cpp" />
     <ClCompile Include="cmd_gmw_tools.cpp" />
     <ClCompile Include="io_tools.cpp" />
