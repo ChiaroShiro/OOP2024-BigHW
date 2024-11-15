@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <cstring>
 #include "../include/class_aat.h"
 //如有必要，可以加入其它头文件
 using namespace std;
@@ -24,7 +25,7 @@ using namespace std;
 args_analyse_tools::args_analyse_tools()
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 1;
+	args_name = string("");
 }
 
 /***************************************************************************
@@ -37,7 +38,6 @@ args_analyse_tools::args_analyse_tools()
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const bool def)
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 0;
 	this->args_name = string(name);
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
@@ -56,7 +56,6 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const int def, const int _min, const int _max)
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 0;
 	this->args_name = string(name);
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
@@ -77,7 +76,6 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_TYPE type, const int ext_num, const int def_of_set_pos, const int* const set)
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 0;
 	this->args_name = string(name);
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
@@ -104,7 +102,6 @@ args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_T
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const string def)
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 0;
 	this->args_name = string(name);
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
@@ -128,7 +125,6 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const int def_of_set_pos, const string* const set)
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 0;
 	this->args_name = string(name);
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
@@ -157,7 +153,6 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE type, const int ext_num, const double	def, const double _min, const double _max)
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 0;
 	this->args_name = string(name);
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
@@ -178,7 +173,6 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_TYPE type, const int ext_num, const int def_of_set_pos, const double* const set)
 {
 	memset(this, 0, sizeof(*this));
-	this->endOfAll = 0;
 	this->args_name = string(name);
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
@@ -343,6 +337,30 @@ void args_analyse_tools::giveInitValue()
 	extargs_ipaddr_value = extargs_ipaddr_default;
 }
 
+static args_analyse_tools* findOption(args_analyse_tools* const args, const char* const str)
+{
+	args_analyse_tools* ptr = args;
+	while(ptr->get_name() != string("")) {
+		if(string(str) == ptr->get_name()) {
+			return ptr;
+		}
+		++ptr;
+	}
+	return NULL;
+}
+
+static bool checkIsCommand(const char* const cmd) 
+{
+	if(strlen(cmd) < 3)
+		return 0;
+	return cmd[0] == '-' && cmd[1] == '-';
+}
+
+static string printTypeInfo(const args_analyse_tools x)
+{
+	static string TYPE_NAME[] = {"bool", "int", "double", "string"};
+}
+
 /***************************************************************************
   函数名称：
   功    能：
@@ -354,8 +372,27 @@ void args_analyse_tools::giveInitValue()
 ***************************************************************************/
 int args_analyse_process(const int argc, const char* const *const argv, args_analyse_tools* const args, const int follow_up_args)
 {
-	for(int i = 1; i <= )
-	return 0; //此句根据需要修改
+	int retcnt = 0;
+	for(retcnt = 1; retcnt < argc; retcnt++) {
+		if(checkIsCommand(argv[retcnt]) == 0) {
+			cout << "参数[" << argv[retcnt] << "]格式非法(不是--开头的有效内容)\n";
+		}
+		args_analyse_tools *opt = findOption(args, argv[retcnt]);
+		if(opt == NULL) // 找不到这个参数
+			break;
+		opt->args_existed = 1;
+		if(opt->extargs_num == 0)
+			continue;
+		if(retcnt + 1 >= argc) {
+			cout << "参数[" << argv[retcnt] << "]缺少附加参数. (";
+			printTypeInfo(*opt);
+			cout << ")\n";
+		}
+	}
+	if(retcnt == argc || follow_up_args)
+		return retcnt;
+	cout << "参数[" << argv[retcnt] << "]非法\n";
+	return -1; //此句根据需要修改
 }
 
 

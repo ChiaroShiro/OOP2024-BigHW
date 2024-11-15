@@ -99,7 +99,6 @@ private:
 	   ---------------------------------------------------------------- */
 	void giveInitValue();
 	const u_int get_int_ipaddr() const;
-	bool endOfAll;
 	char pad[67];
 
 public:
