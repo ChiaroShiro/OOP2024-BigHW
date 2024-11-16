@@ -15,6 +15,12 @@ using namespace std;
 	 允许加入其它需要static函数（内部工具用）
    ---------------------------------------------------------------- */
 
+template <class _A, class _B>
+static _A max(const _A &a, const _B &b)
+{
+	return a > (_A)b ? a : b;
+}
+
 template <class _T>
 static _T invalidVal() // 返回对应类型的末尾数值
 {
@@ -180,7 +186,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
 
-	extargs_string_default = set[def_of_set_pos];
+	extargs_string_default = string(set[def_of_set_pos]);
 	int cnt = 1;
 	const string* p = set;
 	while (*p != string("")) {
@@ -378,28 +384,34 @@ static bool checkIsCommand(const char* const cmd)
 
 static string getType(const ST_EXTARGS_TYPE t)
 {
-	if(t == ST_EXTARGS_TYPE::int_with_default || t == ST_EXTARGS_TYPE::int_with_error || t == ST_EXTARGS_TYPE::int_with_set_default || t == ST_EXTARGS_TYPE::int_with_set_error) {
+	if(t == ST_EXTARGS_TYPE::boolean)
+		return "bool";
+	if(t == ST_EXTARGS_TYPE::int_with_default || t == ST_EXTARGS_TYPE::int_with_error || t == ST_EXTARGS_TYPE::int_with_set_default || t == ST_EXTARGS_TYPE::int_with_set_error)
 		return "int";
-	}
-	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_error || t == ST_EXTARGS_TYPE::double_with_set_default || t == ST_EXTARGS_TYPE::double_with_set_error) {
+	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_error || t == ST_EXTARGS_TYPE::double_with_set_default || t == ST_EXTARGS_TYPE::double_with_set_error)
 		return "double";
-	}
-	if(t == ST_EXTARGS_TYPE::str || t == ST_EXTARGS_TYPE::str_with_set_default || t == ST_EXTARGS_TYPE::str_with_set_error) {
+	if(t == ST_EXTARGS_TYPE::str || t == ST_EXTARGS_TYPE::str_with_set_default || t == ST_EXTARGS_TYPE::str_with_set_error)
 		return "string";
-	}
-	if(t == ST_EXTARGS_TYPE::ipaddr_with_default || t == ST_EXTARGS_TYPE::ipaddr_with_error) {
+	if(t == ST_EXTARGS_TYPE::ipaddr_with_default || t == ST_EXTARGS_TYPE::ipaddr_with_error)
 		return "IP地址";
-	}
 	return "TypeError!";
 }
 
-static bool isDefualt(const ST_EXTARGS_TYPE t)
+static bool isDefualt(const ST_EXTARGS_TYPE t, const string strde)
 {
 	if(t == ST_EXTARGS_TYPE::int_with_default || t == ST_EXTARGS_TYPE::int_with_set_default)
 		return 1;
 	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_set_default)
 		return 1;
 	if(t == ST_EXTARGS_TYPE::str_with_set_default || t == ST_EXTARGS_TYPE::ipaddr_with_default)
+		return 1;
+	if(t == ST_EXTARGS_TYPE::str || t == ST_EXTARGS_TYPE::ipaddr_with_error) {
+		if(strde == "")
+			return 0;
+		else 
+			return 1;
+	}
+	if(t == ST_EXTARGS_TYPE::boolean)
 		return 1;
 	return 0;
 }
@@ -453,24 +465,32 @@ static bool checkIsIPAddr(string s)
 }
 
 template <class _T>
-static void printList(_T* ptr) // 打印 a/b/c/d 这种东西
+static string generateList(_T* ptr) // 打印 a/b/c/d 这种东西
 {
+	string ret;
+	stringstream ssm;
 	_T *p = ptr;
 	bool flag = 1;
 	while(*p != invalidVal <_T> ()) {
 		if(flag)
 			flag = 0;
 		else 
-			cout << "/";
-		cout << *p;
+			ssm << "/";
+		ssm << fixed << setprecision(6) << *p;
 		p++;
 	}
+	ssm >> ret;
+	return ret;
 }
 
 template <class _T>
-static void printRange(_T mn, _T mx)
+static string generateRange(_T mn, _T mx)
 {
-	cout << "[" << mn << ".." << mx << "]";
+	string ret;
+	stringstream ssm;
+	ssm << "[" << fixed << setprecision(6) << mn << ".." << fixed << setprecision(6) << mx << "]";
+	ssm >> ret;
+	return ret;
 }
 
 template <class _T>
@@ -616,25 +636,25 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 			else 
 				cout << "参数[" << argv[retcnt] << "]缺少附加参数. (";
 			cout << "类型:" << type;
-			if(isSet(opt->extargs_type) || isRange(opt->extargs_type) || isDefualt(opt->extargs_type))
+			if(isSet(opt->extargs_type) || isRange(opt->extargs_type) || isDefualt(opt->extargs_type, opt->extargs_string_default))
 				cout << ",";
 			if(isSet(opt->extargs_type)) {
 				cout << " 可取值";
 				if(type == "int") 
-					printList (opt->extargs_int_set);
+					cout << generateList (opt->extargs_int_set);
 				if(type == "double")
-					printList (opt->extargs_double_set);
+					cout << generateList (opt->extargs_double_set);
 				if(type == "string")
-					printList (opt->extargs_string_set);
+					cout << generateList (opt->extargs_string_set);
 			}
 			if(isRange(opt->extargs_type)) {
 				cout << " 范围";
 				if (type == "int")
-					printRange(opt->extargs_int_min, opt->extargs_int_max);
+					cout << generateRange(opt->extargs_int_min, opt->extargs_int_max);
 				if (type == "double")
-					printRange(opt->extargs_double_min, opt->extargs_double_max);
+					cout << generateRange(opt->extargs_double_min, opt->extargs_double_max);
 			}
-			if(isDefualt(opt->extargs_type)) {
+			if(isDefualt(opt->extargs_type, opt->extargs_string_default)) {
 				cout << " 缺省:";
 				if(type == "int")
 					cout << opt->extargs_int_default;
@@ -666,7 +686,107 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 ***************************************************************************/
 int args_analyse_print(const args_analyse_tools* const args)
 {
-	
+	int wname = 4;
+	int wtype = 4;
+	int wdefault = 7;
+	int wexists = 6;
+	int wvalue = 5;
+	int wrange = 9;
+	const args_analyse_tools* p = args;
+	while(p->get_name() != invalidVal <string> ()) { // 获取每个区段的长度
+		wname = max(wname, p->get_name().length());
+		wtype = max(wtype, TYPE_NAME[(int)p->extargs_type].length());
+		string type = getType(p->extargs_type);
+		if(isDefualt(p->extargs_type, p->extargs_string_default)) {
+			if(type == "int")
+				wdefault = max(wdefault, to_string(p->extargs_int_default).length());
+			if(type == "double")
+				wdefault = max(wdefault, to_string(p->extargs_double_default).length());
+			if(type == "string" || type == "IP地址")
+				wdefault = max(wdefault, p->extargs_string_default.length());
+		}
+		if(p->args_existed) {
+			if(type == "int")
+				wvalue = max(wvalue, to_string(p->extargs_int_value).length());
+			if(type == "double")
+				wvalue = max(wvalue, to_string(p->extargs_double_value).length());
+			if(type == "string" || type == "IP地址")
+				wvalue = max(wvalue, p->extargs_string_value.length());
+			if(type == "bool")
+				wvalue = max(wvalue, 4);
+		}
+		if(isSet(p->extargs_type)) {
+			if(type == "int")
+				wrange = max(wrange, generateList(p->extargs_int_set).length());
+			if(type == "double")
+				wrange = max(wrange, generateList(p->extargs_double_set).length());
+			if(type == "string")
+				wrange = max(wrange, generateList(p->extargs_string_set).length());
+		}
+		if(isRange(p->extargs_type)) {
+			if(type == "int")
+				wrange = max(wrange, generateRange(p->extargs_int_min, p->extargs_int_max).length());
+			if(type == "double")
+				wrange = max(wrange, generateRange(p->extargs_double_min, p->extargs_double_max).length());
+		}
+		p++;
+	}
+	int tot = wrange + wvalue + wname + wtype + wdefault + wexists + 7;
+	cout << setw(tot) << setfill('=') << "=" << setfill(' ') << endl;;
+	cout << left << ' ' << setw(wname) << "name" << ' ' << setw(wtype) << "type" << ' ' << setw(wdefault) << "default" << ' ' << setw(wexists) << "exists" << ' ' << setw(wvalue) << "value" << ' ' << setw(wrange) << "range/set" << endl;
+	cout << setw(tot) << setfill('=') << "=" << setfill(' ') << endl;
+
+	p = args;
+	while(p->get_name() != invalidVal <string> ()) { // 输出每个区段
+		cout << " " << setw(wname) << p->get_name();
+		cout << " " << setw(wtype) << TYPE_NAME[(int)p->extargs_type];
+		string type = getType(p->extargs_type);
+		if(isDefualt(p->extargs_type, p->extargs_string_default)) {
+			if(type == "int")
+				cout << " " << setw(wdefault) << p->extargs_int_default;
+			if(type == "double")
+				cout << " " << setw(wdefault) << fixed << setprecision(6) << p->extargs_double_default;
+			if(type == "string" || type == "IP地址")
+				cout << " " << setw(wdefault) << p->extargs_string_default;
+			if(type == "bool")
+				cout << " " << setw(wdefault) << (p->extargs_bool_default ? "true" : "false");
+		}
+		else
+			cout << " " << setw(wdefault) << "/";
+		cout << " " << setw(wexists) << p->existed();
+		if(p->args_existed) {
+			if(type == "int")
+				cout << " " << setw(wvalue) << p->extargs_int_value;
+			if (type == "double")
+				cout << " " << setw(wvalue) << p->extargs_double_value;
+			if(type == "string" || type == "IP地址")
+				cout << " " << setw(wvalue) << p->extargs_string_value;
+			if(type == "bool")
+				cout << " " << setw(wvalue) << "true";
+		}
+		else
+			cout << " " << setw(wvalue) << "/";
+		if(isSet(p->extargs_type)) {
+			if(type == "int")
+				cout << " " << setw(wrange) << generateList(p->extargs_int_set);
+			if(type == "double")
+				cout << " " << setw(wrange) << generateList(p->extargs_double_set);
+			if(type == "string")
+				cout << " " << setw(wrange) << generateList(p->extargs_string_set);
+		}
+		if(isRange(p->extargs_type)) {
+			if(type == "int")
+				cout << " " << setw(wrange) << generateRange(p->extargs_int_min, p->extargs_int_max);
+			if(type == "double")
+				cout << " " << setw(wrange) << generateRange(p->extargs_double_min, p->extargs_double_max);
+		}
+		if(!isRange(p->extargs_type) && !isSet(p->extargs_type))
+			cout << " " << setw(wrange) << "/";
+		cout << endl;
+		p++;
+	}
+
+	cout << setw(tot) << setfill('=') << "=" << setfill(' ') << endl;
 	return 0; //此句根据需要修改
 }
 

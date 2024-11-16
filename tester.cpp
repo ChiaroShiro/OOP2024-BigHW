@@ -7,5 +7,5 @@ bool check()
     return typeid(T) == typeid(double);
 }
 int main () {
-    cout << check <int> () << check <string> () << check <double> ();
+    std::cout << to_string(1293).length() << ", " << to_string(12.111).length();
 }
