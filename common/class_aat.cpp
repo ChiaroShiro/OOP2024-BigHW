@@ -82,6 +82,7 @@ args_analyse_tools::args_analyse_tools()
 {
 	memset(this, 0, sizeof(*this));
 	args_name = string("");
+	extargs_string_default = string("");
 }
 
 /***************************************************************************
@@ -98,6 +99,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
+	extargs_string_default = string("");
 
 	this->extargs_bool_default = def;
 }
@@ -116,6 +118,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
+	extargs_string_default = string("");
 
 	extargs_int_default = def;
 	extargs_int_min = _min;
@@ -136,6 +139,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_T
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
+	extargs_string_default = string("");
 
 	extargs_int_default = set[def_of_set_pos];
 	int cnt = 1;
@@ -164,6 +168,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
+	extargs_string_default = string("");
 
 	extargs_string_default = string(def);
 	if (type == ST_EXTARGS_TYPE::ipaddr_with_default || type == ST_EXTARGS_TYPE::ipaddr_with_error) {
@@ -185,6 +190,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
+	extargs_string_default = string("");
 
 	extargs_string_default = string(set[def_of_set_pos]);
 	int cnt = 1;
@@ -215,6 +221,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const ST_EXTARGS_TYPE t
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
+	extargs_string_default = string("");
 
 	extargs_double_default = def;
 	extargs_double_min = _min;
@@ -235,6 +242,7 @@ args_analyse_tools::args_analyse_tools(const char* name, const enum ST_EXTARGS_T
 	this->extargs_type = type;
 	this->extargs_num = ext_num;
 	this->args_existed = 0;
+	extargs_string_default = string("");
 
 	extargs_double_default = set[def_of_set_pos];
 	int cnt = 1;
@@ -582,36 +590,45 @@ static bool checkNotInSet(string s, string type, void** setlist)
 static bool checkNotInRange(string s, string type, void** rangelist)
 {
 	stringstream sin(s);
+	//printf("in checkNotInRange function: type = %s\n", type.c_str());
 	if (type == "int") {
 		int x;
 		sin >> x;
+		//printf("x = %d\n", x);
 		int mn = **(int**)rangelist;
+		//printf("mn = %d\n", mn);
 		int mx = *(*(int**)rangelist + 1);
-		return x >= mn && x <= mx;
+		//printf("mx = %d\n", mx);
+		return !(x >= mn && x <= mx);
 	}
 	if (type == "double") {
 		double x;
 		sin >> x;
 		double mn = **(double**)rangelist;
 		double mx = *(*(double**)rangelist + 1);
-		return x >= mn - DOUBLE_DELTA && x <= mx + DOUBLE_DELTA;
+		return !(x >= mn - DOUBLE_DELTA && x <= mx + DOUBLE_DELTA);
 	}
-	return 0;
+	return 1;
 }
 
 static bool needPrintTypeInfo(int retcnt, int argc, string arg, ST_EXTARGS_TYPE opttype, void** setlist, void** rangelist, string strde)
 {
+	//printf("needPrintTypeInfo:\n");
 	string type = getType(opttype);
-	if(retcnt + 1 >= argc) // 后面没东西了
-		return 1;
+	//printf("checking: type = %s, retcnt = %d, argc = %d, arg = %s, strde = %s\n", type.c_str(), retcnt, argc, arg.c_str(), strde.c_str());
+	//printf("finishing 1\n");
 	if(checkIsCommand(arg.c_str())) // 后面是个指令
 		return 1;
+	//printf("finishing 2\n");
 	if(checkInputTypeError(arg, type)) // 输入类型错误
 		return 1;
+	//printf("finishing 3\n");
 	if(isSet(opttype) && !isDefualt(opttype, strde) && checkNotInSet(arg, type, setlist)) // 不在 set 内
 		return 1;
+	//printf("finishing 4\n");
 	if(isRange(opttype) && !isDefualt(opttype, strde) && checkNotInRange(arg, type, rangelist)) // 不在范围内
 		return 1;
+	//printf("finishing ALL\n");
 	return 0;
 }
 
@@ -628,6 +645,7 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 {
 	int retcnt = 0;
 	for(retcnt = 1; retcnt < argc; retcnt++) {
+		//printf("retcnt = %d: <%s>\n", retcnt, argv[retcnt]);
 		if(checkIsCommand(argv[retcnt]) == 0) {
 			cout << "参数[" << argv[retcnt] << "]格式非法(不是--开头的有效内容)\n";
 			return -1;
@@ -635,15 +653,28 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 		args_analyse_tools *opt = findOption(args, argv[retcnt]);
 		if(opt == NULL) // 找不到这个参数
 			break;
+		//printf("find option: %s\n", opt->get_name().c_str());
+		if(opt->args_existed) {
+			cout << "参数[" << opt->get_name() << "]重复.\n";
+			return -1;
+		}
 		opt->args_existed = 1;
 		if(opt->extargs_num == 0)
 			continue;
 		void* setlist[] = {NULL, opt->extargs_int_set, opt->extargs_double_set, opt->extargs_string_set};
-		void* rangelist[] = {NULL, &opt->extargs_int_min, &opt->extargs_double_min};
+		void* rangelist[] = {&opt->extargs_int_min, &opt->extargs_double_min};
 		
 		string type = getType(opt->extargs_type);
-		if(needPrintTypeInfo(retcnt, argc, argv[retcnt + 1], opt->extargs_type, setlist, rangelist, opt->extargs_string_default)) { // 参数不足时错误处理，只有这个函数有友元不知道有什么更简明的实现方式了
+		//printf("type = %s\n", type.c_str());
+		//printf("retcnt = %d\n", retcnt);
+		//printf("argc = %d\n", argc);
+		//printf("arg = %s\n", argv[retcnt + 1]);
+		//printf("type = %d\n", opt->extargs_type);
+		//printf("strde = %s\n", opt->extargs_string_default.c_str());
+		//printf("finish: go on\n");
+		if(retcnt + 1 >= argc || needPrintTypeInfo(retcnt, argc, argv[retcnt + 1], opt->extargs_type, setlist, rangelist, opt->extargs_string_default)) { // 参数不足时错误处理，只有这个函数有友元不知道有什么更简明的实现方式了
 			// 输出报错信息
+			//printf("  <get into error branch!>\n");
 			if(retcnt + 1 >= argc) 
 				cout << "参数[" << argv[retcnt] << "]的附加参数不足. (";
 			else if(checkIsCommand(argv[retcnt + 1]))
@@ -675,13 +706,14 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 			if(isSet(opt->extargs_type) || isRange(opt->extargs_type) || isDefualt(opt->extargs_type, opt->extargs_string_default))
 				cout << ",";
 			if(isSet(opt->extargs_type)) {
-				cout << " 可取值";
+				cout << " 可取值[";
 				if(type == "int") 
 					cout << generateList (opt->extargs_int_set);
 				if(type == "double")
 					cout << generateList (opt->extargs_double_set);
 				if(type == "string")
 					cout << generateList (opt->extargs_string_set);
+				cout << "]";
 			}
 			if(isRange(opt->extargs_type)) {
 				cout << " 范围";
@@ -704,8 +736,9 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 			cout << ")\n";
 			return -1;
 		}
-		
+		//printf("no error, all fine\n");
 		if(isSet(opt->extargs_type)) {
+			//printf("is set\n");
 			if(!checkNotInSet(argv[retcnt + 1], type, setlist)) {
 				if(type == "int") 
 					opt->extargs_int_value = atoi(argv[retcnt + 1]);
@@ -718,16 +751,21 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 				opt->giveInitValue();
 		}
 		if(isRange(opt->extargs_type)) {
+			//printf("is range\n");
 			if(!checkNotInRange(argv[retcnt + 1], type, rangelist)) {
+				//printf("checked: in range!\n");
 				if(type == "int") 
 					opt->extargs_int_value = atoi(argv[retcnt + 1]);
 				if(type == "double")
 					opt->extargs_double_value = stod(string(argv[retcnt + 1]));
 			}
-			else
+			else {
+				//printf("checked: not in range!\n");
 				opt->giveInitValue();
+			}
 		}
 		if(!isSet(opt->extargs_type) && !isRange(opt->extargs_type)) {
+			//printf("not set or range\n");
 			if(type == "int") 
 				opt->extargs_int_value = atoi(argv[retcnt + 1]);
 			if(type == "double")
@@ -811,7 +849,7 @@ int args_analyse_print(const args_analyse_tools* const args)
 	}
 	int tot = wrange + wvalue + wname + wtype + wdefault + wexists + 7;
 	cout << setw(tot) << setfill('=') << "=" << setfill(' ') << endl;;
-	cout << left << ' ' << setw(wname) << "name" << ' ' << setw(wtype) << "type" << ' ' << setw(wdefault) << "default" << ' ' << setw(wexists) << "exists" << ' ' << setw(wvalue) << "value" << ' ' << setw(wrange) << "range/set" << endl;
+	cout << left << ' ' << setw(wname) << "name" << ' ' << setw(wtype) << "type" << ' ' << setw(wdefault) << "default" << ' ' << setw(wexists) << "exists" << ' ' << setw(wvalue) << "value" << ' ' << "range/set" << endl;
 	cout << setw(tot) << setfill('=') << "=" << setfill(' ') << endl;
 
 	p = args;
@@ -846,20 +884,20 @@ int args_analyse_print(const args_analyse_tools* const args)
 			cout << " " << setw(wvalue) << "/";
 		if(isSet(p->extargs_type)) {
 			if(type == "int")
-				cout << " " << setw(wrange) << generateList(p->extargs_int_set);
+				cout << " " << generateList(p->extargs_int_set);
 			if(type == "double")
-				cout << " " << setw(wrange) << generateList(p->extargs_double_set);
+				cout << " " << generateList(p->extargs_double_set);
 			if(type == "string")
-				cout << " " << setw(wrange) << generateList(p->extargs_string_set);
+				cout << " " << generateList(p->extargs_string_set);
 		}
 		if(isRange(p->extargs_type)) {
 			if(type == "int")
-				cout << " " << setw(wrange) << generateRange(p->extargs_int_min, p->extargs_int_max);
+				cout << " " << generateRange(p->extargs_int_min, p->extargs_int_max);
 			if(type == "double")
-				cout << " " << setw(wrange) << generateRange(p->extargs_double_min, p->extargs_double_max);
+				cout << " " << generateRange(p->extargs_double_min, p->extargs_double_max);
 		}
 		if(!isRange(p->extargs_type) && !isSet(p->extargs_type))
-			cout << " " << setw(wrange) << "/";
+			cout << " " << "/";
 		cout << endl;
 		p++;
 	}
