@@ -359,7 +359,7 @@ void args_analyse_tools::giveInitValue()
 {
 	extargs_int_value = extargs_int_default;
 	extargs_double_value = extargs_double_default;
-	extargs_string_value = extargs_string_default;
+	extargs_string_value = string(extargs_string_default);
 	extargs_ipaddr_value = extargs_ipaddr_default;
 }
 
@@ -380,6 +380,21 @@ static bool checkIsCommand(const char* const cmd)
 	if(strlen(cmd) < 3)
 		return 0;
 	return cmd[0] == '-' && cmd[1] == '-';
+}
+
+static string getTypeInChinese(const ST_EXTARGS_TYPE t)
+{
+	if(t == ST_EXTARGS_TYPE::boolean)
+		return "布尔";
+	if(t == ST_EXTARGS_TYPE::int_with_default || t == ST_EXTARGS_TYPE::int_with_error || t == ST_EXTARGS_TYPE::int_with_set_default || t == ST_EXTARGS_TYPE::int_with_set_error)
+		return "整数";
+	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_error || t == ST_EXTARGS_TYPE::double_with_set_default || t == ST_EXTARGS_TYPE::double_with_set_error)
+		return "浮点数";
+	if(t == ST_EXTARGS_TYPE::str || t == ST_EXTARGS_TYPE::str_with_set_default || t == ST_EXTARGS_TYPE::str_with_set_error)
+		return "字符串";
+	if(t == ST_EXTARGS_TYPE::ipaddr_with_default || t == ST_EXTARGS_TYPE::ipaddr_with_error)
+		return "IP地址";
+	return "类型错误!";
 }
 
 static string getType(const ST_EXTARGS_TYPE t)
@@ -518,14 +533,10 @@ static bool checkInputTypeError(string s, string type)
 		return checkInputTypeError_attachPart(x, sin);
 	}
 	if(type == "string") {
-		string x;
-		return checkInputTypeError_attachPart(x, sin);
+		return 0;
 	}
 	if(type == "IP地址") {
-		string x;
-		if(checkInputTypeError_attachPart(x, sin))
-			return 1;
-		return checkIsIPAddr(s);
+		return !checkIsIPAddr(s);
 	}
 	return 0;
 }
@@ -588,18 +599,18 @@ static bool checkNotInRange(string s, string type, void** rangelist)
 	return 0;
 }
 
-static bool needPrintTypeInfo(int retcnt, int argc, string arg, ST_EXTARGS_TYPE opttype, void** setlist, void** rangelist)
+static bool needPrintTypeInfo(int retcnt, int argc, string arg, ST_EXTARGS_TYPE opttype, void** setlist, void** rangelist, string strde)
 {
 	string type = getType(opttype);
-	if(retcnt + 1 >= argc)
+	if(retcnt + 1 >= argc) // 后面没东西了
 		return 1;
-	if(checkIsCommand(arg.c_str()))
+	if(checkIsCommand(arg.c_str())) // 后面是个指令
 		return 1;
-	if(checkInputTypeError(arg, type))
+	if(checkInputTypeError(arg, type)) // 输入类型错误
 		return 1;
-	if(isSet(opttype) && checkNotInSet(arg, type, setlist))
+	if(isSet(opttype) && !isDefualt(opttype, strde) && checkNotInSet(arg, type, setlist)) // 不在 set 内
 		return 1;
-	if(isRange(opttype) && checkNotInRange(arg, type, rangelist))
+	if(isRange(opttype) && !isDefualt(opttype, strde) && checkNotInRange(arg, type, rangelist)) // 不在范围内
 		return 1;
 	return 0;
 }
@@ -619,6 +630,7 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 	for(retcnt = 1; retcnt < argc; retcnt++) {
 		if(checkIsCommand(argv[retcnt]) == 0) {
 			cout << "参数[" << argv[retcnt] << "]格式非法(不是--开头的有效内容)\n";
+			return -1;
 		}
 		args_analyse_tools *opt = findOption(args, argv[retcnt]);
 		if(opt == NULL) // 找不到这个参数
@@ -630,11 +642,35 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 		void* rangelist[] = {NULL, &opt->extargs_int_min, &opt->extargs_double_min};
 		
 		string type = getType(opt->extargs_type);
-		if(needPrintTypeInfo(retcnt, argc, argv[retcnt + 1], opt->extargs_type, setlist, rangelist)) { // 参数不足时错误处理，只有这个函数有友元不知道有什么更简明的实现方式了
-			if(retcnt + 1 >= argc)
+		if(needPrintTypeInfo(retcnt, argc, argv[retcnt + 1], opt->extargs_type, setlist, rangelist, opt->extargs_string_default)) { // 参数不足时错误处理，只有这个函数有友元不知道有什么更简明的实现方式了
+			// 输出报错信息
+			if(retcnt + 1 >= argc) 
 				cout << "参数[" << argv[retcnt] << "]的附加参数不足. (";
-			else 
+			else if(checkIsCommand(argv[retcnt + 1]))
 				cout << "参数[" << argv[retcnt] << "]缺少附加参数. (";
+			else if(checkInputTypeError(argv[retcnt + 1], type)) {
+				if(type == "IP地址" && !checkIsIPAddr(argv[retcnt + 1])) { // IP 地址错误直接返回即可
+					cout << "参数[--iperr]的附加参数值(1)非法. (类型:IP地址)";
+					return -1;
+				}
+				cout << "参数[" << argv[retcnt] << "]的附加参数不是" << getTypeInChinese(opt->extargs_type) << ". (";
+			}
+			else {
+				if(type == "int") {
+					int x = atoi(argv[retcnt + 1]);
+					cout << "参数[" << argv[retcnt] << "]的附加参数值(" << x << ")非法. (";
+				}
+				else if(type == "double") {
+					double x = stod(argv[retcnt + 1]);
+					cout << "参数[" << argv[retcnt] << "]的附加参数值(" << x << ")非法. (";
+				}
+				else if(type == "string")
+					cout << "参数[" << argv[retcnt] << "]的附加参数值(" << argv[retcnt + 1] << ")非法. (";
+				else 
+					cout << "<Error Output ID: FHIOQJS>\n";
+			}
+			
+			// 输出类型信息
 			cout << "类型:" << type;
 			if(isSet(opt->extargs_type) || isRange(opt->extargs_type) || isDefualt(opt->extargs_type, opt->extargs_string_default))
 				cout << ",";
@@ -669,9 +705,51 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 			return -1;
 		}
 		
+		if(isSet(opt->extargs_type)) {
+			if(!checkNotInSet(argv[retcnt + 1], type, setlist)) {
+				if(type == "int") 
+					opt->extargs_int_value = atoi(argv[retcnt + 1]);
+				if(type == "double")
+					opt->extargs_double_value = stod(string(argv[retcnt + 1]));
+				if(type == "string") 
+					opt->extargs_string_value = string(argv[retcnt + 1]);
+			}
+			else
+				opt->giveInitValue();
+		}
+		if(isRange(opt->extargs_type)) {
+			if(!checkNotInRange(argv[retcnt + 1], type, rangelist)) {
+				if(type == "int") 
+					opt->extargs_int_value = atoi(argv[retcnt + 1]);
+				if(type == "double")
+					opt->extargs_double_value = stod(string(argv[retcnt + 1]));
+			}
+			else
+				opt->giveInitValue();
+		}
+		if(!isSet(opt->extargs_type) && !isRange(opt->extargs_type)) {
+			if(type == "int") 
+				opt->extargs_int_value = atoi(argv[retcnt + 1]);
+			if(type == "double")
+				opt->extargs_double_value = stod(string(argv[retcnt + 1]));
+			if(type == "string") 
+				opt->extargs_string_value = string(argv[retcnt + 1]);
+			if(type == "IP地址") {
+				opt->extargs_string_value = string(argv[retcnt + 1]);
+				opt->extargs_ipaddr_value = getIntIPAddr(opt->extargs_string_value);
+			}
+		}
+		++retcnt;
 	}
-	if(retcnt == argc || follow_up_args)
+	if(retcnt == argc || follow_up_args) {
+		args_analyse_tools* p = args;
+		while(p->get_name() != invalidVal <string> ()) {
+			if(!p->existed())
+				p->giveInitValue();
+			p++;
+		}
 		return retcnt;
+	}
 	cout << "参数[" << argv[retcnt] << "]非法\n";
 	return -1; //此句根据需要修改
 }
@@ -786,7 +864,8 @@ int args_analyse_print(const args_analyse_tools* const args)
 		p++;
 	}
 
-	cout << setw(tot) << setfill('=') << "=" << setfill(' ') << endl;
+	cout << setw(tot) << setfill('=') << "=" << setfill(' ') << endl << endl;
+	cout.unsetf(ios::fixed);
 	return 0; //此句根据需要修改
 }
 
