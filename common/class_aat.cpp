@@ -15,6 +15,56 @@ using namespace std;
 	 允许加入其它需要static函数（内部工具用）
    ---------------------------------------------------------------- */
 
+template <class _T>
+static _T invalidVal() // 返回对应类型的末尾数值
+{
+	if (typeid(_T) == typeid(int))
+		return (_T)(INVALID_INT_VALUE_OF_SET);
+	else
+		return _T();
+}
+
+template <>
+static double invalidVal() // 不能模板元所以要特化double
+{
+	return INVALID_DOUBLE_VALUE_OF_SET;
+}
+
+template <>
+static string invalidVal() // 不能模板元所以要特化string
+{
+	return string("");
+}
+
+// IP addr: uint->string
+static string getStringIPAddr(const u_int ip)
+{
+
+	string ret;
+	u_int ipval = ip;
+	for (int i = 0; i < 4; i++) {
+		ret = to_string(ipval & ((1u << 8) - 1)) + ret;
+		if (i != 3)
+			ret = "." + ret;
+		ipval >>= 8;
+	}
+	return ret;
+}
+
+// IP addr: string->uint
+static u_int getIntIPAddr(const string s)
+{
+	int pos = 0, nxtpos = 0;
+	u_int ret = 0;
+	while ((nxtpos = s.find('.', pos)) != -1) {
+		ret = (ret << 8) + atoi(s.substr(pos, nxtpos - pos).c_str());
+		pos = nxtpos + 1;
+	}
+	nxtpos = s.size();
+	ret = (ret << 8) + atoi(s.substr(pos, nxtpos - pos).c_str());
+	return ret;
+}
+
 /***************************************************************************
   函数名称：
   功    能：
@@ -287,34 +337,6 @@ const unsigned int args_analyse_tools::get_ipaddr() const
 	return this->extargs_ipaddr_value;
 }
 
-// IP addr: uint->string
-static string getStringIPAddr(const u_int ip)
-{
-	string ret;
-	u_int ipval = ip;
-	for (int i = 0; i < 4; i++) {
-		ret = to_string(ipval & ((1u << 8) - 1)) + ret;
-		if (i != 3)
-			ret = "." + ret;
-		ipval >>= 8;
-	}
-	return ret; 
-}
-
-// IP addr: string->uint
-static u_int getIntIPAddr(const string s)
-{
-	int pos = 0, nxtpos = 0;
-	u_int ret = 0;
-	while ((nxtpos = s.find('.', pos)) != -1) {
-		ret = (ret << 8) + atoi(s.substr(pos, nxtpos - pos).c_str());
-		pos = nxtpos + 1;
-	}
-	nxtpos = s.size();
-	ret = (ret << 8) + atoi(s.substr(pos, nxtpos - pos).c_str());
-	return ret;
-}
-
 /***************************************************************************
   函数名称：
   功    能：
@@ -402,20 +424,36 @@ static bool isRange(const ST_EXTARGS_TYPE t)
 	return 0;
 }
 
-template <class _T>
-static _T invalidVal() // 返回对应类型的末尾数值
+static bool checkIsIPAddr(string s)
 {
-	if(typeid(_T) == typeid(int))
-		return INVALID_INT_VALUE_OF_SET;
-	if(typeid(_T) == typeid(double))
-		return INVALID_DOUBLE_VALUE_OF_SET;
-	if(typeid(_T) == typeid(string))
-		return string("");
-	return _T();
+	int cnt = 0;
+	int pos[5] = {0};
+	for(u_int i = 0; i < s.size(); i++) {
+		cnt += (s[i] == '.');
+		pos[cnt] = i;
+		if(cnt > 3)
+			return 0;
+	}
+	if(cnt != 3)
+		return 0;
+	pos[4] = s.size();
+	string subs[4];
+	for(int i = 0; i < 4; i++) {
+		subs[i] = s.substr(pos[i], pos[i + 1] - pos[i]);
+		if(subs[i] == "")
+			return 0;
+		for(u_int j = 0; j < subs[i].size(); j++) {
+			if(isdigit(subs[i][j]) == 0)
+				return 0;
+		}
+		if(atoi(subs[i].c_str()) < 0 || atoi(subs[i].c_str()) > 255)
+			return 0;
+	}
+	return 1;
 }
 
 template <class _T>
-static void printList(void* ptr) // 打印 a/b/c/d 这种东西
+static void printList(_T* ptr) // 打印 a/b/c/d 这种东西
 {
 	_T *p = ptr;
 	bool flag = 1;
@@ -427,6 +465,123 @@ static void printList(void* ptr) // 打印 a/b/c/d 这种东西
 		cout << *p;
 		p++;
 	}
+}
+
+template <class _T>
+static void printRange(_T mn, _T mx)
+{
+	cout << "[" << mn << ".." << mx << "]";
+}
+
+template <class _T>
+static bool checkInputTypeError_attachPart(_T &x, stringstream &sin)
+{
+	string ts;
+	bool flag1, flag2;
+	sin >> x;
+	flag1 = sin.fail();
+	sin >> ts;
+	flag2 = sin.good();
+	return flag1 || flag2; // 第一次失败或第二次成功都是错误
+}
+
+static bool checkInputTypeError(string s, string type)
+{
+	stringstream sin;
+	sin.str(s);
+	if(type == "int") {
+		int x;
+		return checkInputTypeError_attachPart(x, sin);
+	}
+	if(type == "double") {
+		double x;
+		return checkInputTypeError_attachPart(x, sin);
+	}
+	if(type == "string") {
+		string x;
+		return checkInputTypeError_attachPart(x, sin);
+	}
+	if(type == "IP地址") {
+		string x;
+		if(checkInputTypeError_attachPart(x, sin))
+			return 1;
+		return checkIsIPAddr(s);
+	}
+	return 0;
+}
+
+template <class _T>
+static bool IsInList(string s, _T *li)
+{
+	stringstream sin;
+	sin.str(s);
+	_T x, *ptr = li;
+	sin >> x;
+	while(*ptr != invalidVal <_T> ()) {
+		if(*ptr == x)
+			return 1;
+		ptr++;
+	}
+	return 0;
+}
+
+#define LIST_BOOL_POS 	0
+#define LIST_INT_POS  	1
+#define LIST_DOUBLE_POS 2
+#define LIST_STRING_POS 3
+#define LIST_IP_POS 	4
+
+static bool checkNotInSet(string s, string type, void** setlist)
+{
+	if(type == "int") {
+		int* setl = (int*)setlist[LIST_INT_POS];
+		return !IsInList(s, setl);
+	}
+	if(type == "double") {
+		double* setl = (double*)setlist[LIST_DOUBLE_POS];
+		return !IsInList(s, setl);
+	}
+	if(type == "string") {
+		string* setl = (string*)setlist[LIST_STRING_POS];
+		return !IsInList(s, setl);
+	}
+	return 0;
+}
+
+static bool checkNotInRange(string s, string type, void** rangelist)
+{
+	stringstream sin(s);
+	if (type == "int") {
+		int x;
+		sin >> x;
+		int mn = **(int**)rangelist;
+		int mx = *(*(int**)rangelist + 1);
+		return x >= mn && x <= mx;
+	}
+	if (type == "double") {
+		double x;
+		sin >> x;
+		double mn = **(double**)rangelist;
+		double mx = *(*(double**)rangelist + 1);
+		return x >= mn - DOUBLE_DELTA && x <= mx + DOUBLE_DELTA;
+	}
+	return 0;
+}
+
+static bool needPrintTypeInfo(int retcnt, int argc, string arg, ST_EXTARGS_TYPE opttype, void** setlist, void** rangelist)
+{
+	string type = getType(opttype);
+	if(retcnt + 1 >= argc)
+		return 1;
+	if(checkIsCommand(arg.c_str()))
+		return 1;
+	if(checkInputTypeError(arg, type))
+		return 1;
+	if(isSet(opttype) && checkNotInSet(arg, type, setlist))
+		return 1;
+	if(isRange(opttype) && checkNotInRange(arg, type, rangelist))
+		return 1;
+	return 0;
 }
 
 /***************************************************************************
@@ -451,9 +606,11 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 		opt->args_existed = 1;
 		if(opt->extargs_num == 0)
 			continue;
+		void* setlist[] = {NULL, opt->extargs_int_set, opt->extargs_double_set, opt->extargs_string_set};
+		void* rangelist[] = {NULL, &opt->extargs_int_min, &opt->extargs_double_min};
 		
 		string type = getType(opt->extargs_type);
-		if(retcnt + 1 >= argc || checkIsCommand(argv[retcnt + 1]) || checkInputTypeError(argv[retcnt + 1], type) || (isSet(opt->extargs_type) && checkNotInSet(argv[retcnt + 1], type)) || (isRange(opt->extargs_type) && checkNotInRange(argv[retcnt + 1], type))) { // 参数不足时错误处理，只有这个函数有友元不知道有什么更简明的实现方式了
+		if(needPrintTypeInfo(retcnt, argc, argv[retcnt + 1], opt->extargs_type, setlist, rangelist)) { // 参数不足时错误处理，只有这个函数有友元不知道有什么更简明的实现方式了
 			if(retcnt + 1 >= argc)
 				cout << "参数[" << argv[retcnt] << "]的附加参数不足. (";
 			else 
@@ -462,22 +619,20 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 			if(isSet(opt->extargs_type) || isRange(opt->extargs_type) || isDefualt(opt->extargs_type))
 				cout << ",";
 			if(isSet(opt->extargs_type)) {
-				cout << " 可取值[";
+				cout << " 可取值";
 				if(type == "int") 
-					printList <int> (opt->extargs_int_set);
+					printList (opt->extargs_int_set);
 				if(type == "double")
-					printList <double> (opt->extargs_double_set);
+					printList (opt->extargs_double_set);
 				if(type == "string")
-					printList <string> (opt->extargs_string_set);
-				cout << "]";
+					printList (opt->extargs_string_set);
 			}
 			if(isRange(opt->extargs_type)) {
-				cout << " 范围[";
-				if(type == "int")
-					cout << opt->extargs_int_min << ".." << opt->extargs_int_max;
-				if(type == "double")
-					cout << opt->extargs_double_min << ".." << opt->extargs_double_max;
-				cout << "]";
+				cout << " 范围";
+				if (type == "int")
+					printRange(opt->extargs_int_min, opt->extargs_int_max);
+				if (type == "double")
+					printRange(opt->extargs_double_min, opt->extargs_double_max);
 			}
 			if(isDefualt(opt->extargs_type)) {
 				cout << " 缺省:";
@@ -511,12 +666,7 @@ int args_analyse_process(const int argc, const char* const *const argv, args_ana
 ***************************************************************************/
 int args_analyse_print(const args_analyse_tools* const args)
 {
-	int* ptr = args[4].extargs_int_set;
-	while (*ptr != INVALID_INT_VALUE_OF_SET) {
-		cout << *ptr << ", ";
-		ptr++;
-	}
-	cout << endl;
+	
 	return 0; //此句根据需要修改
 }
 

@@ -56,7 +56,23 @@ enum class ST_EXTARGS_TYPE {
 	 const全局变量/static全局变量(慎用)/define/class/struct/enum/enum class/union等
    ---------------------------------------------------------------- */
 
-
+const string TYPE_NAME[] = {
+	"null",
+	"Bool",
+	"IntWithDefault",
+	"IntWithError",
+	"IntSETWithDefault",
+	"IntSETWithError",
+	"DoubleWithDefault",
+	"DoubleWithError",
+	"DoubleSETWithDefault",
+	"DoubleSETWithError",
+	"String",
+	"StringSETWithDefault",
+	"StringSETWithError",
+	"IPAddrWithDefault",
+	"IPAddrWithError"
+};
 
 /* ---------------------------------------------------------------
 	   class args_analyse_tools的定义，已有部分不要动，允许private加入其它需要的定义
