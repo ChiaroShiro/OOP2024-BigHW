@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
 
 
-	int need_fixed_args = 0;	//试试改为1
+	int need_fixed_args = 1;	//试试改为1
 	int cur_argc;
 
 	/* 最后一个参数：1 - 表示除选项参数外，还需要其它参数

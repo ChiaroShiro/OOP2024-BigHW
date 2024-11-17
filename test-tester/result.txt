@@ -637,26 +637,26 @@
   例：--intdef 100000
       --interr 100000
 
-====================================================================================================================
- name           type                 default        exists value      range/set
-====================================================================================================================
- --help         Bool                 false          0      /          /
- --bool         Bool                 true           0      /          /
- --intdef       IntWithDefault       12345          0      /          [0..65535]
- --interr       IntWithError         /              0      /          [0..65535]
- --intsetdef    IntSETWithDefault    33             0      /          11/22/33/123/345
- --intseterr    IntSETWithError      /              0      /          11/22/33/123/345
- --doubledef    DoubleWithDefault    1.230000       1      101.234000 [-2.500000..99.900000]
- --doubleerr    DoubleWithError      /              0      /          [-2.500000..99.900000]
- --doublesetdef DoubleSETWithDefault 3.300000       0      /          1.100000/2.200000/3.300000/12.300000/3.450000
- --doubleseterr DoubleSETWithError   /              0      /          1.100000/2.200000/3.300000/12.300000/3.450000
- --str1         String               /              0      /          /
- --str2         String               Hello          0      /          /
- --strsetdef    StringSETWithDefault sha256         0      /          md5/sha1/sha224/sha256/sha384/sha512/all
- --strseterr    StringSETWithError   /              0      /          md5/sha1/sha224/sha256/sha384/sha512/all
- --ipdef        IPAddrWithDefault    192.168.80.230 0      /          /
- --iperr        IPAddrWithError      /              0      /          /
-====================================================================================================================
+==================================================================================================================
+ name           type                 default        exists value    range/set
+==================================================================================================================
+ --help         Bool                 false          0      /        /
+ --bool         Bool                 true           0      /        /
+ --intdef       IntWithDefault       12345          0      /        [0..65535]
+ --interr       IntWithError         /              0      /        [0..65535]
+ --intsetdef    IntSETWithDefault    33             0      /        11/22/33/123/345
+ --intseterr    IntSETWithError      /              0      /        11/22/33/123/345
+ --doubledef    DoubleWithDefault    1.230000       1      1.230000 [-2.500000..99.900000]
+ --doubleerr    DoubleWithError      /              0      /        [-2.500000..99.900000]
+ --doublesetdef DoubleSETWithDefault 3.300000       0      /        1.100000/2.200000/3.300000/12.300000/3.450000
+ --doubleseterr DoubleSETWithError   /              0      /        1.100000/2.200000/3.300000/12.300000/3.450000
+ --str1         String               /              0      /        /
+ --str2         String               Hello          0      /        /
+ --strsetdef    StringSETWithDefault sha256         0      /        md5/sha1/sha224/sha256/sha384/sha512/all
+ --strseterr    StringSETWithError   /              0      /        md5/sha1/sha224/sha256/sha384/sha512/all
+ --ipdef        IPAddrWithDefault    192.168.80.230 0      /        /
+ --iperr        IPAddrWithError      /              0      /        /
+==================================================================================================================
 
 ================================================================================
 参数名          参数是否出现在命令行中  值1                 值2                 
@@ -666,7 +666,7 @@
 --interr        0                       12345               
 --intsetdef     0                       33                  
 --intseterr     0                       33                  
---doubledef     1                       101.234             
+--doubledef     1                       1.23                
 --doubleerr     0                       1.23                
 --doublesetdef  0                       3.3                 
 --doubleseterr  0                       3.3                 
@@ -773,55 +773,8 @@
 --ipdef         0                       c0a850e6            192.168.80.230      
 --iperr         0                       0                   0.0.0.0             
 ================================================================================
-参数[--doubleerr]的附加参数值(-3)非法. (类型:double, 范围[-2.500000..99.900000])
-
-请认真观察打印输出中，对应项的exist是否为1，值是否为预期
-
-查看default与error区别的方法：
-  给出不在指定范围内的值，会看出差别
-  例：--intdef 100000
-      --interr 100000
-
-====================================================================================================================
- name           type                 default        exists value      range/set
-====================================================================================================================
- --help         Bool                 false          0      /          /
- --bool         Bool                 true           0      /          /
- --intdef       IntWithDefault       12345          0      /          [0..65535]
- --interr       IntWithError         /              0      /          [0..65535]
- --intsetdef    IntSETWithDefault    33             0      /          11/22/33/123/345
- --intseterr    IntSETWithError      /              0      /          11/22/33/123/345
- --doubledef    DoubleWithDefault    1.230000       0      /          [-2.500000..99.900000]
- --doubleerr    DoubleWithError      /              1      101.234000 [-2.500000..99.900000]
- --doublesetdef DoubleSETWithDefault 3.300000       0      /          1.100000/2.200000/3.300000/12.300000/3.450000
- --doubleseterr DoubleSETWithError   /              0      /          1.100000/2.200000/3.300000/12.300000/3.450000
- --str1         String               /              0      /          /
- --str2         String               Hello          0      /          /
- --strsetdef    StringSETWithDefault sha256         0      /          md5/sha1/sha224/sha256/sha384/sha512/all
- --strseterr    StringSETWithError   /              0      /          md5/sha1/sha224/sha256/sha384/sha512/all
- --ipdef        IPAddrWithDefault    192.168.80.230 0      /          /
- --iperr        IPAddrWithError      /              0      /          /
-====================================================================================================================
-
-================================================================================
-参数名          参数是否出现在命令行中  值1                 值2                 
-================================================================================
---bool          0                       False
---intdef        0                       12345               
---interr        0                       12345               
---intsetdef     0                       33                  
---intseterr     0                       33                  
---doubledef     0                       1.23                
---doubleerr     1                       101.234             
---doublesetdef  0                       3.3                 
---doubleseterr  0                       3.3                 
---str1          0                       <NULL>              
---str2          0                       Hello               
---strsetdef     0                       sha256              
---strseterr     0                       sha256              
---ipdef         0                       c0a850e6            192.168.80.230      
---iperr         0                       0                   0.0.0.0             
-================================================================================
+参数[--doubleerr]的附加参数值(-3)非法. (类型:double, 范围[-2.5..99.9])
+参数[--doubleerr]的附加参数值(101.234)非法. (类型:double, 范围[-2.5..99.9])
 
 请认真观察打印输出中，对应项的exist是否为1，值是否为预期
 
@@ -967,7 +920,7 @@
 --ipdef         0                       c0a850e6            192.168.80.230      
 --iperr         0                       0                   0.0.0.0             
 ================================================================================
-参数[--doubleseterr]的附加参数值(5.6)非法. (类型:double, 可取值[1.100000/2.200000/3.300000/12.300000/3.450000])
+参数[--doubleseterr]的附加参数值(5.6)非法. (类型:double, 可取值[1.1/2.2/3.3/12.3/3.45])
 参数[--doubleseterr]重复.
 
 请认真观察打印输出中，对应项的exist是否为1，值是否为预期
@@ -1214,7 +1167,203 @@
 ================================================================================
 参数[--strseterr]的附加参数值(md4)非法. (类型:string, 可取值[md5/sha1/sha224/sha256/sha384/sha512/all])
 参数[--strseterr]重复.
-参数[--iperr]的附加参数值(1)非法. (类型:IP地址)参数[--iperr]的附加参数值(1)非法. (类型:IP地址)参数[--iperr]的附加参数值(1)非法. (类型:IP地址)参数[--iperr]的附加参数值(1)非法. (类型:IP地址)参数[--iperr]的附加参数值(1)非法. (类型:IP地址)参数[--iperr]的附加参数值(1)非法. (类型:IP地址)参数[--iperr]的附加参数值(1)非法. (类型:IP地址)参数[--iperr]的附加参数值(1)非法. (类型:IP地址)指定需要固定参数，但未给出
+
+请认真观察打印输出中，对应项的exist是否为1，值是否为预期
+
+查看default与error区别的方法：
+  给出不在指定范围内的值，会看出差别
+  例：--intdef 100000
+      --interr 100000
+
+=================================================================================================================
+ name           type                 default        exists value   range/set
+=================================================================================================================
+ --help         Bool                 false          0      /       /
+ --bool         Bool                 true           0      /       /
+ --intdef       IntWithDefault       12345          0      /       [0..65535]
+ --interr       IntWithError         /              0      /       [0..65535]
+ --intsetdef    IntSETWithDefault    33             0      /       11/22/33/123/345
+ --intseterr    IntSETWithError      /              0      /       11/22/33/123/345
+ --doubledef    DoubleWithDefault    1.230000       0      /       [-2.500000..99.900000]
+ --doubleerr    DoubleWithError      /              0      /       [-2.500000..99.900000]
+ --doublesetdef DoubleSETWithDefault 3.300000       0      /       1.100000/2.200000/3.300000/12.300000/3.450000
+ --doubleseterr DoubleSETWithError   /              0      /       1.100000/2.200000/3.300000/12.300000/3.450000
+ --str1         String               /              0      /       /
+ --str2         String               Hello          0      /       /
+ --strsetdef    StringSETWithDefault sha256         0      /       md5/sha1/sha224/sha256/sha384/sha512/all
+ --strseterr    StringSETWithError   /              0      /       md5/sha1/sha224/sha256/sha384/sha512/all
+ --ipdef        IPAddrWithDefault    192.168.80.230 1      1.1.1.1 /
+ --iperr        IPAddrWithError      /              0      /       /
+=================================================================================================================
+
+================================================================================
+参数名          参数是否出现在命令行中  值1                 值2                 
+================================================================================
+--bool          0                       False
+--intdef        0                       12345               
+--interr        0                       12345               
+--intsetdef     0                       33                  
+--intseterr     0                       33                  
+--doubledef     0                       1.23                
+--doubleerr     0                       1.23                
+--doublesetdef  0                       3.3                 
+--doubleseterr  0                       3.3                 
+--str1          0                       <NULL>              
+--str2          0                       Hello               
+--strsetdef     0                       sha256              
+--strseterr     0                       sha256              
+--ipdef         1                       1010101             1.1.1.1             
+--iperr         0                       0                   0.0.0.0             
+================================================================================
+
+请认真观察打印输出中，对应项的exist是否为1，值是否为预期
+
+查看default与error区别的方法：
+  给出不在指定范围内的值，会看出差别
+  例：--intdef 100000
+      --interr 100000
+
+========================================================================================================================
+ name           type                 default        exists value          range/set
+========================================================================================================================
+ --help         Bool                 false          0      /              /
+ --bool         Bool                 true           0      /              /
+ --intdef       IntWithDefault       12345          0      /              [0..65535]
+ --interr       IntWithError         /              0      /              [0..65535]
+ --intsetdef    IntSETWithDefault    33             0      /              11/22/33/123/345
+ --intseterr    IntSETWithError      /              0      /              11/22/33/123/345
+ --doubledef    DoubleWithDefault    1.230000       0      /              [-2.500000..99.900000]
+ --doubleerr    DoubleWithError      /              0      /              [-2.500000..99.900000]
+ --doublesetdef DoubleSETWithDefault 3.300000       0      /              1.100000/2.200000/3.300000/12.300000/3.450000
+ --doubleseterr DoubleSETWithError   /              0      /              1.100000/2.200000/3.300000/12.300000/3.450000
+ --str1         String               /              0      /              /
+ --str2         String               Hello          0      /              /
+ --strsetdef    StringSETWithDefault sha256         0      /              md5/sha1/sha224/sha256/sha384/sha512/all
+ --strseterr    StringSETWithError   /              0      /              md5/sha1/sha224/sha256/sha384/sha512/all
+ --ipdef        IPAddrWithDefault    192.168.80.230 1      192.168.80.230 /
+ --iperr        IPAddrWithError      /              0      /              /
+========================================================================================================================
+
+================================================================================
+参数名          参数是否出现在命令行中  值1                 值2                 
+================================================================================
+--bool          0                       False
+--intdef        0                       12345               
+--interr        0                       12345               
+--intsetdef     0                       33                  
+--intseterr     0                       33                  
+--doubledef     0                       1.23                
+--doubleerr     0                       1.23                
+--doublesetdef  0                       3.3                 
+--doubleseterr  0                       3.3                 
+--str1          0                       <NULL>              
+--str2          0                       Hello               
+--strsetdef     0                       sha256              
+--strseterr     0                       sha256              
+--ipdef         1                       c0a850e6            192.168.80.230      
+--iperr         0                       0                   0.0.0.0             
+================================================================================
+参数[--ipdef]重复.
+
+请认真观察打印输出中，对应项的exist是否为1，值是否为预期
+
+查看default与error区别的方法：
+  给出不在指定范围内的值，会看出差别
+  例：--intdef 100000
+      --interr 100000
+
+=================================================================================================================
+ name           type                 default        exists value   range/set
+=================================================================================================================
+ --help         Bool                 false          0      /       /
+ --bool         Bool                 true           0      /       /
+ --intdef       IntWithDefault       12345          0      /       [0..65535]
+ --interr       IntWithError         /              0      /       [0..65535]
+ --intsetdef    IntSETWithDefault    33             0      /       11/22/33/123/345
+ --intseterr    IntSETWithError      /              0      /       11/22/33/123/345
+ --doubledef    DoubleWithDefault    1.230000       0      /       [-2.500000..99.900000]
+ --doubleerr    DoubleWithError      /              0      /       [-2.500000..99.900000]
+ --doublesetdef DoubleSETWithDefault 3.300000       0      /       1.100000/2.200000/3.300000/12.300000/3.450000
+ --doubleseterr DoubleSETWithError   /              0      /       1.100000/2.200000/3.300000/12.300000/3.450000
+ --str1         String               /              0      /       /
+ --str2         String               Hello          0      /       /
+ --strsetdef    StringSETWithDefault sha256         0      /       md5/sha1/sha224/sha256/sha384/sha512/all
+ --strseterr    StringSETWithError   /              0      /       md5/sha1/sha224/sha256/sha384/sha512/all
+ --ipdef        IPAddrWithDefault    192.168.80.230 0      /       /
+ --iperr        IPAddrWithError      /              1      1.1.1.1 /
+=================================================================================================================
+
+================================================================================
+参数名          参数是否出现在命令行中  值1                 值2                 
+================================================================================
+--bool          0                       False
+--intdef        0                       12345               
+--interr        0                       12345               
+--intsetdef     0                       33                  
+--intseterr     0                       33                  
+--doubledef     0                       1.23                
+--doubleerr     0                       1.23                
+--doublesetdef  0                       3.3                 
+--doubleseterr  0                       3.3                 
+--str1          0                       <NULL>              
+--str2          0                       Hello               
+--strsetdef     0                       sha256              
+--strseterr     0                       sha256              
+--ipdef         0                       c0a850e6            192.168.80.230      
+--iperr         1                       1010101             1.1.1.1             
+================================================================================
+参数[--iperr]的附加参数值(1.1.1.1234)非法. (类型:IP地址)
+参数[--iperr]重复.
+
+请认真观察打印输出中，对应项的exist是否为1，值是否为预期
+
+查看default与error区别的方法：
+  给出不在指定范围内的值，会看出差别
+  例：--intdef 100000
+      --interr 100000
+
+========================================================================================================================
+ name           type                 default        exists value          range/set
+========================================================================================================================
+ --help         Bool                 false          1      true           /
+ --bool         Bool                 true           0      /              /
+ --intdef       IntWithDefault       12345          1      12345          [0..65535]
+ --interr       IntWithError         /              1      123            [0..65535]
+ --intsetdef    IntSETWithDefault    33             1      33             11/22/33/123/345
+ --intseterr    IntSETWithError      /              1      11             11/22/33/123/345
+ --doubledef    DoubleWithDefault    1.230000       1      1.230000       [-2.500000..99.900000]
+ --doubleerr    DoubleWithError      /              1      2.340000       [-2.500000..99.900000]
+ --doublesetdef DoubleSETWithDefault 3.300000       1      12.300000      1.100000/2.200000/3.300000/12.300000/3.450000
+ --doubleseterr DoubleSETWithError   /              1      12.300000      1.100000/2.200000/3.300000/12.300000/3.450000
+ --str1         String               /              1      Hello,         /
+ --str2         String               Hello          1      Tong Ji        /
+ --strsetdef    StringSETWithDefault sha256         1      sha256         md5/sha1/sha224/sha256/sha384/sha512/all
+ --strseterr    StringSETWithError   /              1      md5            md5/sha1/sha224/sha256/sha384/sha512/all
+ --ipdef        IPAddrWithDefault    192.168.80.230 1      192.168.80.230 /
+ --iperr        IPAddrWithError      /              1      10.80.42.245   /
+========================================================================================================================
+
+================================================================================
+参数名          参数是否出现在命令行中  值1                 值2                 
+================================================================================
+--bool          0                       False
+--intdef        1                       12345               
+--interr        1                       123                 
+--intsetdef     1                       33                  
+--intseterr     1                       11                  
+--doubledef     1                       1.23                
+--doubleerr     1                       2.34                
+--doublesetdef  1                       12.3                
+--doubleseterr  1                       12.3                
+--str1          1                       Hello,              
+--str2          1                       Tong Ji             
+--strsetdef     1                       sha256              
+--strseterr     1                       md5                 
+--ipdef         1                       c0a850e6            192.168.80.230      
+--iperr         1                       a502af5             10.80.42.245        
+================================================================================
+参数[extra]格式非法(不是--开头的有效内容).
+指定需要固定参数，但未给出
 还有2个固定参数，具体某个参数对应的动作由具体程序决定，本处忽略
 extra1
 extra2
