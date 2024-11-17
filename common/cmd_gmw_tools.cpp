@@ -806,57 +806,6 @@ int gmw_set_colno_switch(CONSOLE_GRAPHICS_INFO *const pCGI, const bool on_off)
 
 /***************************************************************************
   函数名称：
-  功    能：打印 CONSOLE_GRAPHICS_INFO 结构体中的各成员值
-  输入参数：
-  返 回 值：
-  说    明：1、仅供调试用，打印格式自定义
-            2、本函数测试用例中未调用过，可以不实现
-***************************************************************************/
-int gmw_print(const CONSOLE_GRAPHICS_INFO *const pCGI)
-{
-	/* 防止在未调用 gmw_init 前调用其它函数 */
-	if (pCGI->inited != CGI_INITED)
-		return -1;
-	cct_cls();
-	cct_setfontsize("新宋体", 16);
-	cct_gotoxy(0, 0);
-	for(int i = 1; i <= 4; i++) {
-		for(int j = 0; j < 11; j++) {
-			shows(DEFAULT_TAB[i][j]);
-			putchar(' ');
-		}
-		puts("");
-	}
-	puts("GMW DEBUG INFO:\n"); // debug 函数里面用下 printf 应该没问题吧，其他地方都没有用，最终版也没有哪个地方会调用这个函数
-	printf("bgcolor = %d, fgcolor = %d\n", pCGI->area_bgcolor, pCGI->area_fgcolor);
-	printf("游戏主框架区域包含的块的行列数 col_num = %d, row_num = %d\n", pCGI->col_num, pCGI->row_num);
-	printf("附加去：up = %d, down = %d, left = %d, right = %d\n", pCGI->extern_up_lines, pCGI->extern_down_lines, pCGI->extern_left_cols, pCGI->extern_right_cols);
-	printf("cmd窗口的大小 cols = %d, lines = %d\n", pCGI->cols, pCGI->lines);
-	printf("主框架起始位置 (startx = %d, starty = %d)，框线起始位置 (framex = %d, framey = %d)\n", pCGI->start_x, pCGI->start_y, pCGI->frame_x, pCGI->frame_y);
-	printf("框线样式：");
-	char *ptr = (char*)&pCGI->CFI;
-	for(int i = 0; i < 11; i++) {
-		shows(ptr);
-		ptr += CFI_LEN;
-	}
-	puts("");
-	shows(pCGI->CFI.top_left);
-	puts("");
-	printf("框架总大小：wid = %d, high = %d\n", pCGI->CFI.tot_wid, pCGI->CFI.tot_high);
-	printf("是否有分割线：%c, 是否有上状态栏 %c, 是否有下状态栏 %c，是否有行号 %c，是否有列号 %c\n", 
-			"FT"[pCGI->CFI.separator], "FT"[pCGI->top_status_line], "FT"[pCGI->lower_status_line], "FT"[pCGI->draw_frame_with_row_no], "FT"[pCGI->draw_frame_with_col_no]);
-	printf("色块宽度和高度 wid = %d, high = %d\n", pCGI->CFI.block_width, pCGI->CFI.block_high);
-	printf("色块总大小： wid = %d, high = %d\n", pCGI->CFI.bwidth, pCGI->CFI.bhigh);
-	printf("区域总色 area_bg = %d, area_fg = %d\n", pCGI->area_bgcolor, pCGI->area_fgcolor);
-	printf("上状态栏: norbg = %d, norfg = %d, chbg = %d, chfg = %d\n", pCGI->SLI.top_normal_bgcolor, pCGI->SLI.top_normal_fgcolor, pCGI->SLI.top_catchy_bgcolor, pCGI->SLI.top_catchy_fgcolor);
-	printf("下状态栏: norbg = %d, norfg = %d, chbg = %d, chfg = %d\n", pCGI->SLI.lower_normal_bgcolor, pCGI->SLI.lower_normal_fgcolor, pCGI->SLI.lower_catchy_bgcolor, pCGI->SLI.lower_catchy_fgcolor);
-	printf("状态栏长度：width = %d\n", pCGI->SLI.width);
-	_getch();
-	return 0; //此句可根据需要修改
-}
-
-/***************************************************************************
-  函数名称：
   功    能：将 CONSOLE_GRAPHICS_INFO 结构体用缺省值进行初始化
   输入参数：CONSOLE_GRAPHICS_INFO *const pCGI：整体结构指针
 		   const int row					：游戏区域色块行数（缺省10）

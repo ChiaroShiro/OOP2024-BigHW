@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test_args_analyse_tools.cpp">
+    <ClCompile Include="my_ping.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\common\class_aat.cpp">
@@ -24,9 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\class_aat.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lib_aat_tools.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
