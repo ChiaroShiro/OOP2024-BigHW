@@ -12,19 +12,15 @@
 
 //允许定义其它需要的结构体（类）、常量、常变量等
 
-template <size_t _SZ>
 class Color {
 public:
-	char data[_SZ];
+	char data[4];
+	int sz;
 	Color();
 
-	int oneColorBits();
-	int colorBits();
-	int exBits();
-};
-
-class Picture {
-
+	int red();
+	int green();
+	int blue();
 };
 
 class bitmap {
@@ -33,8 +29,9 @@ private:
 	int w; // 图片宽度
 	int h; // 图片高度
 	int bpp; // 每一个像素有多少位
-	bool haveColp; // 是否有调色板
-	Color <32> colp[256]; // 调色板
+	int cpsz; // 调色板大小
+	Color colp[300]; // 调色板
+	Color** pic; // 数据
 	
 public:
 	//公有部分不允许添加任何内容
