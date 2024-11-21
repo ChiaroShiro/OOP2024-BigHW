@@ -83,20 +83,12 @@ bitmap::bitmap(const char *const filename)
 		for (int i = 0; i < this->cpsz; i++)
 			fin.read((char*)&this->colp[i], 4);
 	}
-	pic = new Color* [h];
-	if (pic == NULL)
-		return;
-	for (int i = 0; i < h; i++) {
-		pic[i] = new Color[w];
-		if (pic[i] == NULL)
-			return;
-	}
+	pic = buildMatrix(h, w);
 	fin.seekg(databeg, ios::beg);
 
 	for (int i = 0; i < h; i++) {
 		int movbyt = 0;
 		for (int j = 0; j < w;) {
-			pic[i][j].sz = bpp;
 			if (bpp <= 8) {
 				char c;
 				fin.read((char*)&c, 1);
@@ -111,6 +103,7 @@ bitmap::bitmap(const char *const filename)
 			}
 			else {
 				fin.read((char*)&pic[i][j].data, bpp / 8);
+				pic[i][j].sz = bpp;
 				j++;
 				movbyt += bpp / 8;
 			}
