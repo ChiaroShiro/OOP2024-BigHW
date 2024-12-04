@@ -11,8 +11,7 @@
 #include "../include/class_cft.h"
 using namespace std;
 
-#define TEST_FOR_FIXED_FILE	1
-
+#define TEST_FOR_FIXED_FILE	0
 #if TEST_FOR_FIXED_FILE
 
 /***************************************************************************

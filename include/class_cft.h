@@ -56,7 +56,6 @@ private:
 	bool is_read_succeeded_value;
 
 	void read_cfg_file(const string& _cfgname, const enum BREAK_CTYPE _ctype);
-	int getItemValue(const string& group_name, const string& item_name, string& val, const bool group_is_case_sensitive, const bool item_is_case_sensitive);
 	/* 允许添加其它需要的数据成员和成员函数（private部分仅允许自用而不对外） */
 
 public:
