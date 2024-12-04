@@ -136,7 +136,7 @@ public:
 	const u_int get_ipaddr() const;	//返回某设置项的值（IP地址，以"127.0.0.1"为例，返回u_int32型的 0x7f000001）
 	const string get_str_ipaddr() const;	//返回某设置项的值（IP地址，以"127.0.0.1"为例，返回字符串形式的"127.0.0.1"）
 
-    /* 对参数进行分析，返回0/-1 */
+	/* 对参数进行分析，返回0/-1 */
 	friend int args_analyse_process(const int argc, const char* const *const argv, args_analyse_tools* const args, const int follow_up_args);
 	/* 打印分析后的结果 */
 	friend int args_analyse_print(const args_analyse_tools*const args);

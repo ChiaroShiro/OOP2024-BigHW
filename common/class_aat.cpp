@@ -42,6 +42,36 @@ static string invalidVal() // ÌØ»¯string
 	return string("");
 }
 
+static bool checkIsIPAddr(string s)
+{
+	int cnt = 0;
+	int pos[5] = {0};
+	for(u_int i = 0; i < s.size(); i++) {
+		if(s[i] == '.') {
+			pos[++cnt] = i;
+			if(cnt > 3)
+				return 0;
+		}
+	}
+	if(cnt != 3)
+		return 0;
+	pos[0] = -1;
+	pos[4] = s.size() + 1;
+	string subs[4];
+	for(int i = 0; i < 4; i++) {
+		subs[i] = s.substr(pos[i] + 1, pos[i + 1] - pos[i] - 1);
+		if(subs[i] == "")
+			return 0;
+		for(u_int j = 0; j < subs[i].size(); j++) {
+			if(isdigit(subs[i][j]) == 0)
+				return 0;
+		}
+		if(atoi(subs[i].c_str()) < 0 || atoi(subs[i].c_str()) > 255)
+			return 0;
+	}
+	return 1;
+}
+
 // IP addr: uint->string
 static string getStringIPAddr(const u_int ip)
 {
@@ -447,36 +477,6 @@ static bool isRange(const ST_EXTARGS_TYPE t)
 	if(t == ST_EXTARGS_TYPE::double_with_default || t == ST_EXTARGS_TYPE::double_with_error)
 		return 1;
 	return 0;
-}
-
-static bool checkIsIPAddr(string s)
-{
-	int cnt = 0;
-	int pos[5] = {0};
-	for(u_int i = 0; i < s.size(); i++) {
-		if(s[i] == '.') {
-			pos[++cnt] = i;
-			if(cnt > 3)
-				return 0;
-		}
-	}
-	if(cnt != 3)
-		return 0;
-	pos[0] = -1;
-	pos[4] = s.size() + 1;
-	string subs[4];
-	for(int i = 0; i < 4; i++) {
-		subs[i] = s.substr(pos[i] + 1, pos[i + 1] - pos[i] - 1);
-		if(subs[i] == "")
-			return 0;
-		for(u_int j = 0; j < subs[i].size(); j++) {
-			if(isdigit(subs[i][j]) == 0)
-				return 0;
-		}
-		if(atoi(subs[i].c_str()) < 0 || atoi(subs[i].c_str()) > 255)
-			return 0;
-	}
-	return 1;
 }
 
 template <class _T>

@@ -37,7 +37,7 @@ void wait_for_enter()
   返 回 值：
   说    明：
 ***************************************************************************/
-int readconfig_yzmond_conf(const char *const fname)
+int readconfig_yzmond_conf(const char* const fname)
 {
 	config_file_tools sCfg(fname); //分隔符是=
 
@@ -81,7 +81,7 @@ int readconfig_yzmond_conf(const char *const fname)
 	cout << "bind_port = " << mycfg.bind_port << endl;
 	cout << "dbserver_ip = " << hex << mycfg.dbserver_ip << dec << endl;
 	cout << "dbserver_port = " << mycfg.dbserver_port << endl;
-	cout << "log_tcp = " << (mycfg.is_long_tcp ? "Yes":"No") << endl;
+	cout << "log_tcp = " << (mycfg.is_long_tcp ? "Yes" : "No") << endl;
 	cout << "db_bufsize = " << mycfg.db_bufsize << "字节" << endl;
 	cout << "memory_toplimit = " << mycfg.memory_toplimit << "%" << endl;
 
@@ -217,7 +217,7 @@ int readconfig_homework_conf(const char* const fname)
 
 	/* 专业全称和简称的对应关系虽然是 xxx=yyy格式，但xxx未知（如果把专业全称写死在文件中再用 get_item_string 去读简称是非常愚蠢的非工程行为!!!），
 		需要全部取出来，后续再单独处理 */
-	const char *const gname = "[专业全称简称对照]";
+	const char* const gname = "[专业全称简称对照]";
 	vector <string> fname_sname_table;
 	if (sCfg.get_all_item(gname, fname_sname_table) == 0) {
 		cout << "未取到配置文件 [" << fname << "] 的 [" << gname << "] 组." << endl;

@@ -6,6 +6,7 @@
 #include <vector>
 #include <climits>
 /* 允许按需加入需要的头文件等 */ 
+#include <cfloat>
 using namespace std;
 
 static const int MAX_LINE = 1024;	//指定配置文件一行的最大长度，如果超过，则认为非法的配置文件
@@ -37,6 +38,11 @@ enum CFGITEM_TYPE {
 };
 
 /* 允许自定义其它需要的内容 */
+typedef pair <string, string> ITEM_TYPE;
+typedef pair <string, vector <string>> LINERAW_TYPE;
+typedef pair <string, vector <ITEM_TYPE>> DATA_TYPE;
+
+const double DOUBLE_EPS = 1e-10;
 
 /* 定义整个读配置文件类 */
 class config_file_tools {
@@ -44,6 +50,13 @@ private:
 	string   cfgname;
 	enum BREAK_CTYPE item_separate_character_type; //用于配置项名字和值的分隔符（例：分隔符"="，xxx=yyy /分隔符" \t"，xxx yyy或xxx\tyyy均可）
 
+	vector <DATA_TYPE> data; // [组名, [项目名, 项目值]]
+	vector <LINERAW_TYPE> lineraw; // [组名, [行内容]]
+
+	bool is_read_succeeded_value;
+
+	void read_cfg_file(const string& _cfgname, const enum BREAK_CTYPE _ctype);
+	int getItemValue(const string& group_name, const string& item_name, string& val, const bool group_is_case_sensitive, const bool item_is_case_sensitive);
 	/* 允许添加其它需要的数据成员和成员函数（private部分仅允许自用而不对外） */
 
 public:

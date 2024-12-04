@@ -21,9 +21,15 @@
     <ClCompile Include="..\common\class_cft.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\class_aat.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\class_cft.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\class_aat.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
