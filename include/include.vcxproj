@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="class_aat.h" />
+    <ClInclude Include="class_cft.h" />
     <ClInclude Include="cmd_console_tools.h" />
     <ClInclude Include="cmd_gmw_tools.h" />
     <ClInclude Include="io_tools.h" />

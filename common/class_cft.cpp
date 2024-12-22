@@ -32,37 +32,41 @@ typedef unsigned int u_int;
 // 检查IP地址格式
 static bool checkIsIPAddr(string s)
 {
-	int cnt = 0;
-	int pos[5] = {0};
+	int cnt = 0; // 记录点的数量
+	int pos[5] = {0}; // 记录每个点的位置
 	for(u_int i = 0; i < s.size(); i++) {
 		if(s[i] == '.') {
-			pos[++cnt] = i;
-			if(cnt > 3)
-				return 0;
+			pos[++cnt] = i; // 记录点的位置
+			if(cnt > 3) // 如果点的数量超过3个，返回false
+				return false;
 		}
 	}
-	if(cnt != 3)
-		return 0;
+	if(cnt != 3) // 如果点的数量不等于3，返回false
+		return false;
 	pos[0] = -1;
 	pos[4] = s.size() + 1;
-	string subs[4];
+	string subs[4]; // 存储每个分段
 	for(int i = 0; i < 4; i++) {
-		subs[i] = s.substr(pos[i] + 1, pos[i + 1] - pos[i] - 1);
-		if(subs[i] == "")
-			return 0;
+		subs[i] = s.substr(pos[i] + 1, pos[i + 1] - pos[i] - 1); // 提取分段
+		if(subs[i] == "") // 如果分段为空，返回false
+			return false;
 		for(u_int j = 0; j < subs[i].size(); j++) {
-			if(isdigit(subs[i][j]) == 0)
-				return 0;
+			if(!isdigit(subs[i][j])) // 如果分段中有非数字字符，返回false
+				return false;
 		}
-		if(atoi(subs[i].c_str()) < 0 || atoi(subs[i].c_str()) > 255)
-			return 0;
+		int num = atoi(subs[i].c_str()); // 将分段转换为整数
+		if(num < 0 || num > 255) // 如果整数不在0到255之间，返回false
+			return false;
 	}
-	return 1;
+	return true; // 如果所有检查都通过，返回true
 }
 
 // IP addr: string->uint
 static u_int getIntIPAddr(const string s)
 {
+	if (!checkIsIPAddr(s)) {
+		exit(EXIT_FAILURE);
+	}
 	int pos = 0, nxtpos = 0;
 	u_int ret = 0;
 	while ((nxtpos = s.find('.', pos)) != -1) {

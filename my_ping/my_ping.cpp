@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 		args_analyse_tools("--l",    ST_EXTARGS_TYPE::int_with_default, 1, 64, 32, 64000), //[32..64000]，默认64
 		args_analyse_tools("--ip",   ST_EXTARGS_TYPE::ipaddr_with_error,1, string("")),
 		args_analyse_tools()  //最后一个，用于结束
-};
+	};
 
 	/* 不带任何参数做特殊处理，打印提示信息后结束 */
 	if (argc == 1) {
