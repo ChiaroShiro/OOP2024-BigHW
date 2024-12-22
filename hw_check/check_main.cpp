@@ -3,8 +3,8 @@
 #include <string>
 #include <cmath>
 #include <iomanip>
-#include <sstream>
 #include "../include/class_aat.h"
+#include "../include_mariadb_x86/mysql/mysql.h"      // mysql特有
 #include "hw_check.h"
 #include "debug.h"
 
@@ -34,11 +34,16 @@ int main(int argc, char* argv[])
 	int mode = argvChecker(args, argv, info);
 	if(mode == 0)
 		return 0;
-	__debug_info(info);
+	__debugInfo(info);
+	string path;
+	MYSQL* mysql;
 
+	if(!dataMain(info, path, mysql)) {
+		cout << "数据初始化失败" << endl;
+		return -1;
+	}
 
-	
-
+	__debugSQLQueryAll(mysql, info);
 
 	if(mode == 1)
 		baseMain(info);

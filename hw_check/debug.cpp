@@ -12,7 +12,7 @@ static bool checkCanDebug(INFO info) {
     return false;
 }
 
-void __debug_info(INFO info) 
+void __debugInfo(INFO info) 
 {
     if(checkCanDebug(info)) {
 		cout << "课号: ";
@@ -31,5 +31,29 @@ void __debug_info(INFO info)
 		cout << "  错误信息: " << (info.printError ? "显示" : "不显示") << endl;
 		cout << "  汇总信息: " << (info.printSummary ? "显示" : "不显示") << endl;
 		cout << "  严重错误信息: " << (info.printSevere ? "显示" : "不显示") << endl;
+	}
+}
+
+void __debugMySQL(string dbserver, string dbuser, string dbpasswd, string dbname, INFO info)
+{
+	if(checkCanDebug(info)) {
+		cout << "数据库服务器: " << dbserver << endl;
+		cout << "数据库用户名: " << dbuser << endl; 
+		cout << "数据库密码: " << dbpasswd << endl;
+		cout << "数据库名称: " << dbname << endl;
+	}
+}
+
+void __debugSQLQueryAll(MYSQL* mysql, INFO info) 
+{
+	if(checkCanDebug(info)) {
+		cout << "查询所有作业信息" << endl;
+		vector<vector<string>> res = sqlQuery(mysql, "select * from view_hwcheck_hwlist");
+		for(vector<string>& row : res) {
+			for(string& col : row) {
+				cout << col << " ";
+			}
+			cout << endl;
+		}
 	}
 }

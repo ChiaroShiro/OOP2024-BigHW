@@ -57,4 +57,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\lib_mariadb_x86\libmariadb.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+  </ItemGroup>
 </Project>
