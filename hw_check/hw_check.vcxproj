@@ -134,8 +134,10 @@
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="first.cpp" />
     <ClCompile Include="parser.cpp" />
+    <ClCompile Include="printer.cpp" />
     <ClCompile Include="second.cpp" />
     <ClCompile Include="data.cpp" />
+    <ClCompile Include="tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\class_aat.h" />

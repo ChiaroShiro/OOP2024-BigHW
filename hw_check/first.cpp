@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void firstlineMain(INFO info) 
+void firstlineMain(INFO info, MYSQL* mysql, string path) 
 {
 	
 }

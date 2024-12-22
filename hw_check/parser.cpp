@@ -1,3 +1,5 @@
+// 解析命令行参数
+
 #include "../include/class_aat.h"
 #include "hw_check.h"
 #include <iostream>
@@ -8,7 +10,6 @@ using namespace std;
 
 void usage(const char* const full_procname);
 
-const string args_name[] = {"--help", "--debug", "--action", "--cno", "--stu", "--file", "--chapter", "--week", "--display", "--cfgfile", ""};
 #define HELP 		(string("--help"))
 #define DEBUG 		(string("--debug"))
 #define ACTION 		(string("--action"))
@@ -20,6 +21,7 @@ const string args_name[] = {"--help", "--debug", "--action", "--cno", "--stu", "
 #define DISPLAY 	(string("--display"))
 #define CFGFILE 	(string("--cfgfile"))
 
+// 获取对应名字的参数
 static args_analyse_tools& getArgs(string argname, args_analyse_tools* args) 
 {
 	int i = 0;
@@ -31,6 +33,7 @@ static args_analyse_tools& getArgs(string argname, args_analyse_tools* args)
 	return args[i];
 }
 
+// 检查display参数是否正确
 static bool checkDisplay(args_analyse_tools* args, char* argv[]) 
 {
 	if(getArgs(DISPLAY, args).get_string().length() != 5) {
@@ -46,6 +49,7 @@ static bool checkDisplay(args_analyse_tools* args, char* argv[])
 	return 1;
 }
 
+// 检查必要参数是否存在
 static bool checkNecessary(args_analyse_tools* args, char* argv[]) 
 {
 	if(getArgs(ACTION, args).existed() == 0 || getArgs(CNO, args).existed() == 0 || getArgs(STU, args).existed() == 0 || getArgs(FILE, args).existed() == 0) {
@@ -55,6 +59,7 @@ static bool checkNecessary(args_analyse_tools* args, char* argv[])
 	return 1;
 }
 
+// 检查cno参数是否正确
 static bool checkCno(args_analyse_tools* args, char* argv[], INFO& info) 
 {
 	static const string cno_set[] = {"10108001", "10108002", "5000244001602"};
@@ -87,6 +92,7 @@ static bool checkCno(args_analyse_tools* args, char* argv[], INFO& info)
 	return 0;
 }
 
+// 检查命令行参数是否正确
 int argvChecker(args_analyse_tools* args, char* argv[], INFO& info) 
 {
 	if(getArgs(HELP, args).existed() == 1) {
@@ -108,10 +114,30 @@ int argvChecker(args_analyse_tools* args, char* argv[], INFO& info)
 		cout << "secondline模式下仅支持单个文件" << endl;
 		return 0;
 	}
+	if(getArgs(ACTION, args).get_string() == "secondline" && getArgs(STU, args).get_string() != "all") {
+		cout << "secondline模式下仅支持全体学生" << endl;
+		return 0;
+	}
 	if(getArgs(FILE, args).get_string() != "all" && (getArgs(CHAPTER, args).get_int() != -1 || getArgs(WEEK, args).get_int() != -1)) {
 		cout << "参数[--chapter/--week]不能出现在[--file 单个文件名]时" << endl;
 		return 0;
 	}
+	if(getArgs(ACTION, args).get_string() == "secondline" && getArgs(FILE, args).get_string() != "all") {
+		string file = getArgs(FILE, args).get_string();
+		string cno = info.cno[0];
+		bool valid = false;
+		
+		if(cno == "50002440016" && file == "5-b14.c")
+			valid = true;
+		else if(cno == "101080" && (file == "15-b2.cpp" || file == "15-b5.c"))
+			valid = true;
+			
+		if(!valid) {
+			cout << "secondline模式下文件名错误" << endl;
+			return 0;
+		}
+	}
+	
 	info.stu = getArgs(STU, args).get_string();
 	info.file = getArgs(FILE, args).get_string();
 	info.chapter = getArgs(CHAPTER, args).get_int();
@@ -119,23 +145,19 @@ int argvChecker(args_analyse_tools* args, char* argv[], INFO& info)
 	info.cfgfile = getArgs(CFGFILE, args).get_string();
 	info.debug = getArgs(DEBUG, args).existed();
 	bool *ptr = &info.printNormal;
-	for(char c: getArgs(DISPLAY, args).get_string()) {
-		*ptr = c - '0';
-		ptr++;
-	}
-	if(getArgs(ACTION, args).get_string() == "base") {
+	for(char c: getArgs(DISPLAY, args).get_string())
+		*ptr++ = c - '0';
+	if(getArgs(ACTION, args).get_string() == "base") 
 		return 1;
-	}
-	if(getArgs(ACTION, args).get_string() == "firstline") {
+	if(getArgs(ACTION, args).get_string() == "firstline")
 		return 2;
-	}
-	if(getArgs(ACTION, args).get_string() == "secondline") {
+	if(getArgs(ACTION, args).get_string() == "secondline")
 		return 3;
-	}
 	usage(argv[0]);
 	return 0;
 }
 
+// 打印使用方法
 void usage(const char* const full_procname)
 {
 	const char *procname = strrchr(full_procname, '\\');

@@ -6,10 +6,14 @@
 using namespace std;
 
 static bool checkCanDebug(INFO info) {
+#if DEBUG_MODE
+	return true;
+#else
     if(info.debug) {
         return true;
     }
     return false;
+#endif
 }
 
 void __debugInfo(INFO info) 
@@ -55,5 +59,11 @@ void __debugSQLQueryAll(MYSQL* mysql, INFO info)
 			}
 			cout << endl;
 		}
+	}
+}
+
+void __debugPrint(INFO info, string str) {
+	if(checkCanDebug(info)) {
+		cout << str << endl;
 	}
 }

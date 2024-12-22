@@ -30,27 +30,30 @@ int main(int argc, char* argv[])
 	int cur_argc = 0;
 	if ((cur_argc = args_analyse_process(argc, argv, args, 0)) < 0)
 		return -1;
+	
+	// 解析命令行参数
 	INFO info;
 	int mode = argvChecker(args, argv, info);
 	if(mode == 0)
 		return 0;
 	__debugInfo(info);
+
+	// 连接数据库、数据处理
 	string path;
 	MYSQL* mysql;
-
 	if(!dataMain(info, path, mysql)) {
 		cout << "数据初始化失败" << endl;
 		return -1;
 	}
-
 	__debugSQLQueryAll(mysql, info);
 
+	// 开始处理
 	if(mode == 1)
-		baseMain(info);
+		baseMain(info, mysql, path);
 	else if(mode == 2)
-		firstlineMain(info);
+		firstlineMain(info, mysql, path);
 	else if(mode == 3)
-		secondlineMain(info);
+		secondlineMain(info, mysql, path);
 	return 0;
 }
 
