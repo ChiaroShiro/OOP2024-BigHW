@@ -128,14 +128,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\class_aat.cpp" />
+    <ClCompile Include="..\common\class_cft.cpp" />
     <ClCompile Include="base.cpp" />
     <ClCompile Include="check_main.cpp" />
+    <ClCompile Include="debug.cpp" />
     <ClCompile Include="first.cpp" />
+    <ClCompile Include="parser.cpp" />
     <ClCompile Include="second.cpp" />
-    <ClCompile Include="tools.cpp" />
+    <ClCompile Include="data.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\class_aat.h" />
+    <ClInclude Include="..\include\class_cft.h" />
+    <ClInclude Include="debug.h" />
     <ClInclude Include="hw_check.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
