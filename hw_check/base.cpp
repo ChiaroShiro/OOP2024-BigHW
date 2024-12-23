@@ -57,16 +57,26 @@ void baseMain(INFO info, MYSQL* mysql, string path)
 	string sql = generateSQLQueryFromInfo(info, "hw_filename");
 	__debugPrint(info, sql);
 	vector <_VS> sqlResult = sqlQuery(mysql, sql);
+	if(sqlResult.empty()) {
+		cout << "未找到相关数据" << endl;
+		return;
+	}
 	_VS filenames, names, stu_no;
 	for(_VS row : sqlResult) {
 		filenames.push_back(row[0]);
 	}
 	sql = generateSQLQuery(0, "stu_no, stu_name", _VS {"stu_cno = " + info.cno[0]});
 	sqlResult = sqlQuery(mysql, sql);
+	if(sqlResult.empty()) {
+		cout << "未找到相关数据" << endl;
+		return;
+	}
 	for(_VS row : sqlResult) {
 		stu_no.push_back(row[0]);
 		names.push_back(row[1]);
 	}
-
-	multifilePrinter(path, filenames, names, stu_no, info.cno[0], baseChecker, initPairVector);
+	if(filenames.size() == 1)
+		singlefilePrinter(path, filenames[0], names, stu_no, info.cno, baseChecker, initPairVector);
+	else
+		multifilePrinter(path, filenames, names, stu_no, info.cno[0], baseChecker, initPairVector);
 }

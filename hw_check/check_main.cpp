@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iomanip>
 #include "../include/class_aat.h"
-#include "../include_mariadb_x86/mysql/mysql.h"      // mysqlÃÿ”–
+#include "../include_mariadb_x86/mysql/mysql.h"
 #include "hw_check.h"
 #include "debug.h"
 

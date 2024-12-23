@@ -52,8 +52,8 @@ void __debugSQLQueryAll(MYSQL* mysql, INFO info)
 {
 	if(checkCanDebug(info)) {
 		cout << "查询所有作业信息" << endl;
-		vector<vector<string>> res = sqlQuery(mysql, "select * from view_hwcheck_hwlist");
-		for(vector<string>& row : res) {
+		vector<_VS> res = sqlQuery(mysql, "select * from view_hwcheck_hwlist");
+		for(_VS& row : res) {
 			for(string& col : row) {
 				cout << col << " ";
 			}

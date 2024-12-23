@@ -3,38 +3,37 @@
 #include <iostream>
 #include <string>
 #include "../include/class_cft.h"
-
-#include "../include_mariadb_x86/mysql/mysql.h"      // mysql特有
+#include "../include_mariadb_x86/mysql/mysql.h"
 
 using namespace std;
 
 
-/*
-+-----------------+------------+------+-----+---------+-------+
-| Field           | Type       | Null | Key | Default | Extra |
-+-----------------+------------+------+-----+---------+-------+
-| stu_term        | char(11)   | NO   |     |         |       |
-| stu_grade       | char(4)    | NO   |     |         |       |
-| stu_no          | char(8)    | NO   |     |         |       |
-| stu_name        | char(32)   | NO   |     |         |       |
-| stu_sex         | varchar(1) | NO   |     |         |       |
-| stu_class_fname | char(32)   | NO   |     |         |       |
-| stu_class_sname | char(16)   | NO   |     |         |       |
-| stu_cno         | char(16)   | YES  |     | NULL    |       |
-+-----------------+------------+------+-----+---------+-------+
+/**
++------------------------+------------+------+-----+---------+-------+
+| Field                  | Type       | Null | Key | Default | Extra |
++------------------------+------------+------+-----+---------+-------+
+| @param stu_term        | char(11)   | NO   |     |         |       |
+| @param stu_grade       | char(4)    | NO   |     |         |       |
+| @param stu_no          | char(8)    | NO   |     |         |       |
+| @param stu_name        | char(32)   | NO   |     |         |       |
+| @param stu_sex         | varchar(1) | NO   |     |         |       |
+| @param stu_class_fname | char(32)   | NO   |     |         |       |
+| @param stu_class_sname | char(16)   | NO   |     |         |       |
+| @param stu_cno         | char(16)   | YES  |     | NULL    |       |
++------------------------+------------+------+-----+---------+-------+
 
 
-+-------------+--------------+------+-----+---------+-------+
-| Field       | Type         | Null | Key | Default | Extra |
-+-------------+--------------+------+-----+---------+-------+
-| hw_ftype    | int(2)       | NO   |     | 0       |       |
-| hw_cno      | char(16)     | NO   |     | NULL    |       |
-| hw_id       | smallint(6)  | NO   |     | NULL    |       |
-| hw_chapter  | tinyint(4)   | NO   |     | NULL    |       |
-| hw_week     | tinyint(4)   | NO   |     | NULL    |       |
-| hw_filename | char(64)     | NO   |     | NULL    |       |
-| hw_score    | decimal(5,1) | NO   |     | 0.0     |       |
-+-------------+--------------+------+-----+---------+-------+
++------------------------+--------------+------+-----+---------+-------+
+| Field                  | Type         | Null | Key | Default | Extra |
++------------------------+--------------+------+-----+---------+-------+
+| @param hw_ftype        | int(2)       | NO   |     | 0       |       |
+| @param hw_cno          | char(16)     | NO   |     | NULL    |       |
+| @param hw_id           | smallint(6)  | NO   |     | NULL    |       |
+| @param hw_chapter      | tinyint(4)   | NO   |     | NULL    |       |
+| @param hw_week         | tinyint(4)   | NO   |     | NULL    |       |
+| @param hw_filename     | char(64)     | NO   |     | NULL    |       |
+| @param hw_score        | decimal(5,1) | NO   |     | 0.0     |       |
++------------------------+--------------+------+-----+---------+-------+
 */
 
 const string STUDENT_TABLE = "view_hwcheck_stulist";
@@ -57,21 +56,16 @@ string generateSQLQuery(int stu_or_hw, string resultList, _VS conditions, string
 string generateSQLQueryFromInfo(INFO info, string resultList)
 {
 	_VS conditions;
-	if(info.cno.size() == 1) {
+	if(info.cno.size() == 1)
 		conditions.push_back("hw_cno = " + info.cno[0]);
-	}
-	else if(info.cno.size() == 2) {
+	else if(info.cno.size() == 2)
 		conditions.push_back("(hw_cno = " + info.cno[0] + " or hw_cno = " + info.cno[1] + ")");
-	}
-	if(info.file != "all") {
-		conditions.push_back("hw_file = " + info.file);
-	}
-	if(info.chapter != -1) {
+	if(info.file != "all")
+		conditions.push_back("hw_filename = '" + info.file + "'");
+	if(info.chapter != -1)
 		conditions.push_back("hw_chapter = " + to_string(info.chapter));
-	}
-	if(info.week != -1) {
+	if(info.week != -1)
 		conditions.push_back("hw_week = " + to_string(info.week));
-	}
 	return generateSQLQuery(1, resultList, conditions);
 }
 
@@ -115,7 +109,7 @@ static bool initMySQL(config_file_tools& cfg, MYSQL*& mysql, INFO info)
 		return false;
 	}
 
-	/* 连接数据库，失败返回NULL
+	/** 连接数据库，失败返回NULL
 		1、mysqld没运行
 		2、没有指定名称的数据库存在 */
 	if (mysql_real_connect(mysql, dbserver.c_str(), dbuser.c_str(), dbpasswd.c_str(), dbname.c_str(), 0, NULL, 0) == NULL) {
@@ -138,7 +132,7 @@ bool dataMain(INFO info, string& path, MYSQL*& mysql)
 	cfg.item_get_raw("[文件目录]", "src_rootdir", path, 0, 0);
 
 	if(!initMySQL(cfg, mysql, info)) {
-		return false;
+		return 0;
 	}
 	return 1;
 }
