@@ -40,20 +40,18 @@ const string STUDENT_TABLE = "view_hwcheck_stulist";
 const string HW_TABLE = "view_hwcheck_hwlist";
 
 // stu_or_hw: 0-学生，1-作业
-string generateSQLQuery(int stu_or_hw, string resultList, _VS conditions, string connect) 
+string generateSQLQuery(int stu_or_hw, const string& resultList, const _VS& conditions, const string& connect) 
 {
 	string ret = "select " + resultList + " from " + (stu_or_hw == 0 ? STUDENT_TABLE : HW_TABLE);
 	if(conditions.size() > 0) {
 		ret += " where ";
-		for (int i = 0; i < int(conditions.size()); i++) {
+		for (int i = 0; i < int(conditions.size()); i++)
 			ret += conditions[i] + ' ' + (i == conditions.size() - 1 ? "" : connect) + ' ';
-		}
 	}
-	ret += ";";
-	return ret;
+	return ret + ';';
 }
 
-string generateSQLQueryFromInfo(INFO info, string resultList)
+string generateSQLQueryFromInfo(const INFO& info, const string& resultList)
 {
 	_VS conditions;
 	if(info.cno.size() == 1)
@@ -69,7 +67,7 @@ string generateSQLQueryFromInfo(INFO info, string resultList)
 	return generateSQLQuery(1, resultList, conditions);
 }
 
-vector <_VS> sqlQuery(MYSQL* mysql, string sql) 
+vector <_VS> sqlQuery(MYSQL* mysql, const string& sql) 
 {
 	if (mysql_query(mysql, sql.c_str())) {
 		cout << "mysql_query failed(" << mysql_error(mysql) << ")" << endl;
@@ -88,41 +86,32 @@ vector <_VS> sqlQuery(MYSQL* mysql, string sql)
 			tmp.push_back(string(row[i]));
 		res.push_back(tmp);
 	}
-
 	mysql_free_result(result);
 	return res;
 }
 
-static bool initMySQL(config_file_tools& cfg, MYSQL*& mysql, INFO info) 
+static bool initMySQL(config_file_tools& cfg, MYSQL*& mysql, const INFO& info) 
 {
 	string dbserver, dbuser, dbpasswd, dbname;
 	cfg.item_get_raw("[数据库]", "db_host", dbserver, 0, 0);
 	cfg.item_get_raw("[数据库]", "db_username", dbuser, 0, 0);
 	cfg.item_get_raw("[数据库]", "db_passwd", dbpasswd, 0, 0);
 	cfg.item_get_raw("[数据库]", "db_name", dbname, 0, 0);
-
 	__debugMySQL(dbserver, dbuser, dbpasswd, dbname, info);
 
-	/* 初始化 mysql 变量，失败返回NULL */
 	if ((mysql = mysql_init(NULL)) == NULL) {
 		cout << "mysql_init failed" << endl;
-		return false;
+		return 0;
 	}
-
-	/** 连接数据库，失败返回NULL
-		1、mysqld没运行
-		2、没有指定名称的数据库存在 */
 	if (mysql_real_connect(mysql, dbserver.c_str(), dbuser.c_str(), dbpasswd.c_str(), dbname.c_str(), 0, NULL, 0) == NULL) {
 		cout << "mysql_real_connect failed(" << mysql_error(mysql) << ")" << endl;
-		return false;
+		return 0;
 	}
-
-	/* 设置字符集，否则读出的字符乱码 */
 	mysql_set_character_set(mysql, "gbk");
 	return 1;
 }
 
-bool dataMain(INFO info, string& path, MYSQL*& mysql) 
+bool dataMain(const INFO& info, string& path, MYSQL*& mysql) 
 {
 	config_file_tools cfg(info.cfgfile);
 	if(cfg.is_read_succeeded() == 0) {
@@ -130,9 +119,7 @@ bool dataMain(INFO info, string& path, MYSQL*& mysql)
 		return 0;
 	}
 	cfg.item_get_raw("[文件目录]", "src_rootdir", path, 0, 0);
-
-	if(!initMySQL(cfg, mysql, info)) {
+	if(!initMySQL(cfg, mysql, info))
 		return 0;
-	}
 	return 1;
 }

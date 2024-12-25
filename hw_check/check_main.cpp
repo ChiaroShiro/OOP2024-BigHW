@@ -10,6 +10,13 @@
 
 using namespace std;
 
+// mysql -uhwcheck -p'hw_CheCk-For24251*oOP' -Dhomework
+// show tables;
+// view_hwcheck_hwlist;
+// view_hwcheck_stulist;
+// desc view_hwcheck_hwlist;
+// desc view_hwcheck_stulist;
+
 const string action_set[] = {"ERROR", "base", "firstline", "secondline", "help"};
 
 int main(int argc, char* argv[])
@@ -56,5 +63,3 @@ int main(int argc, char* argv[])
 		secondlineMain(info, mysql, path);
 	return 0;
 }
-
-

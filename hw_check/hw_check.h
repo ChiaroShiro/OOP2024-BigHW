@@ -5,11 +5,13 @@
 
 using namespace std;
 
-// #define DEBUG_MODE 		1
+#define DEBUG_MODE 		0
+
+typedef vector <string> _VS;
 
 class INFO {
 public:
-	vector<string> cno;
+	_VS cno;
 	string stu;
 	string file;
 	int chapter;
@@ -24,15 +26,22 @@ struct Pair {
     int num;
 };
 
-typedef string (*CHECKER_FUNC)(string, string&);
+class tableInfo {
+public:
+	_VS name; // 学生姓名
+	_VS allName; // 为满足demo特性专门放的数据
+	_VS stu_no; // 学生学号
+	_VS classc; // 班级全称
+	_VS classb; // 班级简称
+};
+
+typedef string (*CHECKER_FUNC)(const string&, string&, const tableInfo&);
 typedef void (*INIT_FUNC)(vector<Pair>&);
-#define _VS vector <string>
 
-
-const string SQL_STU = "select * from view_hwcheck_stulist ";
-const string SQL_HW = "select * from view_hwcheck_hwlist ";
-const string SQL_STU_ALL = "select * from view_hwcheck_stulist_all;";
-const string SQL_HW_ALL = "select * from view_hwcheck_hwlist_all;";
+// const string SQL_STU = "select * from view_hwcheck_stulist ";
+// const string SQL_HW = "select * from view_hwcheck_hwlist ";
+// const string SQL_STU_ALL = "select * from view_hwcheck_stulist_all;";
+// const string SQL_HW_ALL = "select * from view_hwcheck_hwlist_all;";
 
 /**
  * *检查命令行参数
@@ -52,7 +61,7 @@ int argvChecker(args_analyse_tools* args, char* argv[], INFO& info);
  * @param mysql: 存储数据库连接
  * @return: 返回是否成功
 */
-bool dataMain(INFO info, string& path, MYSQL*& mysql);
+bool dataMain(const INFO& info, string& path, MYSQL*& mysql);
 
 /**
  * *执行sql语句
@@ -60,7 +69,7 @@ bool dataMain(INFO info, string& path, MYSQL*& mysql);
  * @param sql: 执行的sql语句
  * @return: 返回查询结果
 */
-vector <_VS> sqlQuery(MYSQL* mysql, string sql);
+vector <_VS> sqlQuery(MYSQL* mysql, const string& sql);
 
 /**
  * *生成sql查询语句
@@ -70,7 +79,7 @@ vector <_VS> sqlQuery(MYSQL* mysql, string sql);
  * @param connect: 连接逻辑运算符
  * @return: 返回sql查询语句
 */
-string generateSQLQuery(int stu_or_hw, string resultList = "*", _VS conditions = _VS(), string connect = "and");
+string generateSQLQuery(int stu_or_hw, const string& resultList = "*", const _VS& conditions = _VS(), const string& connect = "and");
 
 /**
  * *从INFO中生成其对应的sql查询文件的语句
@@ -78,7 +87,7 @@ string generateSQLQuery(int stu_or_hw, string resultList = "*", _VS conditions =
  * @param resultList: 要查询哪些数据
  * @return: 返回sql查询语句
 */
-string generateSQLQueryFromInfo(INFO info, string resultList = "*");
+string generateSQLQueryFromInfo(const INFO& info, const string& resultList = "*");
 
 
 
@@ -87,42 +96,79 @@ string generateSQLQueryFromInfo(INFO info, string resultList = "*");
  * @param path: 文件路径
  * @return: 返回是否存在
 */
-bool checkFileExist(string path);
+bool checkFileExist(const string& path);
 
 /**
  * *获取文件名后缀
  * @param path: 文件路径
  * @return: 返回文件后缀
 */
-string getFileSuffix(string path);
+string getFileSuffix(const string& path);
 
 /**
  * *检测文件是否为UTF-8编码
  * @param path: 文件路径
  * @return: 返回是否为UTF-8编码
 */
-bool checkIsUTF8(string path);
+bool checkIsUTF8(const string& path);
 
 /**
  * *检测文件是否为mac文件
  * @param path: 文件路径
  * @return: 返回是否为mac文件
 */
-bool checkIsMacFile(string path);
+bool checkIsMacFile(const string& path);
+
+/**
+ * *提取文件的第line行	
+ * @param path: 文件路径
+ * @param line: 行号
+ * @return: 返回第line行
+*/
+string extractLine(const string& path, int line);
+
+/**
+ * *检测文件是否为注释行
+ * @param path: 文件路径
+ * @param line: 行号，取值只有 1/2
+ * @return: -1: 不是注释行; -2: 是错误的多行注释; 1: 是单行注释行; 2: 是正确多行注释
+*/	
+int checkLineIsComment(const string& path, int line);
+
+/**
+ * *去掉一行字符串前后空格以及注释
+ * @param str: 输入字符串
+ * @return: 返回处理后的字符串
+*/
+string trimComment(const string& str);
+
+/**
+ * *去掉字符串前后空格和制表符
+ * @param str: 输入字符串
+ * @return: 返回处理后的字符串
+*/
+string trim(const string& str);
+
+/**
+ * *判断字符串被空格或制表符分隔的项数
+ * @param str: 输入字符串
+ * @return: 返回项数
+*/
+int countItems(const string& str);
+
 
 
 /**
  * *多文件与单文件模式下的输出函数
  * @param path: 文件路径
  * @param filenames: 文件名列表
- * @param names: 学生姓名列表
- * @param stu_no: 学生学号列表
- * @param cno: 课程号
+ * @param table: 表信息
+ * @param cno: 课程号 （多课程下是一个字符串，单课程下是多个字符串）
  * @param checker: 检查函数
  * @param initPairVector: 初始化pair向量函数
 */
-void multifilePrinter(string path, _VS filenames, _VS names, _VS stu_no, string cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
-void singlefilePrinter(string path, string filename, _VS names, _VS stu_no, _VS cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
+void multifilePrinter(const string& path, const _VS& filenames, const tableInfo& table, const string& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
+void singlefilePrinter(const string& path, const string& filename, const tableInfo& table, const _VS& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
 
 
 /**
@@ -131,6 +177,6 @@ void singlefilePrinter(string path, string filename, _VS names, _VS stu_no, _VS 
  * @param mysql: 数据库连接
  * @param path: 文件路径
 */
-void baseMain(INFO info, MYSQL* mysql, string path);
-void firstlineMain(INFO info, MYSQL* mysql, string path);
-void secondlineMain(INFO info, MYSQL* mysql, string path);
+void baseMain(const INFO& info, MYSQL* mysql, const string& path);
+void firstlineMain(const INFO& info, MYSQL* mysql, const string& path);
+void secondlineMain(const INFO& info, MYSQL* mysql, const string& path);

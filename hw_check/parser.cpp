@@ -68,26 +68,17 @@ static bool checkCno(args_analyse_tools* args, char* argv[], INFO& info)
 		info.cno.push_back(cno);
 		return 1;
 	}
-	
 	// 处理可能带空格的逗号分隔形式
 	size_t pos = cno.find(",");
 	if(pos != string::npos) {
-		string cno1 = cno.substr(0, pos);
-		string cno2 = cno.substr(pos + 1);
-		
-		// 去除两边可能的空格
-		cno1.erase(0, cno1.find_first_not_of(" "));
-		cno1.erase(cno1.find_last_not_of(" ") + 1);
-		cno2.erase(0, cno2.find_first_not_of(" "));
-		cno2.erase(cno2.find_last_not_of(" ") + 1);
-		
+		string cno1 = trim(cno.substr(0, pos));
+		string cno2 = trim(cno.substr(pos + 1));
 		if(cno1 == cno_set[0] && cno2 == cno_set[1]) {
 			info.cno.push_back(cno1);
 			info.cno.push_back(cno2);
 			return 1;
 		}
 	}
-	
 	cout << "课号错误" << endl;
 	return 0;
 }
@@ -99,7 +90,6 @@ int argvChecker(args_analyse_tools* args, char* argv[], INFO& info)
 		usage(argv[0]);
 		return 0;
 	}
-
 	if(checkNecessary(args, argv) == 0)
 		return 0;
 	if(checkDisplay(args, argv) == 0)
@@ -125,19 +115,23 @@ int argvChecker(args_analyse_tools* args, char* argv[], INFO& info)
 	if(getArgs(ACTION, args).get_string() == "secondline" && getArgs(FILE, args).get_string() != "all") {
 		string file = getArgs(FILE, args).get_string();
 		string cno = info.cno[0];
-		bool valid = false;
-		
+		bool valid = 1;
 		if(cno == "50002440016" && file == "5-b14.c")
-			valid = true;
+			valid = 1;
 		else if(cno == "101080" && (file == "15-b2.cpp" || file == "15-b5.c"))
-			valid = true;
-			
+			valid = 1;
 		if(!valid) {
 			cout << "secondline模式下文件名错误" << endl;
 			return 0;
 		}
 	}
-	
+	if(getArgs(ACTION, args).get_string() == "firstline") {
+		string filestr = getFileSuffix(getArgs(FILE, args).get_string());
+		if(filestr != "h" && filestr != "cpp" && filestr != "c" && filestr != "hpp" && filestr != "all") {
+			cout << "首行检查的文件[" << getArgs(FILE, args).get_string() << "]必须是源程序文件" << endl;
+			return 0;
+		}
+	}
 	info.stu = getArgs(STU, args).get_string();
 	info.file = getArgs(FILE, args).get_string();
 	info.chapter = getArgs(CHAPTER, args).get_int();
