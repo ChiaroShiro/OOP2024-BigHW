@@ -198,7 +198,11 @@ _VS extractItems(const string &s);
  * @return: 该学号对应的所有数据: stu_no, stu_name, classb, classc, cno
  */
 _VS findRowByStuNo(const string& stuNo, const tableInfo& table);
-
+#define ROWPLACE_STU_NO 0
+#define ROWPLACE_STU_NAME 1
+#define ROWPLACE_CLASSB 2
+#define ROWPLACE_CLASSC 3
+#define ROWPLACE_CNO 4
 
 
 /**
@@ -213,6 +217,16 @@ _VS findRowByStuNo(const string& stuNo, const tableInfo& table);
 void multifilePrinter(const string& path, const _VS& filenames, const tableInfo& table, const string& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
 void singlefilePrinter(const string& path, const string& filename, const tableInfo& table, const _VS& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
 
+/**
+ * *交叉检查打印
+ * @param path: 文件路径
+ * @param filename: 文件名
+ * @param table: 表信息
+ * @param cno: 课程号 （多课程下是一个字符串，单课程下是多个字符串）
+ * @param extracter: 提取合法项函数
+ * @param checker: 检查函数
+*/
+void crossIdentifyPrinter(const string& path, const string& filename, const tableInfo& table, const _VS& cno, EXTRACT_FUNC extracter, CHECKER_FUNC checker);
 
 /**
  * *基础模式、第一行模式、第二行模式

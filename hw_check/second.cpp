@@ -18,16 +18,28 @@ static int checkHaveMine(const _VS &item, int pos, const tableInfo& table)
     string myid = table.stu_no[pos];
     for(int i = 0; i < int(item.size()); i += 2) {
         const string &s = item[i];
-		__debugPrint(__DEBUG_INFO, "s: " + s);
-		__debugPrint(__DEBUG_INFO, "s.size(): " + to_string(s.size()));
-        if(s == myid)
+        if(s == myid) // 检查者中包含自己
             return (1 << 8) + i;
-		if(i + 1 == int(item.size()))
+		if(i + 1 == int(item.size())) // 有单独项
 			return (1 << 9) + i;
-        if(s.size() != 7)
+        if(s.size() != 7) // 学号长度不对
             return (1 << 10) + i;
     }
     return 0;
+}
+
+static _VS extracter(const _VS &item, int pos, const tableInfo& table)
+{
+	_VS ret;
+	string myid = table.stu_no[pos];
+    for(int i = 0; i < int(item.size()); i += 2) {
+        const string &s = item[i];
+        if(s == myid || i + 1 == int(item.size()) || s.size() != 7)
+            break;
+		ret.push_back(s);
+		ret.push_back(item[i + 1]);
+    }
+    return ret;
 }
 
 static string secondLineChecker(const string& path, string& result, const tableInfo& table)
@@ -120,18 +132,16 @@ void secondlineMain(const INFO& info, MYSQL* mysql, const string& path)
 	}
 
 	// 获取所有满足stu_cno的学生列表
-	if(info.cno.size() == 1) {
+	if(info.cno.size() == 1)
 		sql = generateSQLQuery(0, "stu_name", {"stu_cno = " + info.cno[0]});
-	}
-	else {
+	else 
 		sql = generateSQLQuery(0, "stu_name", {"(stu_cno = " + info.cno[0] + " or stu_cno = " + info.cno[1] + ")"});
-	}
 	__debugPrint(info, sql);
 	sqlResult = sqlQuery(mysql, sql);
 	for(const _VS& row : sqlResult)
 		table.allName.push_back(row[0]);
 
 	singlefilePrinter(path, filenames[0], table, info.cno, secondLineChecker, initPairVector);
-
+	crossIdentifyPrinter(path, filenames[0], table, info.cno, extracter, secondLineChecker);
 
 }

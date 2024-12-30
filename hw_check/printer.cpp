@@ -164,9 +164,8 @@ void singlefilePrinter(const string& path, const string& filename, const tableIn
 		cout << setw(3) << left << i + 1 << ": " << stu_no[i] << "/" << setw(maxNameLen) << left << replaceChineseDot(names[i]) << ": ";
 		string result;
 		string path_stu = path + "/" + cno[0] + "-" + stu_no[i] + "/" + filename;
-		if(cno.size() == 2) {
-			path_stu = path + "/" + findRowByStuNo(stu_no[i], table)[4] + "-" + stu_no[i] + "/" + filename;
-		}
+		if(cno.size() == 2)
+			path_stu = path + "/" + findRowByStuNo(stu_no[i], table)[ROWPLACE_CNO] + "-" + stu_no[i] + "/" + filename;
 		cout << checker(path_stu, result, table) << endl;
 		updatePairVector(res, result);
 		totalFiles++;
@@ -183,15 +182,96 @@ void singlefilePrinter(const string& path, const string& filename, const tableIn
 	cout << endl;
 }
 
-void crossIdentifyPrinter(const string& path, const _VS& filenames, const tableInfo& table, const string& cno, EXTRACT_FUNC extracter)
+static bool checkIDExist(const string& id, const tableInfo& table) {
+	return findRowByStuNo(id, table) != _VS();
+}
+
+static bool checkNameRight(const string& id, const string& name, const tableInfo& table) {
+	return findRowByStuNo(id, table)[ROWPLACE_STU_NAME] == name;
+}
+
+// stu_no是否在id的列表中
+static bool checkInList(const string& id, const string& stu_no, const vector<_VS>& items, const tableInfo& table) {
+	for(int i = 0; i < int(table.stu_no.size()); i++) {
+		if(table.stu_no[i] == id) {
+			for(int j = 0; j < int(items[i].size()); j += 2) {
+				if(items[i][j] == stu_no)
+					return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+// id的列表中学号为stu_no的姓名是否为name
+static bool checkNameWrittenRight(const string& id, const string& stu_no, const string& name, const vector<_VS>& items, const tableInfo& table) {
+	for(int i = 0; i < int(table.stu_no.size()); i++) {
+		if(table.stu_no[i] == id) {
+			for(int j = 0; j < int(items[i].size()); j += 2) {
+				if(items[i][j] == stu_no)
+					return items[i][j + 1] == name;
+			}
+		}
+	}
+	return 0;
+}
+
+
+/**
+ * *交叉检查打印
+ * @param path: 文件路径
+ * @param filename: 文件名
+ * @param table: 表信息
+ * @param cno: 课程号 （多课程下是一个字符串，单课程下是多个字符串）
+ * @param extracter: 提取合法项函数
+ *  *提取一个学生的第二行合法项并作为_VS类型返回
+ * 	参数：
+ * 		@param item : 第二行所有的项
+ * 		@param pos : 学生序号
+ * 		@param table : 表信息
+ * @param checker: 检查函数
+ *  *返回一个用于输出的字符串，将检查的结果类型存到result中
+ * 	参数：
+ * 		@param path : 文件路径
+ * 		@param result : 检查结果
+ * 		@param table : 表信息
+*/
+void crossIdentifyPrinter(const string& path, const string& filename, const tableInfo& table, const _VS& cno, EXTRACT_FUNC extracter, CHECKER_FUNC checker)
 {
 	const _VS &names = table.name;
 	const _VS &stu_no = table.stu_no;
 	const _VS &cnos = table.cno;
-	int idwidth = to_string(names.size()).size();
 	cout << "交叉检查结果：\n";
+	vector<_VS> items; // items: 所有学生的所有项
 	for(int i = 0; i < int(names.size()); i++) {
-		cout << setw(idwidth) << right << i << " : " << cnos[i] << "-" << stu_no[i] << "-" << names[i] << '\n';
-		//_VS items = extracter();
+		string path_stu = path + "/" + cno[0] + "-" + stu_no[i] + "/" + filename;
+		if(cno.size() == 2)
+			path_stu = path + "/" + findRowByStuNo(stu_no[i], table)[ROWPLACE_CNO] + "-" + stu_no[i] + "/" + filename;
+		string result;
+		checker(path_stu, result, table);
+		if(result != "正确") {
+			items.push_back(_VS());
+			continue;
+		}
+		_VS item = extracter(extractItems(trimComment(extractLine(path_stu, 2))), i, table); // 提取对应的文件的第二行中合法的项
+		items.push_back(item);
 	}
+	for(int i = 0; i < int(names.size()); i++) {
+		cout << setw(3) << left << i + 1 << ": " << findRowByStuNo(stu_no[i], table)[ROWPLACE_CNO] << "-" << stu_no[i] << "-" << names[i] << endl;
+		for(int j = 0; j < int(items[i].size()); j += 2) {
+			const string &id = items[i][j];
+			const string &name = items[i][j + 1];
+			cout << "\t" << id << " " << name;
+			if(checkIDExist(id, table) == 0)
+				cout << "\t对方学号不存在";
+			else if(checkNameRight(id, name, table) == 0)
+				cout << "\t对方姓名不正确";
+			else if(checkInList(id, stu_no[i], items, table) == 0)
+				cout << "\t抛弃了你";
+			else if(checkNameWrittenRight(id, stu_no[i], names[i], items, table) == 0)
+				cout << "\t没写对你名字";
+			cout << endl;
+		}
+	}
+	cout << endl;
 }
