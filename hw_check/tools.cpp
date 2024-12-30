@@ -244,12 +244,56 @@ int countItems(const string& str)
  */
 _VS extractItems(const string &s)
 {
-	int n = countItems(s);
-	_VS ret;
-	int pos = -1, lst = -1;
-	while((pos = s.find_first_of(" \t", pos + 1)) != string::npos) {
-		ret.push_back(s.substr(lst + 1, pos - lst));
-		lst = pos;
-	}
-	return ret;
+    _VS ret;
+    int start = 0;
+    bool inItem = 0;
+    
+	for (int i = 0; i < int(s.length()); i++) {
+        if(s[i] == ' ' || s[i] == '\t') {
+            if(inItem) {
+                ret.push_back(s.substr(start, i - start));
+                inItem = 0;
+            }
+        }
+        else if(!inItem) {
+            start = i;
+            inItem = 1;
+        }
+    }
+    
+    if(inItem)
+        ret.push_back(s.substr(start));
+        
+    return ret;
+}
+
+/**
+ * 根据学号在table中查找对应行的所有数据
+ * @param stuNo: 学号
+ * @param table: 表格信息
+ * @return: 该学号对应的所有数据: stu_no, stu_name, classb, classc, cno
+ */
+_VS findRowByStuNo(const string& stuNo, const tableInfo& table)
+{
+    _VS ret;
+    for(int i = 0; i < int(table.stu_no.size()); i++) {
+        if(table.stu_no[i] == stuNo) {
+            ret.push_back(table.stu_no[i]);
+            ret.push_back(table.name[i]);
+            if(!table.classb.empty())
+                ret.push_back(table.classb[i]);
+			else 
+				ret.push_back("");
+            if(!table.classc.empty()) 
+                ret.push_back(table.classc[i]);
+			else
+				ret.push_back("");
+            if(!table.cno.empty())
+                ret.push_back(table.cno[i]);
+			else
+				ret.push_back("");
+            break;
+        }
+    }
+    return ret;
 }

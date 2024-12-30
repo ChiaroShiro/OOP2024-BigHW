@@ -78,6 +78,11 @@ static bool checkCno(args_analyse_tools* args, char* argv[], INFO& info)
 			info.cno.push_back(cno2);
 			return 1;
 		}
+		if(cno1 == cno_set[1] && cno2 == cno_set[0]) {
+			info.cno.push_back(cno1);
+			info.cno.push_back(cno2);
+			return 1;
+		}
 	}
 	cout << "¿ÎºÅ´íÎó" << endl;
 	return 0;

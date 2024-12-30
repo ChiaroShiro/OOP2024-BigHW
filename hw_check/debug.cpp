@@ -65,8 +65,18 @@ void __debugSQLQueryAll(MYSQL* mysql, INFO info)
 	}
 }
 
-void __debugPrint(INFO info, string str) {
+void __debugPrint(const INFO& info, const string& str) {
 	if(checkCanDebug(info)) {
 		cerr << str << endl;
 	}
 }
+
+void __debugPrintContainer(const INFO& info, const _VS& container, const string& name) {
+	if(checkCanDebug(info)) {
+		cerr << name << ": ";
+		for(const string& item : container)
+			cerr << "*" << item << "* ";
+		cerr << endl;
+	}
+}
+

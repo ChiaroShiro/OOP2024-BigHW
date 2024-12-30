@@ -163,7 +163,11 @@ void singlefilePrinter(const string& path, const string& filename, const tableIn
 	for(int i = 0; i < int(names.size()); i++) {
 		cout << setw(3) << left << i + 1 << ": " << stu_no[i] << "/" << setw(maxNameLen) << left << replaceChineseDot(names[i]) << ": ";
 		string result;
-		cout << checker(path + "/" + cno[0] + "-" + stu_no[i] + "/" + filename, result, table) << endl;
+		string path_stu = path + "/" + cno[0] + "-" + stu_no[i] + "/" + filename;
+		if(cno.size() == 2) {
+			path_stu = path + "/" + findRowByStuNo(stu_no[i], table)[4] + "-" + stu_no[i] + "/" + filename;
+		}
+		cout << checker(path_stu, result, table) << endl;
 		updatePairVector(res, result);
 		totalFiles++;
 		if(result == "ÕýÈ·")

@@ -20,7 +20,32 @@ public:
 	string cfgfile;
 	bool debug;
 	bool printNormal, printUnsubmit, printError, printSummary, printSevere; // 正常信息/未提交信息/错误信息/汇总信息/严重错误信息
+	INFO() 
+	{
+		debug = false;
+	}
+	INFO(int __debug) 
+	{
+		cno = _VS();
+		stu = "";
+		file = "";
+		chapter = -1;
+		week = -1;
+		cfgfile = "";
+		printNormal = true;
+		printUnsubmit = true;
+		printError = true;
+		printSummary = true;
+		printSevere = true;
+		debug = __debug;
+	}
 };
+
+#if DEBUG_MODE
+const INFO __DEBUG_INFO(1);
+#else 
+const INFO __DEBUG_INFO(0);
+#endif
 
 struct Pair {
     string str;
@@ -160,12 +185,20 @@ string trim(const string& str);
 int countItems(const string& str);
 
 /**
- * ! 手写函数，正确性待验证
  * *将字符串用空格隔开的若干项取出
  * @param str: 字符串
  * @return: 分割结果
  */
 _VS extractItems(const string &s);
+
+/**
+ * *根据学号在table中查找对应行的所有数据
+ * @param stuNo: 学号
+ * @param table: 表格信息
+ * @return: 该学号对应的所有数据: stu_no, stu_name, classb, classc, cno
+ */
+_VS findRowByStuNo(const string& stuNo, const tableInfo& table);
+
 
 
 /**
