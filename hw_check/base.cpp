@@ -52,8 +52,6 @@ static string baseChecker(const string& path, string& result, const tableInfo& t
 void baseMain(const INFO& info, MYSQL* mysql, const string& path) 
 {
 	tableInfo table;
-	table.classc = _VS();
-	table.classb = _VS();
 
 	// 获取查询的作业文件名
 	string sql = generateSQLQueryFromInfo(info, "hw_filename");

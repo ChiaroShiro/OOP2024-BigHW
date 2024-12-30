@@ -178,3 +178,16 @@ void singlefilePrinter(const string& path, const string& filename, const tableIn
 	printSummary(res, "详细信息", '=');
 	cout << endl;
 }
+
+void crossIdentifyPrinter(const string& path, const _VS& filenames, const tableInfo& table, const string& cno, EXTRACT_FUNC extracter)
+{
+	const _VS &names = table.name;
+	const _VS &stu_no = table.stu_no;
+	const _VS &cnos = table.cno;
+	int idwidth = to_string(names.size()).size();
+	cout << "交叉检查结果：\n";
+	for(int i = 0; i < int(names.size()); i++) {
+		cout << setw(idwidth) << right << i << " : " << cnos[i] << "-" << stu_no[i] << "-" << names[i] << '\n';
+		//_VS items = extracter();
+	}
+}

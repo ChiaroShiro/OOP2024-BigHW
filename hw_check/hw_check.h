@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../include/class_aat.h"
 #include "../include_mariadb_x86/mysql/mysql.h"
 #include <vector>
@@ -33,10 +34,12 @@ public:
 	_VS stu_no; // 学生学号
 	_VS classc; // 班级全称
 	_VS classb; // 班级简称
+	_VS cno; // 课号
 };
 
 typedef string (*CHECKER_FUNC)(const string&, string&, const tableInfo&);
 typedef void (*INIT_FUNC)(vector<Pair>&);
+typedef _VS (*EXTRACT_FUNC)(const _VS &, int, const tableInfo&);
 
 // const string SQL_STU = "select * from view_hwcheck_stulist ";
 // const string SQL_HW = "select * from view_hwcheck_hwlist ";
@@ -156,6 +159,13 @@ string trim(const string& str);
 */
 int countItems(const string& str);
 
+/**
+ * ! 手写函数，正确性待验证
+ * *将字符串用空格隔开的若干项取出
+ * @param str: 字符串
+ * @return: 分割结果
+ */
+_VS extractItems(const string &s);
 
 
 /**

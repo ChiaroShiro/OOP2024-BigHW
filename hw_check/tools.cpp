@@ -236,3 +236,20 @@ int countItems(const string& str)
 	}
 	return count;
 }
+
+/**
+ * 将字符串用空格隔开的若干项取出
+ * @param str: 字符串
+ * @return: 分割结果
+ */
+_VS extractItems(const string &s)
+{
+	int n = countItems(s);
+	_VS ret;
+	int pos = -1, lst = -1;
+	while((pos = s.find_first_of(" \t", pos + 1)) != string::npos) {
+		ret.push_back(s.substr(lst + 1, pos - lst));
+		lst = pos;
+	}
+	return ret;
+}
