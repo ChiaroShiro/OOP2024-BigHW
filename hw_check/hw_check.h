@@ -3,7 +3,6 @@
 #include "../include/class_aat.h"
 #include "../include_mariadb_x86/mysql/mysql.h"
 #include <vector>
-
 using namespace std;
 
 #define DEBUG_MODE 		0
@@ -20,32 +19,8 @@ public:
 	string cfgfile;
 	bool debug;
 	bool printNormal, printUnsubmit, printError, printSummary, printSevere; // 正常信息/未提交信息/错误信息/汇总信息/严重错误信息
-	INFO() 
-	{
-		debug = false;
-	}
-	INFO(int __debug) 
-	{
-		cno = _VS();
-		stu = "";
-		file = "";
-		chapter = -1;
-		week = -1;
-		cfgfile = "";
-		printNormal = true;
-		printUnsubmit = true;
-		printError = true;
-		printSummary = true;
-		printSevere = true;
-		debug = __debug;
-	}
+	string origin_cno; // 为满足demo特性专门放的数据：原始课号字符串
 };
-
-#if DEBUG_MODE
-const INFO __DEBUG_INFO(1);
-#else 
-const INFO __DEBUG_INFO(0);
-#endif
 
 struct Pair {
     string str;
@@ -55,21 +30,17 @@ struct Pair {
 class tableInfo {
 public:
 	_VS name; // 学生姓名
-	_VS allName; // 为满足demo特性专门放的数据
+	_VS allName; // 为满足demo特性专门放的数据：表里所有学生的信息
 	_VS stu_no; // 学生学号
 	_VS classc; // 班级全称
 	_VS classb; // 班级简称
 	_VS cno; // 课号
+	string origin_cno; // 为满足demo特性专门放的数据：原始课号字符串
 };
 
 typedef string (*CHECKER_FUNC)(const string&, string&, const tableInfo&);
 typedef void (*INIT_FUNC)(vector<Pair>&);
 typedef _VS (*EXTRACT_FUNC)(const _VS &, int, const tableInfo&);
-
-// const string SQL_STU = "select * from view_hwcheck_stulist ";
-// const string SQL_HW = "select * from view_hwcheck_hwlist ";
-// const string SQL_STU_ALL = "select * from view_hwcheck_stulist_all;";
-// const string SQL_HW_ALL = "select * from view_hwcheck_hwlist_all;";
 
 /**
  * *检查命令行参数
@@ -192,6 +163,14 @@ int countItems(const string& str);
 _VS extractItems(const string &s);
 
 /**
+ * *根据学号在table里查找对应的行下标
+ * @param stuNo: 学号
+ * @param table: 表格信息
+ * @return: 该学号对应的行下标,未找到返回-1
+ */
+int findRowIndexByStuNo(const string& stuNo, const tableInfo& table);
+
+/**
  * *根据学号在table中查找对应行的所有数据
  * @param stuNo: 学号
  * @param table: 表格信息
@@ -207,6 +186,7 @@ _VS findRowByStuNo(const string& stuNo, const tableInfo& table);
 
 /**
  * *多文件与单文件模式下的输出函数
+ * @param info: 命令行信息
  * @param path: 文件路径
  * @param filenames: 文件名列表
  * @param table: 表信息
@@ -214,19 +194,20 @@ _VS findRowByStuNo(const string& stuNo, const tableInfo& table);
  * @param checker: 检查函数
  * @param initPairVector: 初始化pair向量函数
 */
-void multifilePrinter(const string& path, const _VS& filenames, const tableInfo& table, const string& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
-void singlefilePrinter(const string& path, const string& filename, const tableInfo& table, const _VS& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
+void multifilePrinter(const INFO& info, const string& path, const _VS& filenames, const tableInfo& table, const string& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
+void singlefilePrinter(const INFO& info, const string& path, const string& filename, const tableInfo& table, const _VS& cno, CHECKER_FUNC checker, INIT_FUNC initPairVector);
 
 /**
  * *交叉检查打印
+ * @param info: 命令行信息
  * @param path: 文件路径
  * @param filename: 文件名
  * @param table: 表信息
  * @param cno: 课程号 （多课程下是一个字符串，单课程下是多个字符串）
- * @param extracter: 提取合法项函数
+ * @param extracter: 将所有项中的合法项提取出来
  * @param checker: 检查函数
 */
-void crossIdentifyPrinter(const string& path, const string& filename, const tableInfo& table, const _VS& cno, EXTRACT_FUNC extracter, CHECKER_FUNC checker);
+void crossIdentifyPrinter(const INFO& info, const string& path, const string& filename, const tableInfo& table, const _VS& cno, EXTRACT_FUNC extracter, CHECKER_FUNC checker);
 
 /**
  * *基础模式、第一行模式、第二行模式

@@ -513,36 +513,46 @@ string commandBase[] = {
     "--action base --stu all --cno 10108001 --file all",
     "--action base --stu all --cno 10108002 --file all",
     "--action base --stu all --cno 5000244001602 --file all",
+
     "--action base --stu 2351871 --cno 10108002 --file all",
+    "--action base --stu 2251919 --cno 5000244001602 --file all",
+    "--action base --stu 2154062 --cno 5000244001602 --file all",
+    "--action base --stu 2351871 --cno 10108002 --file all --week 12",
+    "--action base --stu 2351871 --cno 10108002 --file all --chapter 14",
+    "--action base --stu 2351871 --cno 10108002 --file all --chapter 16",
+    "--action base --stu 2351871 --cno 10108002 --file all --week 8 --chapter 13",
+    
+    "--action base --stu 2351871 --cno 10108002 --file 15-b8-bmp.cpp",
     "--action base --stu all --cno 10108002 --file 16-b2-2.hpp",
     "--action base --stu all --cno 10108001 --file 16-b5.h",
-    "--action base --stu 2351871 --cno 10108002 --file 15-b8-bmp.cpp",
     "--action base --stu all --cno 10108002 --file 90-02-bmp.rar",
     "--action base --stu all --cno 10108002 --file Report-16-b1.pdf",
+
     "--action base --stu all --cno 10108001 --file all --week 12",
     "--action base --stu all --cno 10108002 --file all --week 2",
     "--action base --stu all --cno 5000244001602 --file all --week 5",
+    "--action base --stu all --cno 5000244001602 --file all --week 5 --chapter 3",
     "--action base --stu all --cno 5000244001602 --file all --week 11",
-    "--action base --stu 2351871 --cno 10108002 --file all --week 12",
-    "--action base --stu 2351871 --cno 10108002 --file all --week 8",
     "--action base --stu all --cno 10108001 --file all --chapter 15",
     "--action base --stu all --cno 10108002 --file all --chapter 90",
     "--action base --stu all --cno 5000244001602 --file all --chapter 3",
     "--action base --stu all --cno 5000244001602 --file all --chapter 5",
-    "--action base --stu 2351871 --cno 10108002 --file all --chapter 14",
-    "--action base --stu 2351871 --cno 10108002 --file all --chapter 16",
 };
 
 string commandFirst[] = {
     "--action firstline --stu all --cno 10108001 --file all",
     "--action firstline --stu all --cno 10108002 --file all",
     "--action firstline --stu all --cno 5000244001602 --file all",
+
     "--action firstline --stu 2351871 --cno 10108002 --file all",
+    "--action firstline --stu 2154062 --cno 5000244001602 --file all",
     "--action firstline --stu 2251919 --cno 5000244001602 --file all",
     "--action firstline --stu 2352988 --cno 5000244001602 --file all",
     "--action firstline --stu 2356218 --cno 5000244001602 --file all",
+    "--action firstline --stu 2351871 --cno 10108002 --file all --week 8 --chapter 13",
     "--action firstline --stu all --cno 10108002 --file 16-b2-2.hpp",
     "--action firstline --stu all --cno 10108001 --file 16-b5.h",
+    "--action firstline --stu all --cno 5000244001602 --file all --week 5 --chapter 3",
     "--action firstline --stu 2351871 --cno 10108002 --file 15-b8-bmp.cpp",
     "--action firstline --stu all --cno 10108001 --file all --week 12",
     "--action firstline --stu all --cno 10108002 --file all --week 2",
@@ -558,6 +568,23 @@ string commandFirst[] = {
     "--action firstline --stu 2351871 --cno 10108002 --file all --chapter 16",
 };
 
+string commandSecond[] = {
+    "--action secondline --file 5-b14.c --stu all --cno 5000244001602",
+
+    "--action secondline --file 15-b5.c --stu all --cno 10108001,10108002",
+    "--action secondline --file 15-b5.c --stu all --cno 10108002,10108001",
+    "--action secondline --file 15-b2.cpp --stu all --cno 10108001,10108002",
+    "--action secondline --file 15-b2.cpp --stu all --cno 10108002,10108001",
+
+    "--action secondline --file 15-b5.c --stu all --cno \"10108001, 10108002\"",
+    "--action secondline --file 15-b5.c --stu all --cno \"10108002  ,    10108001\"",
+
+    "--action secondline --file 15-b5.c --stu all --cno 10108001",
+    "--action secondline --file 15-b5.c --stu all --cno 10108002",
+    "--action secondline --file 15-b2.cpp --stu all --cno 10108001",
+    "--action secondline --file 15-b2.cpp --stu all --cno 10108002",
+};
+
 string commandAdd[] = {
     "--action base --stu all --cno 10108001 --file ",
     "--action base --stu all --cno 10108002 --file ",
@@ -565,28 +592,116 @@ string commandAdd[] = {
 };
 
 int main() {
-    for(int i = 0; i < 22; i++) {
-        cerr << "i = " << i << " " << commandBase[i] << endl;
+    double baseDemo = 0, baseHw = 0;
+    double firstDemo = 0, firstHw = 0;
+    double secondDemo = 0, secondHw = 0;
+    int baseCount = 0, firstCount = 0, secondCount = 0;
+
+    if(1) {
+        cout << "base 测试" << endl;
+        for(int i = 0; i < 24; i++) { // base 测试
+            cerr << "i = " << i << " " << commandBase[i] << endl;
         
-        cerr << "run demo" << endl;
-        auto start = chrono::steady_clock::now();
-        string cmd = "demo " + commandBase[i] + " > .ans";
-        system(cmd.c_str());
-        auto end = chrono::steady_clock::now();
-        auto demoTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
-        cerr << "demo运行时间: " << demoTime << "ms" << endl;
+            cerr << "run demo" << endl;
+            auto start = chrono::steady_clock::now();
+            string cmd = "demo " + commandBase[i] + " > .ans";
+            system(cmd.c_str());
+            auto end = chrono::steady_clock::now();
+            auto demoTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+            baseDemo += demoTime;
+            cerr << "demo运行时间: " << demoTime << "ms" << endl;
+            
+            cerr << "run hw_check" << endl;
+            start = chrono::steady_clock::now();
+            cmd = "hw_check " + commandBase[i] + " > .out";
+            system(cmd.c_str());
+            end = chrono::steady_clock::now();
+            auto hwTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+            baseHw += hwTime;
+            cerr << "hw_check运行时间: " << hwTime << "ms" << endl;
+            
+            cerr << "run tc" << endl;
+            cmd = "tc  --file1 .ans --file2 .out --trim right --display normal";
+            system(cmd.c_str());
+            Sleep(1000);
+            baseCount++;
+        }
+    }
+    if(1) {
+        cout << "firstline 测试" << endl;
+        for(int i = 0; i < 25; i++) { // firstline 测试
+            cerr << "i = " << i << " " << commandFirst[i] << endl;
         
-        cerr << "run hw_check" << endl;
-        start = chrono::steady_clock::now();
-        cmd = "hw_check " + commandBase[i] + " > .out";
-        system(cmd.c_str());
-        end = chrono::steady_clock::now();
-        auto hwTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
-        cerr << "hw_check运行时间: " << hwTime << "ms" << endl;
-        
-        cerr << "run tc" << endl;
-        cmd = "tc  --file1 .ans --file2 .out --trim right --display normal";
-        system(cmd.c_str());
-        Sleep(1000);
+            cerr << "run demo" << endl;
+            auto start = chrono::steady_clock::now();
+            string cmd = "demo " + commandFirst[i] + " > .ans";
+            system(cmd.c_str());
+            auto end = chrono::steady_clock::now();
+            auto demoTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+            firstDemo += demoTime;
+            cerr << "demo运行时间: " << demoTime << "ms" << endl;
+            
+            cerr << "run hw_check" << endl;
+            start = chrono::steady_clock::now();
+            cmd = "hw_check " + commandFirst[i] + " > .out";
+            system(cmd.c_str());
+            end = chrono::steady_clock::now();
+            auto hwTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+            firstHw += hwTime;
+            cerr << "hw_check运行时间: " << hwTime << "ms" << endl;
+            
+            cerr << "run tc" << endl;
+            cmd = "tc  --file1 .ans --file2 .out --trim right --display normal";
+            system(cmd.c_str());
+            Sleep(1000);
+            firstCount++;
+        }
+    }
+
+    if(1) {
+        cout << "secondline 测试" << endl;
+        for(int i = 0; i < 11; i++) { // secondline 测试
+                cerr << "i = " << i << " " << commandSecond[i] << endl;
+            cerr << "run demo" << endl;
+            auto start = chrono::steady_clock::now();
+            string cmd = "demo " + commandSecond[i] + " > .ans";
+            system(cmd.c_str());
+            auto end = chrono::steady_clock::now();
+            auto demoTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+            secondDemo += demoTime;
+            cerr << "demo运行时间: " << demoTime << "ms" << endl;
+            
+            cerr << "run hw_check" << endl;
+            start = chrono::steady_clock::now();
+            cmd = "hw_check " + commandSecond[i] + " > .out";
+            system(cmd.c_str());
+            end = chrono::steady_clock::now();
+            auto hwTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+            secondHw += hwTime;
+            cerr << "hw_check运行时间: " << hwTime << "ms" << endl;
+            
+            cerr << "run tc" << endl;
+            cmd = "tc  --file1 .ans --file2 .out --trim right --display normal";
+            system(cmd.c_str());
+            Sleep(1000);
+            secondCount++;
+        }
+    }
+
+    cout << "\n平均运行时间统计:" << endl;
+    if(baseCount > 0) {
+        cout << "base模式:" << endl;
+        cout << "  demo平均: " << baseDemo/baseCount << "ms" << endl;
+        cout << "  hw_check平均: " << baseHw/baseCount << "ms" << endl;
+    }
+    if(firstCount > 0) {
+        cout << "firstline模式:" << endl; 
+        cout << "  demo平均: " << firstDemo/firstCount << "ms" << endl;
+        cout << "  hw_check平均: " << firstHw/firstCount << "ms" << endl;
+    }
+    if(secondCount > 0) {
+        cout << "secondline模式:" << endl;
+        cout << "  demo平均: " << secondDemo/secondCount << "ms" << endl;
+        cout << "  hw_check平均: " << secondHw/secondCount << "ms" << endl;
     }
 }

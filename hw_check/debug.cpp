@@ -5,7 +5,8 @@
 
 using namespace std;
 
-static bool checkCanDebug(INFO info) {
+static bool checkCanDebug(INFO info) 
+{
 #if DEBUG_MODE
 	return 1;
 #else
@@ -65,13 +66,15 @@ void __debugSQLQueryAll(MYSQL* mysql, INFO info)
 	}
 }
 
-void __debugPrint(const INFO& info, const string& str) {
+void __debugPrint(const INFO& info, const string& str) 
+{
 	if(checkCanDebug(info)) {
 		cerr << str << endl;
 	}
 }
 
-void __debugPrintContainer(const INFO& info, const _VS& container, const string& name) {
+void __debugPrintContainer(const INFO& info, const _VS& container, const string& name) 
+{
 	if(checkCanDebug(info)) {
 		cerr << name << ": ";
 		for(const string& item : container)

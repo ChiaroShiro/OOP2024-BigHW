@@ -4,7 +4,8 @@
 #include <fstream>
 using namespace std;
 
-static void initPairVector(vector<Pair>& pairs) {
+static void initPairVector(vector<Pair>& pairs) 
+{
 	pairs.clear();
 	pairs.push_back({"正确", 0});
 	pairs.push_back({"未提交", 0});
@@ -52,16 +53,14 @@ static string baseChecker(const string& path, string& result, const tableInfo& t
 void baseMain(const INFO& info, MYSQL* mysql, const string& path) 
 {
 	tableInfo table;
-
+	table.origin_cno = info.origin_cno;
+	_VS filenames;
 	// 获取查询的作业文件名
-	string sql = generateSQLQueryFromInfo(info, "hw_filename");
-	__debugPrint(info, sql);
-	vector <_VS> sqlResult = sqlQuery(mysql, sql);
+	vector <_VS> sqlResult = sqlQuery(mysql, generateSQLQueryFromInfo(info, "hw_filename"));
 	if(sqlResult.empty()) {
 		cout << "未找到相关数据" << endl;
 		return;
 	}
-	_VS filenames;
 	for(const _VS& row : sqlResult)
 		filenames.push_back(row[0]);
 	
@@ -69,11 +68,10 @@ void baseMain(const INFO& info, MYSQL* mysql, const string& path)
 	_VS request = {"stu_cno = " + info.cno[0]}; // 数据库检索条件
 	if(info.stu != "all")
 		request.push_back("stu_no = " + info.stu);
-	sql = generateSQLQuery(0, "stu_no, stu_name", request);
-	__debugPrint(info, sql);
-	sqlResult = sqlQuery(mysql, sql);
+	sqlResult = sqlQuery(mysql, generateSQLQuery(0, "stu_no, stu_name", request));
 	if(sqlResult.empty()) {
-		cout << "未找到相关数据" << endl;
+		if(info.printError)
+			cout << "未找到相关数据" << endl;
 		return;
 	}
 	for(const _VS& row : sqlResult) {
@@ -82,14 +80,12 @@ void baseMain(const INFO& info, MYSQL* mysql, const string& path)
 	}
 
 	// 获取所有满足stu_cno的学生列表
-	sql = generateSQLQuery(0, "stu_name", {"stu_cno = " + info.cno[0]});
-	__debugPrint(info, sql);
-	sqlResult = sqlQuery(mysql, sql);
+	sqlResult = sqlQuery(mysql, generateSQLQuery(0, "stu_name", {"stu_cno = " + info.cno[0]}));
 	for(const _VS& row : sqlResult)
 		table.allName.push_back(row[0]);
 
 	if(info.file != "all")
-		singlefilePrinter(path, filenames[0], table, info.cno, baseChecker, initPairVector);
+		singlefilePrinter(info, path, filenames[0], table, info.cno, baseChecker, initPairVector);
 	else
-		multifilePrinter(path, filenames, table, info.cno[0], baseChecker, initPairVector);
+		multifilePrinter(info, path, filenames, table, info.cno[0], baseChecker, initPairVector);
 }

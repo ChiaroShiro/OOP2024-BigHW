@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <cmath>
 #include <iomanip>
 #include <fstream>
 #include "../include/class_aat.h"
@@ -211,7 +210,6 @@ string trimComment(const string& str)
 		result = result.substr(2, result.length() - 4);
 		return trim(result);
 	}
-	
 	return result;
 }
 
@@ -247,7 +245,6 @@ _VS extractItems(const string &s)
     _VS ret;
     int start = 0;
     bool inItem = 0;
-    
 	for (int i = 0; i < int(s.length()); i++) {
         if(s[i] == ' ' || s[i] == '\t') {
             if(inItem) {
@@ -260,12 +257,26 @@ _VS extractItems(const string &s)
             inItem = 1;
         }
     }
-    
     if(inItem)
-        ret.push_back(s.substr(start));
-        
+        ret.push_back(s.substr(start));   
     return ret;
 }
+
+/**
+ * 根据学号在table里查找对应的行下标
+ * @param stuNo: 学号
+ * @param table: 表格信息
+ * @return: 该学号对应的行下标,未找到返回-1
+ */
+int findRowIndexByStuNo(const string& stuNo, const tableInfo& table)
+{
+    for(int i = 0; i < int(table.stu_no.size()); i++) {
+        if(table.stu_no[i] == stuNo)
+            return i;
+    }
+    return -1;
+}
+
 
 /**
  * 根据学号在table中查找对应行的所有数据
@@ -276,24 +287,13 @@ _VS extractItems(const string &s)
 _VS findRowByStuNo(const string& stuNo, const tableInfo& table)
 {
     _VS ret;
-    for(int i = 0; i < int(table.stu_no.size()); i++) {
-        if(table.stu_no[i] == stuNo) {
-            ret.push_back(table.stu_no[i]);
-            ret.push_back(table.name[i]);
-            if(!table.classb.empty())
-                ret.push_back(table.classb[i]);
-			else 
-				ret.push_back("");
-            if(!table.classc.empty()) 
-                ret.push_back(table.classc[i]);
-			else
-				ret.push_back("");
-            if(!table.cno.empty())
-                ret.push_back(table.cno[i]);
-			else
-				ret.push_back("");
-            break;
-        }
-    }
+    int index = findRowIndexByStuNo(stuNo, table);
+    if(index == -1)
+        return ret;
+    ret.push_back(table.stu_no[index]);
+    ret.push_back(table.name[index]);
+    ret.push_back(!table.classb.empty() ? table.classb[index] : "");
+    ret.push_back(!table.classc.empty() ? table.classc[index] : "");
+    ret.push_back(!table.cno.empty() ? table.cno[index] : "");
     return ret;
 }

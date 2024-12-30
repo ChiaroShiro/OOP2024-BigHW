@@ -5,7 +5,6 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
-
 using namespace std;
 
 void usage(const char* const full_procname);
@@ -73,12 +72,7 @@ static bool checkCno(args_analyse_tools* args, char* argv[], INFO& info)
 	if(pos != string::npos) {
 		string cno1 = trim(cno.substr(0, pos));
 		string cno2 = trim(cno.substr(pos + 1));
-		if(cno1 == cno_set[0] && cno2 == cno_set[1]) {
-			info.cno.push_back(cno1);
-			info.cno.push_back(cno2);
-			return 1;
-		}
-		if(cno1 == cno_set[1] && cno2 == cno_set[0]) {
+		if((cno1 == cno_set[0] && cno2 == cno_set[1]) || (cno1 == cno_set[1] && cno2 == cno_set[0])) {
 			info.cno.push_back(cno1);
 			info.cno.push_back(cno2);
 			return 1;
@@ -137,12 +131,13 @@ int argvChecker(args_analyse_tools* args, char* argv[], INFO& info)
 			return 0;
 		}
 	}
-	info.stu = getArgs(STU, args).get_string();
-	info.file = getArgs(FILE, args).get_string();
-	info.chapter = getArgs(CHAPTER, args).get_int();
-	info.week = getArgs(WEEK, args).get_int();
-	info.cfgfile = getArgs(CFGFILE, args).get_string();
-	info.debug = getArgs(DEBUG, args).existed();
+	info.stu 		= getArgs(STU, args).get_string();
+	info.file 		= getArgs(FILE, args).get_string();
+	info.chapter 	= getArgs(CHAPTER, args).get_int();
+	info.week 		= getArgs(WEEK, args).get_int();
+	info.cfgfile 	= getArgs(CFGFILE, args).get_string();
+	info.debug 		= getArgs(DEBUG, args).existed();
+	info.origin_cno	= getArgs(CNO, args).get_string();
 	bool *ptr = &info.printNormal;
 	for(char c: getArgs(DISPLAY, args).get_string())
 		*ptr++ = c - '0';

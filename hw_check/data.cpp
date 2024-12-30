@@ -1,12 +1,10 @@
 #include "hw_check.h"
 #include "debug.h"
-#include <iostream>
 #include <string>
+#include <iostream>
 #include "../include/class_cft.h"
 #include "../include_mariadb_x86/mysql/mysql.h"
-
 using namespace std;
-
 
 /**
 +------------------------+------------+------+-----+---------+-------+
